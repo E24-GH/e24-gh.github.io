@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZEN — ファームウェア セットアップガイド</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=DotGothic16&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../e24.css">
+<link rel="stylesheet" href="../zen.css">
+<link rel="stylesheet" href="../zen-firmware.css">
+</head>
+<body>
+
+<!-- GLOBAL NAV -->
+<nav class="gnav">
+  <div class="gnav-inner solo">
+    <span class="brand" aria-label="e24"><span class="e">e</span><span class="num">24</span><span class="dot">.</span></span>
+  </div>
+</nav>
+
+<!-- PRODUCT SUBNAV -->
+<div class="subnav">
+  <div class="subnav-inner">
+    <div class="name">ZEN<small>ゼン</small><span class="tagline">ファームウェア セットアップ</span></div>
+    <div class="links">
+      <a href="index.html" class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>製品ページ</a>
+      <a href="index.html#faq">FAQ</a>
+      <a href="https://github.com/E24-GH/zen-firmware" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener" class="buy-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        購入
+      </a>
+    </div>
+  </div>
+</div>
+
+<main class="fw-page" data-screen-label="ファームウェアガイド">
+
+  <!-- HERO -->
+  <header class="fw-hero">
+    <div class="wrap">
+      <span class="eyebrow-mono">FIRMWARE SETUP GUIDE</span>
+      <h1>キー配列セットアップ</h1>
+      <p class="lead">ZEN のキー配置を編集して、GitHub Actions でファームウェアを作るまでの手順です。</p>
+
+      <nav class="fw-toc" aria-label="目次">
+        <a href="#req"><span class="n">0</span><span class="t">必要なもの</span></a>
+        <a href="#fork"><span class="n">1</span><span class="t">リポジトリを fork する</span></a>
+        <a href="#login"><span class="n">2</span><span class="t">Keymap Editor にログイン</span></a>
+        <a href="#addrepo"><span class="n">3</span><span class="t">fork を追加する</span></a>
+        <a href="#edit"><span class="n">4</span><span class="t">キー配置を編集して保存</span></a>
+        <a href="#build"><span class="n">5</span><span class="t">ファームウェアを作る</span></a>
+        <a href="#flash"><span class="n">6</span><span class="t">ファームウェアを書き込む</span></a>
+        <a href="#trouble"><span class="n">?</span><span class="t">困ったとき</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 0. requirements -->
+  <section class="fw-sec" id="req">
+    <div class="wrap">
+      <div class="sec-num">00 — REQUIREMENTS</div>
+      <h2>必要なもの</h2>
+      <ul class="fw-list">
+        <li>GitHub アカウント</li>
+        <li>ZEN 本体</li>
+        <li>BMP Boost（左右ぶん）</li>
+        <li>データ通信対応の USB Type-C ケーブル</li>
+        <li>Mac / PC</li>
+      </ul>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 1. fork -->
+  <section class="fw-sec" id="fork">
+    <div class="wrap">
+      <div class="sec-num">01 — FORK</div>
+      <h2>リポジトリを fork する</h2>
+      <p>fork は、このファームウェア設定を自分の GitHub アカウントにコピーする操作です。キー配置を自分用に編集するため、まず fork を作成します。</p>
+      <ol class="fw-steps">
+        <li><a href="https://github.com/E24-GH/zen-firmware" target="_blank" rel="noopener">E24-GH/zen-firmware</a> を開きます。</li>
+        <li>画面右上の <code>Fork</code> を押し、<code>Create a new fork</code> を選びます。</li>
+        <li>Owner に自分の GitHub アカウントを選びます。</li>
+        <li>Repository name は通常そのまま <code>zen-firmware</code> で構いません。</li>
+        <li><code>Copy the main branch only</code> は ON のままにします。</li>
+        <li><code>Create fork</code> を押します。</li>
+      </ol>
+      <div class="fw-figs">
+        <figure class="fw-fig">
+          <img src="../assets/fw/fork-menu.png" alt="GitHub リポジトリページの Fork メニュー" loading="lazy">
+          <figcaption><code>Fork</code> メニューから <code>Create a new fork</code> を選びます。</figcaption>
+        </figure>
+        <figure class="fw-fig">
+          <img src="../assets/fw/create-fork.png" alt="GitHub の Create a new fork 画面" loading="lazy">
+          <figcaption><code>Create fork</code> を押すと、自分のアカウントにコピーが作成されます。</figcaption>
+        </figure>
+      </div>
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>ヒント</div>
+        fork 後は URL が <code>https://github.com/あなたのアカウント/zen-firmware</code> のようになります。以降は自分の fork したリポジトリを使います。
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 2. login -->
+  <section class="fw-sec" id="login">
+    <div class="wrap">
+      <div class="sec-num">02 — LOGIN</div>
+      <h2>Keymap Editor にログインする</h2>
+      <p>Keymap Editor を使うと、ブラウザ上でキー配置を編集できます。初回は GitHub ログインと認証が必要です。</p>
+      <ol class="fw-steps">
+        <li><a href="https://nickcoutsos.github.io/keymap-editor/" target="_blank" rel="noopener">Keymap Editor</a> を開きます。</li>
+        <li><code>Login with GitHub</code> を押します。</li>
+        <li>認証画面が出たら <code>Authorize</code> を押します。</li>
+      </ol>
+      <div class="fw-figs">
+        <figure class="fw-fig">
+          <img src="../assets/fw/keymap-login.png" alt="Keymap Editor の GitHub ログイン画面" loading="lazy">
+          <figcaption>まず Keymap Editor に GitHub アカウントでログインします。</figcaption>
+        </figure>
+        <figure class="fw-fig">
+          <img src="../assets/fw/keymap-authorize.png" alt="Keymap Editor を GitHub で認証" loading="lazy">
+          <figcaption><code>Authorize</code> を押して、Keymap Editor の利用を許可します。</figcaption>
+        </figure>
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 3. add repo -->
+  <section class="fw-sec" id="addrepo">
+    <div class="wrap">
+      <div class="sec-num">03 — ADD REPOSITORY</div>
+      <h2>fork したリポジトリを追加する</h2>
+      <ol class="fw-steps">
+        <li>Keymap Editor で <code>Add Repository</code> が表示されたら押します。</li>
+        <li>GitHub App のインストール画面で、<code>Only select repositories</code> を選びます。</li>
+        <li>自分が fork した <code>zen-firmware</code> だけを選び、<code>Install</code> を押します。</li>
+        <li>Keymap Editor に戻ったら、Source を <code>GitHub</code> にして自分の <code>zen-firmware</code> を開きます。</li>
+        <li><code>config/keymap.keymap</code> が読み込まれ、ZEN のレイアウトが表示されれば OK です。</li>
+      </ol>
+      <div class="fw-figs">
+        <figure class="fw-fig">
+          <img src="../assets/fw/keymap-add-repository.png" alt="Keymap Editor の Add Repository 画面" loading="lazy">
+          <figcaption><code>Add Repository</code> を押して、fork した <code>zen-firmware</code> を追加します。</figcaption>
+        </figure>
+        <figure class="fw-fig">
+          <img src="../assets/fw/keymap-install-app.png" alt="Keymap Editor の GitHub App インストール画面" loading="lazy">
+          <figcaption><code>All repositories</code> ではなく <code>Only select repositories</code> を選び、fork した <code>zen-firmware</code> だけを選択します。</figcaption>
+        </figure>
+      </div>
+      <div class="fw-panel warn">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>注意</div>
+        <strong>All repositories は選ばないでください。</strong> 選ぶと Keymap Editor 側で利用が停止される場合があります。ZEN 用の fork だけを選択してください。
+      </div>
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>レイアウトが表示されないとき</div>
+        fork が最新でない可能性があります。GitHub の fork 画面で <code>Sync fork</code> を押してから、もう一度 Keymap Editor で開いてください。
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 4. edit -->
+  <section class="fw-sec" id="edit">
+    <div class="wrap">
+      <div class="sec-num">04 — EDIT & SAVE</div>
+      <h2>キー配置を編集して保存する</h2>
+      <ol class="fw-steps">
+        <li>Keymap Editor 上でキーを変更します。</li>
+        <li>変更が終わったら <code>Save</code> を押します。</li>
+        <li>保存すると、自分の fork した GitHub リポジトリに変更が反映されます。</li>
+      </ol>
+      <p>保存後、GitHub Actions が自動でファームウェアを build します。ダウンロードは次の手順で GitHub Actions 画面から行います。</p>
+      <figure class="fw-fig">
+        <img src="../assets/fw/keymap-save-and-download.png" alt="Keymap Editor の Save ボタン" loading="lazy">
+        <figcaption>キー配置を変更したら <code>Save</code> を押します。保存すると GitHub Actions で build が始まります。</figcaption>
+      </figure>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 5. build -->
+  <section class="fw-sec" id="build">
+    <div class="wrap">
+      <div class="sec-num">05 — BUILD</div>
+      <h2>GitHub Actions でファームウェアを作る</h2>
+      <ol class="fw-steps">
+        <li>自分の <code>zen-firmware</code> リポジトリを開きます。</li>
+        <li><code>Actions</code> タブを開きます。</li>
+        <li>初回だけ、Actions を有効化するボタンが出る場合があります。その場合は有効化します。</li>
+        <li>最新の build を開きます。</li>
+        <li>build が完了したら、図の赤枠のダウンロードボタンを押します。</li>
+      </ol>
+      <figure class="fw-fig">
+        <img src="../assets/fw/actions-download-firmware.png" alt="GitHub Actions のファームウェアダウンロードボタン" loading="lazy">
+        <figcaption>画面下部の <code>firmware</code> 行にあるボタンを押すと、zip ファイルがダウンロードされます。</figcaption>
+      </figure>
+      <p>ダウンロードした zip ファイルの中には、以下の UF2 ファイルが入っています。</p>
+      <ul class="fw-files">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><code>settings_reset.uf2</code></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><code>zen_right_trackball_pmw3610_central.uf2</code></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><code>zen_left_peripheral.uf2</code></li>
+      </ul>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 6. flash -->
+  <section class="fw-sec" id="flash">
+    <div class="wrap">
+      <div class="sec-num">06 — FLASH</div>
+      <h2>ファームウェアを書き込む</h2>
+
+      <h3>通常の書き込み</h3>
+      <ol class="fw-steps">
+        <li>右手側の BMP Boost をブートローダーモードにします。</li>
+        <li><code>zen_right_trackball_pmw3610_central.uf2</code> を書き込みます。</li>
+        <li>左手側の BMP Boost をブートローダーモードにします。</li>
+        <li><code>zen_left_peripheral.uf2</code> を書き込みます。</li>
+      </ol>
+
+      <h3>Bluetooth 接続がうまくいかない場合</h3>
+      <ol class="fw-steps">
+        <li>Mac / PC の Bluetooth 設定から <code>ZEN</code> を削除します。</li>
+        <li><code>settings_reset.uf2</code> を書き込みます。</li>
+        <li>USB を外します。</li>
+        <li>ZEN の電源を入れます。</li>
+        <li>もう一度、通常ファームウェアを書き込みます。</li>
+        <li>Mac / PC の Bluetooth 設定から <code>ZEN</code> を接続します。</li>
+      </ol>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- trouble -->
+  <section class="fw-sec" id="trouble">
+    <div class="wrap">
+      <div class="sec-num">?? — TROUBLESHOOTING</div>
+      <h2>困ったとき</h2>
+      <div class="fw-trouble">
+        <div class="fw-tcard">
+          <h3>Keymap Editor で App Disabled と表示される</h3>
+          <p>GitHub App が使えるリポジトリに、自分の fork した <code>zen-firmware</code> が含まれていない状態です。画面の <code>Add Repository</code> から fork したリポジトリを追加してください。</p>
+        </div>
+        <div class="fw-tcard">
+          <h3>Keymap Editor でレイアウトが表示されない</h3>
+          <p>fork が古い、または <code>config/info.json</code> が読み込まれていない可能性があります。fork を同期してから再度開いてください。</p>
+        </div>
+        <div class="fw-tcard">
+          <h3>Actions が動かない</h3>
+          <p>fork したリポジトリの <code>Actions</code> タブを開き、GitHub Actions を有効化してください。</p>
+        </div>
+        <div class="fw-tcard">
+          <h3>Bluetooth 接続が不安定</h3>
+          <p>一度 <code>settings_reset.uf2</code> を書き込んでから、左右の通常ファームウェアを書き直してください。Mac / PC 側に残っている古い <code>ZEN</code> のペアリング情報も削除してください。</p>
+        </div>
+      </div>
+
+      <a class="dl-link" href="https://github.com/E24-GH/zen-firmware" target="_blank" rel="noopener" style="margin-top:28px;">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.42 7.86 10.95.58.1.79-.25.79-.56 0-.27-.01-1.16-.02-2.1-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.04 11.04 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12.02C23.5 5.74 18.27.5 12 .5Z"/></svg>
+        <span>zen-firmware リポジトリ・Issues</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- GLOBAL FOOTER -->
+<footer class="gfoot">
+  <div class="wrap">
+    <div class="top">
+      <div class="brandcol">
+        <div class="bm">e<span class="num">24</span></div>
+        <p>毎日ふれる道具に、ちょっと嬉しいを。<br>キーボードと、その周辺をつくっています。</p>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h4>ZEN</h4>
+          <a href="index.html#feature">特徴</a>
+          <a href="index.html#layout">キー配列</a>
+          <a href="index.html#kit">必要なもの</a>
+          <a href="index.html#spec">スペック</a>
+        </div>
+        <div class="col">
+          <h4>ファームウェア</h4>
+          <a href="firmware.html">セットアップガイド</a>
+          <a href="https://github.com/E24-GH/zen-firmware" target="_blank" rel="noopener">GitHub リポジトリ</a>
+          <a href="https://nickcoutsos.github.io/keymap-editor/" target="_blank" rel="noopener">Keymap Editor</a>
+        </div>
+        <div class="col">
+          <h4>e24</h4>
+          <a href="index.html">製品ページ</a>
+          <a href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener">BOOTH</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 e24. All rights reserved.</span>
+      <span class="mono">// EVERY KEYSTROKE A NEW IDEA.</span>
+    </div>
+  </div>
+</footer>
+
+<button id="toTop" class="to-top" aria-label="ページ上部へ戻る">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+  <span class="lbl">上へ戻る</span>
+</button>
+
+<script src="../e24-scroll.js"></script>
+<script src="../zen-lightbox.js"></script>
+</body>
+</html>

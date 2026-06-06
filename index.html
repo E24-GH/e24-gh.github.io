@@ -1,36 +1,120 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>E24-GH</title>
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>e24 — ちょっと嬉しいを、毎日に。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=DotGothic16&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="e24.css">
 </head>
 <body>
-  <header class="site-header">
-    <a class="brand" href="/">E24-GH</a>
-  </header>
 
-  <main>
-    <section class="home-hero">
-      <div class="home-hero__inner">
-        <p class="eyebrow">Keyboards and everyday tools</p>
-        <h1>日々の作業が少し楽しくなる道具をつくっています。</h1>
+<!-- GLOBAL NAV -->
+<nav class="gnav">
+  <div class="gnav-inner solo">
+    <a class="brand" href="index.html" aria-label="e24 home"><span class="e">e</span><span class="num">24</span><span class="dot">.</span></a>
+  </div>
+</nav>
+
+<main class="board">
+
+  <!-- HERO TILE — latest release: ZEN -->
+  <section class="tile light hero-tile" data-screen-label="トップ・ヒーロー">
+    <div class="t-eyebrow reveal">NEW · 最新リリース</div>
+    <h2 class="reveal d1">ZEN</h2>
+    <p class="t-sub reveal d1">右手にトラックボール。<br>手は、そのまま。指は、自由に。</p>
+    <div class="t-links reveal d2">
+      <a class="tlink" href="zen/index.html">詳しく見る<span class="arr">›</span></a>
+      <a class="tlink" href="zen/index.html#kit">はじめる<span class="arr">›</span></a>
+    </div>
+    <div class="t-shot reveal d2">
+      <img src="assets/zen-hero.png" alt="ZEN — 左右分割・右手側トラックボール搭載のワイヤレスキーボード">
+    </div>
+  </section>
+
+  <!-- BRAND STORY TILE -->
+  <section class="tile dark" id="story" data-screen-label="ブランドストーリー">
+    <div class="t-eyebrow reveal">e24 — everyday tools</div>
+    <h2 class="reveal d1" style="font-size:clamp(30px,4.6vw,60px);max-width:18ch;">ちょっと嬉しいを、<br><span class="accent">毎日に。</span></h2>
+    <p class="t-sub reveal d2" style="max-width:30ch;color:rgba(244,241,235,.75);">e24 がつくるのは、毎日ふれるキーボードの道具。ひとつのキーストロークに、小さな心地よさを。</p>
+    <div class="t-links reveal d2">
+      <a class="tlink" href="#lineup">ラインナップを見る<span class="arr">›</span></a>
+    </div>
+  </section>
+
+  <!-- LINEUP GRID -->
+  <div class="tile-grid" id="lineup">
+    <!-- ZEN gateway -->
+    <section class="tile paper small reveal" data-screen-label="ラインナップ・ZEN">
+      <div class="t-eyebrow">KEYBOARD</div>
+      <h2>ZEN</h2>
+      <p class="t-sub">分割型 ＋ トラックボール。<br>組立済みでお届け。</p>
+      <p class="t-price">単4電池駆動 · ワイヤレス</p>
+      <div class="t-links">
+        <a class="tlink" href="zen/index.html">見る<span class="arr">›</span></a>
+      </div>
+      <div class="t-shot">
+        <img src="assets/zen-pcb.jpg" alt="ZEN の基板クローズアップ">
       </div>
     </section>
 
-    <section class="section">
-      <div class="section__inner">
-        <h2>Products</h2>
-        <a class="product-row" href="/zen/">
-          <span>
-            <strong>ZEN</strong>
-            <small>組み立て済みトラックボール付き分割キーボードベース</small>
-          </span>
-          <span class="arrow">View</span>
-        </a>
+    <!-- Coming soon -->
+    <section class="tile coming small reveal d1" data-screen-label="ラインナップ・近日">
+      <span class="badge">COMING SOON</span>
+      <h2>次の e24。</h2>
+      <p class="t-sub">毎日の道具を、<br>もうひとつ。</p>
+      <div class="t-links">
+        <a class="tlink muted">近日公開</a>
       </div>
+      <div class="ghost-keys" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </section>
-  </main>
+  </div>
+
+</main>
+
+<!-- GLOBAL FOOTER -->
+<footer class="gfoot">
+  <div class="wrap">
+    <div class="top">
+      <div class="brandcol">
+        <div class="bm">e<span class="num">24</span></div>
+        <p>毎日ふれる道具に、ちょっと嬉しいを。<br>キーボードと、その周辺をつくっています。</p>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h4>Products</h4>
+          <a href="zen/index.html">ZEN</a>
+          <a style="color:var(--ink-3);">次の製品<span class="soon-tag">近日</span></a>
+        </div>
+        <div class="col">
+          <h4>ZEN</h4>
+          <a href="zen/index.html#feature">特徴</a>
+          <a href="zen/index.html#layout">キー配列</a>
+          <a href="zen/index.html#kit">必要なもの</a>
+          <a href="zen/firmware.html">ファームウェア</a>
+        </div>
+        <div class="col">
+          <h4>e24</h4>
+          <a href="#story">ストーリー</a>
+          <a href="#lineup">ラインナップ</a>
+          <a href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener">BOOTH</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 e24. All rights reserved.</span>
+      <span class="mono">// EVERY KEYSTROKE A NEW IDEA.</span>
+    </div>
+  </div>
+</footer>
+
+<button id="toTop" class="to-top" aria-label="ページ上部へ戻る">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+  <span class="lbl">上へ戻る</span>
+</button>
+
+<script src="e24-scroll.js"></script>
 </body>
 </html>

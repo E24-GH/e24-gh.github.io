@@ -1,68 +1,505 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ZEN | E24-GH</title>
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZEN — 右手にトラックボールを載せた、左右分割キーボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=DotGothic16&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../e24.css">
+<link rel="stylesheet" href="../zen.css">
 </head>
 <body>
-  <header class="site-header">
-    <a class="brand" href="/">E24-GH</a>
-    <nav class="site-nav">
-      <a href="#features">Features</a>
-      <a href="#setup">Setup</a>
-      <a href="#links">Links</a>
-    </nav>
-  </header>
 
-  <main>
-    <section class="zen-hero">
-      <div class="zen-hero__content">
-        <p class="eyebrow">Split keyboard base with trackball</p>
-        <h1>ZEN</h1>
-        <p class="lead">
-          慣れたキー配置の延長で、トラックボール操作まで自然に扱える分割キーボードベースです。
-        </p>
-      </div>
-    </section>
+<!-- GLOBAL NAV -->
+<nav class="gnav">
+  <div class="gnav-inner solo">
+    <span class="brand" aria-label="e24"><span class="e">e</span><span class="num">24</span><span class="dot">.</span></span>
+  </div>
+</nav>
 
-    <section class="section" id="features">
-      <div class="section__inner grid">
-        <article>
-          <h2>はんだ付け済み</h2>
-          <p>基板、PMW3610トラックボール機構、底面アクリル、ケース、電池ボックス、FPCケーブルは組み立て済みです。</p>
-        </article>
-        <article>
-          <h2>PMW3610 Trackball</h2>
-          <p>19mmトラックボールを使うためのPMW3610ブレイクアウト基板を内蔵しています。</p>
-        </article>
-        <article>
-          <h2>AAA Battery</h2>
-          <p>市販の単4電池を使う構成です。保管や交換がしやすく、日常の道具として扱いやすい構成です。</p>
-        </article>
-      </div>
-    </section>
+<!-- PRODUCT SUBNAV -->
+<div class="subnav">
+  <div class="subnav-inner">
+    <div class="name">ZEN<small>ゼン</small><span class="tagline">ちょうどいいキーボード</span></div>
+    <div class="links">
+      <a href="#feature">特徴</a>
+      <a href="#layout">キー配列</a>
+      <a href="#kit">必要なもの</a>
+      <a href="#setup">組み立て</a>
+      <a href="firmware.html">ファームウェア</a>
+      <a href="#spec">スペック</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener" class="buy-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        購入
+      </a>
+    </div>
+  </div>
+</div>
 
-    <section class="section muted" id="setup">
-      <div class="section__inner">
-        <h2>ご利用までの流れ</h2>
-        <ol class="steps">
-          <li>別途用意したBMP Boostにファームウェアを書き込みます。</li>
-          <li>BMP BoostをZEN本体に差し込みます。</li>
-          <li>キースイッチ、キーキャップ、トラックボール、単4電池を取り付けます。</li>
-          <li>PCやタブレットとBluetooth接続します。</li>
-        </ol>
+<!-- HERO -->
+<header class="hero" data-screen-label="ヒーロー">
+  <div class="hero-glow"></div>
+  <div class="hero-stage reveal d3">
+    <button id="heroSound" class="hero-sound" type="button" aria-label="キーボードをタップして打鍵音を聞く">
+      <img src="../assets/zen-hero.png" draggable="false" alt="ZEN — 白いキーキャップと朱色のアクセントキー、右手側にトラックボールを備えた左右分割キーボード">
+      <span class="hero-sound-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M16 8.5a4 4 0 0 1 0 7M19 6a8 8 0 0 1 0 12"/></svg>
+        タップして打鍵音
+      </span>
+    </button>
+  </div>
+  <div class="wrap">
+    <div class="hero-spec-row reveal">
+      <div class="item">
+        <svg class="spec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="8" height="12" rx="1.6"/><rect x="13.5" y="6" width="8" height="12" rx="1.6"/></svg>
+        <div class="lab">左右分割</div><div class="sub">SPLIT</div>
       </div>
-    </section>
+      <div class="item">
+        <svg class="spec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="13" r="6.2"/><circle cx="12" cy="13" r="1.8" fill="currentColor" stroke="none"/><path d="M12 6.8V3.4" stroke-linecap="round"/></svg>
+        <div class="lab">トラックボール</div><div class="sub">TRACKBALL</div>
+      </div>
+      <div class="item">
+        <svg class="spec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3.5" width="10" height="17" rx="2"/><path d="M10 3.5V2.2h4v1.3M12 8.2v7.6M9.2 12h5.6"/></svg>
+        <div class="lab">単4電池</div><div class="sub">AAA BATTERY</div>
+      </div>
+      <div class="item">
+        <svg class="spec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 9.3a10 10 0 0 1 14.4 0M7.6 12.4a6 6 0 0 1 8.8 0M10.3 15.4a2 2 0 0 1 3.4 0"/><circle cx="12" cy="18.4" r="1" fill="currentColor" stroke="none"/></svg>
+        <div class="lab">ワイヤレス</div><div class="sub">WIRELESS</div>
+      </div>
+    </div>
+  </div>
+</header>
 
-    <section class="section" id="links">
-      <div class="section__inner link-list">
-        <h2>Links</h2>
-        <a href="https://github.com/E24-GH/zen-firmware">Firmware</a>
-        <a href="https://e24-gh.github.io/zen-firmware/">Firmware guide</a>
+<!-- STATEMENT -->
+<section class="statement">
+  <div class="marquee" aria-hidden="true">
+    <div class="track">
+      <span>EVERY KEYSTROKE <span class="accent">A NEW IDEA.</span></span><span class="sep">✦</span>
+      <span>GOOD KEYBOARDS INSPIRE GOOD WORK.</span><span class="sep">✦</span>
+      <span>EVERY KEYSTROKE <span class="accent">A NEW IDEA.</span></span><span class="sep">✦</span>
+      <span>GOOD KEYBOARDS INSPIRE GOOD WORK.</span><span class="sep">✦</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="feature" class="pad">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="tdeco"></span>
+      <h2 class="h2">いつもの作業が、<br>ほんの少し楽になる</h2>
+      <p class="lead">慣れた手の位置に、決定・削除・十字キー・スペース、自然に指がのびる場所に置きました。いつもの作業が、少しだけ楽しくなります。</p>
+    </div>
+
+    <!-- 02 trackball -->
+    <div class="feat flip reveal">
+      <div class="feat-text">
+        <span class="tdeco"></span>
+        <h3>指先ひとつで、<span class="accent">すいすい</span></h3>
+        <p>自然に手を置いた時の親指の位置にトラックボールがあります。<br>文字を打つことと、ポインタを動かすことが、自然につながります。</p>
+        <div class="tags">
+          <span class="chip">手を大きく動かさない</span><span class="chip">打つ・動かすがつながる</span>
+        </div>
       </div>
-    </section>
-  </main>
+      <div class="feat-media">
+        <img src="../assets/zen-trackball-hand.png" alt="トラックボールに親指を添え、右手でホームポジションのままカーソルを操作するようす" style="object-fit:cover;object-position:center;">
+      </div>
+    </div>
+
+    <!-- 03 battery -->
+    <div class="feat reveal">
+      <div class="feat-text">
+        <span class="tdeco"></span>
+        <h3>乾電池だから、安心</h3>
+        <p>電源は、市販の単4電池。リポバッテリーを使わないので、保管も交換も気軽にできます。むずかしい取り扱いはいりません。毎日の道具として、安心して使えます。</p>
+        <div class="tags">
+          <span class="chip">単4電池</span><span class="chip">交換が簡単</span><span class="chip">リポ不使用</span>
+        </div>
+      </div>
+      <div class="feat-media">
+        <img src="../assets/zen-battery.png" alt="シルク印刷風に ALKALINE BATTERY 04 と入った、白い単4乾電池" style="object-fit:contain;object-position:center;">
+      </div>
+    </div>
+
+    <!-- 04 assembled -->
+    <div class="feat flip reveal">
+      <div class="feat-text">
+        <span class="tdeco"></span>
+        <h3>裏側、たまに見てください</h3>
+        <p>背面は、基板がそのまま見えるスケルトン仕様。使いやすさだけでなく、見て、触れて、少し嬉しくなる。毎日使う道具だからこそ、そんな楽しさも大切にしました。</p>
+        <div class="tags">
+          <span class="chip">スケルトン背面</span><span class="chip">見て、触れて、嬉しい</span>
+        </div>
+      </div>
+      <div class="feat-media">
+        <img src="../assets/zen-pcb.jpg" alt="透明ケース越しに見えるZENの基板" style="object-fit:contain;object-position:center;">
+      </div>
+    </div>
+
+    <!-- 05 bumper -->
+    <div class="feat reveal">
+      <div class="feat-text">
+        <span class="tdeco"></span>
+        <h3>バンパーで、<span class="accent">気分を着替える</span></h3>
+        <p>本体のふちを彩るバンパーをその日の気分やデスクの雰囲気に合わせて、着替え。いつもの道具が、ちょっと新鮮に見えてきます。</p>
+        <div class="tags">
+          <span class="chip">付け替え式</span><span class="chip">カラーいろいろ</span><span class="chip">気分で選ぶ</span>
+        </div>
+      </div>
+      <div class="feat-media" style="background:#ECECEC;">
+        <img src="../assets/zen-bumpers.png" alt="白・赤・黄・緑・青と並んだ、付け替え式のカラフルなZENのバンパー" style="object-fit:contain;object-position:center;">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEYMAP -->
+<section id="layout" class="pad" style="background:var(--paper-3);">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="tdeco"></span>
+      <h2 class="h2"><span class="accent">自分専用</span>キーマップ</h2>
+      <p class="lead">ZEN は ZMK ファームウェアを採用。購入後はブラウザの Keymap Editor から、すべてのキーとレイヤーを自由に書き換えられます。下の配置は、あくまで一例です。</p>
+      <a class="fw-link" href="firmware.html" target="_blank" rel="noopener" style="margin-top:18px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span>Keymap Editor の使い方・セットアップガイド</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </div>
+
+    <div class="keymap-wrap reveal d1">
+      <div class="keymap-controls">
+        <span class="label">LAYER</span>
+        <button class="cat-btn active" data-layer="0">ベース</button>
+        <button class="cat-btn" data-layer="1">数字・記号</button>
+        <button class="cat-btn" data-layer="2">移動・Fn</button>
+        <span class="km-editor-note">＋ Keymap Editor で自由に編集</span>
+      </div>
+
+      <div class="board">
+        <div class="half" id="half-left"></div>
+        <div class="half" id="half-right"></div>
+      </div>
+
+      <div class="keymap-legend">
+        <div class="it"><span class="sw" style="background:transparent;border-color:rgba(20,20,25,.22);"></span>キー</div>
+        <div class="it"><span class="sw" style="background:transparent;border-style:dashed;border-color:rgba(20,20,25,.32);"></span>レイヤー / Fn</div>
+        <div class="it"><span class="sw" style="background:var(--accent);border-color:var(--accent);"></span>アクセントキー</div>
+        <div class="it"><span class="sw" style="background:radial-gradient(circle at 38% 32%,#fff,#DCDCE1);border-color:var(--key-sh);"></span>トラックボール</div>
+      </div>
+      <p class="keymap-hint" id="km-info">→ レイヤーを切り替えると、同じキーの役割が変わります。ZMK ならこの割り当ても、すべて自由に。</p>
+    </div>
+  </div>
+</section>
+
+<!-- KIT / 必要なもの -->
+<section id="kit" class="pad">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="tdeco"></span>
+      <h2 class="h2">ご用意いただくもの</h2>
+    </div>
+
+    <div class="included-banner reveal">
+      <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      <div><b>基板・ケース・トラックボール機構</b>は、組み立て済み・はんだ付け済み。下の5つを用意して取り付けるだけで使えます。</div>
+    </div>
+
+    <div class="kit-list reveal d1">
+
+      <div class="kit-row">
+        <div class="kit-id">
+          <div class="kit-ibox"><svg class="kit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="7" width="16" height="10" rx="2"/><path d="M8 7V5m8 2V5M8 17v2m8-2v2"/></svg><span class="kit-qty">×2</span></div>
+          <div><div class="t">BMP Boost</div><div class="d">無線でつなぐためのパーツ。</div></div>
+        </div>
+        <div class="kit-recs">
+          <div class="rlabel">おすすめ・購入先</div>
+          <div class="rrow">
+            <a class="rec" href="https://shop.yushakobo.jp/products/10737" target="_blank" rel="noopener"><span class="rec-name">BMP Boost</span><span class="rec-shop">遊舎工房</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="kit-row">
+        <div class="kit-id">
+          <div class="kit-ibox"><svg class="kit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M12 9v6M9 12h6"/></svg><span class="kit-qty">×50</span></div>
+          <div><div class="t">キースイッチ</div><div class="d">押し心地を決めるスイッチ。</div></div>
+        </div>
+        <div class="kit-recs">
+          <div class="rlabel">おすすめ・購入先</div>
+          <div class="rrow">
+            <a class="rec" href="https://jezailfunder.jp/products/mist-switch" target="_blank" rel="noopener"><span class="rec-name">Kailh 霧</span><span class="rec-shop">JezailFunder</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            <a class="rec" href="https://shop.talpkeyboard.com/products/kailh-taro-ice-cream-mini-37gf-5" target="_blank" rel="noopener"><span class="rec-name">Kailh Taro Ice Cream Mini</span><span class="rec-shop">TALP KEYBOARD</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="kit-row">
+        <div class="kit-id">
+          <div class="kit-ibox"><svg class="kit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9 4 18h16l-2-9z"/><rect x="6" y="5" width="12" height="4" rx="1.5"/></svg><span class="kit-qty">×50</span></div>
+          <div><div class="t">キーキャップ</div><div class="d">指がふれる部分。色や形を自由に。</div></div>
+        </div>
+        <div class="kit-recs">
+          <div class="rlabel">おすすめ・購入先</div>
+          <div class="rrow">
+            <a class="rec" href="https://jezailfunder.jp/products/cornix-keycapset" target="_blank" rel="noopener"><span class="rec-name">Cornix</span><span class="rec-shop">JezailFunder</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            <a class="rec" href="https://shop.beekeeb.jp/products/smolo-low-profile-keycaps" target="_blank" rel="noopener"><span class="rec-name">SMOLO low profile</span><span class="rec-shop">beekeeb</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="kit-row">
+        <div class="kit-id">
+          <div class="kit-ibox"><svg class="kit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="7"/><circle cx="9.5" cy="9.5" r="1.4" fill="currentColor" stroke="none"/></svg><span class="kit-qty">×1</span></div>
+          <div><div class="t">トラックボール</div><div class="d">19mm。右手で転がす玉。</div></div>
+        </div>
+        <div class="kit-recs">
+          <div class="rlabel">おすすめ・購入先</div>
+          <div class="rrow">
+            <a class="rec" href="https://shakupan.booth.pm/items/7667439" target="_blank" rel="noopener"><span class="rec-name">19mm トラックボール</span><span class="rec-shop">しゃくぱん / BOOTH</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            <a class="rec" href="https://shop.beekeeb.jp/products/19mm-light-trackball" target="_blank" rel="noopener"><span class="rec-name">19mm Light Trackball</span><span class="rec-shop">beekeeb</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="kit-row">
+        <div class="kit-id">
+          <div class="kit-ibox"><svg class="kit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V2.5h6V4M12 8v8M9 12h6"/></svg><span class="kit-qty">×2</span></div>
+          <div><div class="t">単4電池</div><div class="d">市販の単4電池でOK。</div></div>
+        </div>
+        <div class="kit-recs">
+          <div class="rlabel">おすすめ・購入先</div>
+          <div class="rrow">
+            <a class="rec" href="https://jp.daisonet.com/products/4550480511610" target="_blank" rel="noopener"><span class="rec-name">アルカリ単4電池</span><span class="rec-shop">DAISO</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="kit-foot reveal d2">※ 上記はおすすめの一例です。19mm トラックボール・対応するキースイッチ／キーキャップであれば、お好みのものをお使いいただけます。</p>
+  </div>
+</section>
+
+<!-- SETUP / 組み立て方 -->
+<section id="setup" class="pad" style="background:var(--paper-3);" data-screen-label="組み立て方">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="tdeco"></span>
+      <h2 class="h2">組み立て</h2>
+      <p class="lead">はんだ付けや基板の組み立ては必要ありません。用意したパーツを取り付けて、つなぐだけ。</p>
+    </div>
+    <ol class="steps reveal d1">
+      <li class="step"><div class="step-n">1</div><div class="step-body"><h4>ファームウェアを書き込む</h4><p>別途用意した BMP Boost に、ファームウェアを書き込みます。<span class="note">※ データ通信対応の USB Type-C ケーブルで接続して書き込みます</span></p><a class="fw-link" href="firmware.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span>セットアップガイドを見る</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div></li>
+      <li class="step"><div class="step-n">2</div><div class="step-body"><h4>BMP Boost を差し込む</h4><p>BMP Boost を ZEN 本体に差し込みます。</p></div></li>
+      <li class="step"><div class="step-n">3</div><div class="step-body"><h4>パーツを取り付ける</h4><p>キースイッチ、キーキャップ、トラックボール、単4電池を取り付けます。</p></div></li>
+      <li class="step"><div class="step-n">4</div><div class="step-body"><h4>Bluetooth で接続する</h4><p>PC やタブレットと Bluetooth 接続します。これで完成です。</p></div></li>
+    </ol>
+    <div class="setup-note reveal d2">※ はんだ付けや基板の組み立て作業は不要です。</div>
+  </div>
+</section>
+
+<!-- SPEC -->
+<section id="spec" class="pad" style="background:var(--paper-2);">
+  <div class="wrap" style="max-width:880px;">
+    <div class="section-head reveal">
+      <span class="tdeco"></span>
+      <h2 class="h2">スペック</h2>
+    </div>
+    <div class="reveal d1">
+      <table class="spec">
+        <tr><th>種類</th><td>左右分割型ワイヤレスキーボード（トラックボール搭載）</td></tr>
+        <tr><th>キー数</th><td>左右合計 50キー</td></tr>
+        <tr><th>ファームウェア</th><td>ZMK <span class="mono">/ Keymap Editor でキー配置を自由に編集</span></td></tr>
+        <tr><th>ポインティング</th><td>右手側トラックボール</td></tr>
+        <tr><th>接続方式</th><td>Bluetooth ワイヤレス <span class="mono">/ BMP Boost</span></td></tr>
+        <tr><th>電源</th><td>単4アルカリ乾電池（リポバッテリー不使用）</td></tr>
+        <tr><th>コントローラ</th><td>BMP Boost（別途ご用意）</td></tr>
+        <tr><th>提供状態</th><td>基板・ケース・トラックボール機構を 組み立て済み・はんだ付け済み でお届け</td></tr>
+        <tr><th>別途必要なもの</th><td>BMP Boost・キースイッチ・キーキャップ・トラックボール・単4電池</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="pad" style="background:var(--paper-3);">
+  <div class="wrap" style="max-width:880px;">
+    <div class="section-head reveal">
+      <span class="tdeco"></span>
+      <h2 class="h2">よくある質問</h2>
+      <p class="lead">製品のことから、組み立て・接続のつまずきまで。気になる点をまとめました。</p>
+    </div>
+
+    <div class="faq-list reveal d1">
+
+      <details class="faq-item">
+        <summary>ZEN はどんなキーボードですか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>普段使いに近いキー配置とトラックボール位置を活かし、無理なく使い始められることを目指した分割キーボードです。文字入力とポインタ操作を、手を大きく動かさず自然につなげられるように設計しています。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>自作キーボードが初めてでも使えますか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>基本的な組み立てと設定が必要です。頒布予定キットでは、はんだ作業は済ませた状態ですので、BMP Boost・キースイッチ・キーキャップ・トラックボール・電池の取り付けのみを行っていただきます。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>はんだ付けは必要ですか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>頒布予定キットでは、購入者さまによるはんだ付けは不要な構成を想定しています。必要な作業内容は頒布時の組立ガイドに記載します。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>別途用意するものはありますか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>BMP Boost・キースイッチ・キーキャップ・19mm トラックボール・単4電池は別途用意する想定です。最終的な同梱物は頒布ページで案内します。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>トラックボールは何 mm ですか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>19mm ボールを想定しています。色や素材によってセンサーの反応が変わる場合があるため、動作確認済みのものを推奨します。</p><p class="faq-caution">※ ボールによって大きさがほんの少し異なることがあり、稀に反応しない、または反応しづらいボールがあります。あらかじめご了承ください。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>無線で使えますか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>BMP Boostを使用することで、Bluetooth 接続で利用する想定です。USB 接続での確認や設定も行えます。現在ご用意しているファームウェアでは、最大4台の機器を登録し、キー操作でワンタッチで切り替えられます。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>サイズ感を確認できますか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>実機を触れない方向けに、等倍印刷用のサイズシートをご用意しています。下記からダウンロードいただけます。印刷時は「実際のサイズ」「100%」「拡大縮小なし」を選び、確認線や本体寸法で等倍になっているか確認してください。</p><a class="dl-link" href="../assets/ZEN-Keyboard-Size.pdf" download="ZEN-Keyboard-Size.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg><span>サイズシート（PDF）をダウンロード</span></a></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>ケースなどの STL データは配布されますか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>ケースなどの STL データは、頒布時に案内予定です。3D プリンタでの出力やカスタムに活用できるよう、準備が整いしだい公開します。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>どこで購入できますか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>BOOTH で頒布しています。下記のショップページからご購入いただけます。正式な頒布日時・数量・価格は X および紹介サイトでも案内します。</p><a class="dl-link" href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>BOOTH で購入する</span></a></div>
+      </details>
+
+    </div>
+
+    <div class="trouble reveal d2">
+      <h3 class="trouble-title">トラブルシューティング</h3>
+      <div class="faq-list">
+
+        <details class="faq-item">
+          <summary>電源が入らない、または反応しない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>まず、電池の向きと残量を確認してください。次に、電源スイッチが ON になっているか、BMP Boostが正しい向きで差し込まれているかを確認してください。可能であれば USB 接続でも反応するか確認してください。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Bluetooth で接続できない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>PC やスマートフォン側の Bluetooth 設定から、古い ZEN のペアリング情報を削除してください。その後、ZEN の電源を入れ直し、再度ペアリングしてください。近くに複数の接続先がある場合は、不要な機器の Bluetooth を一時的に OFF にすると接続しやすくなる場合があります。</p><p class="reset-hint">改善しない場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をお試しください。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>片側だけ反応しない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>反応しない側の電源・電池残量・接続状態を確認してください。Bluetooth 接続の場合は、一度ペアリング情報を削除して再接続してください。USB 接続で左右それぞれの動作を確認すると、接続側の問題か本体側の問題かを切り分けやすくなります。</p><p class="reset-hint">改善しない場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をお試しください。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>一部のキーだけ反応しない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>キースイッチが奥まで差し込まれているか、ピンが曲がっていないかを確認してください。別のキースイッチに差し替えて反応する場合は、スイッチ側の問題である可能性があります。キーマップを変更している場合は、初期状態のファームウェアでも確認してください。</p><p>また、ソケット内の接触パーツが変形してしまった可能性もあります。その場合は、下記のリンクを参考に調整してみてください。</p><a class="dl-link" href="https://www.reddit.com/r/MechanicalKeyboards/comments/md2rzk/lpt_on_fixing_kailh_hotswap_socket_contacts/?tl=ja" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18s-1.5 0-3-1.5S4 13 5.5 11.5l2-2a3.5 3.5 0 0 1 5 0M15 6s1.5 0 3 1.5S20 11 18.5 12.5l-2 2a3.5 3.5 0 0 1-5 0"/></svg><span>ソケット接点の調整方法を見る</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>トラックボールが動かない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>19mm ボールが正しく乗っているか、ボールやセンサー周辺にホコリがないかを確認してください。ボールの色や素材によって反応が変わる場合があるため、他のボールや明るい色のボールでも試してください。USB 接続で動作するか確認すると、Bluetooth 側の問題かどうかを切り分けやすくなります。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>トラックボールの動きが不安定な場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>ボールと支持部にホコリや汚れがないか確認してください。ボールを一度外して、センサーが浮いていたり、ズレていたりしないか確認してください。光沢の強いボールや色の濃いボールでは、センサーの反応が不安定になる場合があります。Bluetooth 接続で不安定な場合は、USB 接続でも同じ症状が出るか確認してください。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>LED が光らない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>ステータス LED は、ファームウェアの状態や接続状態によって点灯条件が変わる場合があります。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>USB では動くが Bluetooth では不安定な場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>接続先の古いペアリング情報を削除し、ZEN の電源を入れ直してください。電池残量が少ない場合も不安定になることがあるため、新しい電池でも確認してください。別の PC やスマートフォンで試すと、接続先環境の影響かどうかを確認できます。<br>それでも改善しない場合は、お手数ですがファームウェアリセットを行ってください。</p><p class="reset-hint">手順は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をご覧ください。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>スリープ復帰後に反応しない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>いずれかのキーを押して数秒待ってください。トラックボールを動かすだけでなく、キー入力も試してください。復帰しない場合は電源を入れ直してください。</p><p class="reset-hint">頻発する場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>もお試しください。</p></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>ファームウェアを書き込んだ後に動かない場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>左右それぞれに正しいファームウェアを書き込んだか確認してください。書き込み後に一度 USB を抜き、電源を入れ直してください。書き込み手順は<a href="firmware.html" target="_blank" rel="noopener">セットアップガイド</a>をご覧ください。</p><p class="reset-hint">動かない場合は、設定リセット・ペアリング情報の初期化を行った上で、初期のファームウェアを再度書き込んでください。</p></div>
+        </details>
+
+        <details class="faq-item" id="faq-reset">
+          <summary>設定をリセットしたい / ペアリング情報を初期化したい<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>settings reset 用ファームウェア（<code>settings_reset.uf2</code>）を書き込むことで、キーボード側に保存された設定やペアリング情報を初期化できます。</p>
+          <ol class="faq-steps">
+            <li>電源スイッチを OFF にした状態で、USB ケーブルで Mac / PC と接続します（ブートローダーモード）。</li>
+            <li><code>settings_reset.uf2</code> を書き込みます。（左右）</li>
+            <li>書き込み終わったら、USB ケーブルを外します。</li>
+            <li>電源スイッチを ON にします。</li>
+            <li>USB ケーブルを再接続します。この時点でリセットが実行されます。</li>
+            <li>電源スイッチを OFF にした状態で、USB ケーブルで Mac / PC と接続します（ブートローダーモード）。</li>
+            <li>左右に通常のファームウェアを書き込みます。</li>
+            <li>PC / スマートフォン側に残っている古いペアリング情報を削除します。</li>
+            <li>ZEN の電源を入れ直し、再度ペアリングします。</li>
+          </ol>
+          <a class="dl-link" href="firmware.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.42 7.86 10.95.58.1.79-.25.79-.56 0-.27-.01-1.16-.02-2.1-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.04 11.04 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12.02C23.5 5.74 18.27.5 12 .5Z"/></svg><span>settings_reset.uf2 の取得手順を見る</span></a>
+          <a class="dl-link" href="firmware.html" target="_blank" rel="noopener" style="margin-top:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span>書き込み手順の詳細（セットアップガイド）</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>問い合わせ前に確認することはありますか？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>問い合わせ時は、購入時期やロット、使用している BMP Boost・キースイッチ・キーキャップ・トラックボール・電池の種類、接続方法、接続先の OS や機種、症状が起きる操作と頻度を添えてください。可能であれば写真や動画があると確認しやすくなります。</p><p class="reset-hint">お問い合わせの前に、一度 <a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をお試しいただくと、解決することがあります。</p></div>
+        </details>
+
+      </div>
+      <p class="trouble-note">解決しないときは、ファームウェアのリポジトリの Issues もあわせてご確認ください。<a href="https://github.com/E24-GH/zen-firmware" target="_blank" rel="noopener">github.com/E24-GH/zen-firmware<svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a></p>
+    </div>
+  </div>
+</section>
+
+<!-- GLOBAL FOOTER -->
+<footer class="gfoot">
+  <div class="wrap">
+    <div class="top">
+      <div class="brandcol">
+        <div class="bm">e<span class="num">24</span></div>
+        <p>毎日ふれる道具に、ちょっと嬉しいを。<br>キーボードと、その周辺をつくっています。</p>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h4>Products</h4>
+          <a href="index.html">ZEN</a>
+          <a style="color:var(--ink-3);">次の製品<span class="soon-tag">近日</span></a>
+        </div>
+        <div class="col">
+          <h4>ZEN</h4>
+          <a href="#feature">特徴</a>
+          <a href="#layout">キー配列</a>
+          <a href="#kit">必要なもの</a>
+          <a href="#setup">組み立て</a>
+          <a href="#spec">スペック</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 e24. All rights reserved.</span>
+      <span class="mono">// EVERY KEYSTROKE A NEW IDEA.</span>
+    </div>
+  </div>
+</footer>
+
+<button id="toTop" class="to-top" aria-label="ページ上部へ戻る">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+  <span class="lbl">上へ戻る</span>
+</button>
+
+<script src="../zen-keymap.js"></script>
+<script src="../zen-sound.js"></script>
+<script src="../e24-scroll.js"></script>
 </body>
 </html>
