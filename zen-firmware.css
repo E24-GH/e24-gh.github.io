@@ -35,13 +35,6 @@
 .fw-sec > .wrap > p { color: var(--ink-2); font-size: 17px; line-height: 1.9; max-width: 70ch; }
 .fw-sec p a, .fw-list a { color: var(--accent); font-weight: 700; text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); }
 .fw-sec p a:hover, .fw-list a:hover { border-bottom-color: var(--accent); }
-.fw-steps > li a {
-  color: var(--accent); font-weight: 700; text-decoration: none;
-  display: inline-flex; align-items: center; gap: 5px; vertical-align: baseline;
-  font-family: var(--font-mono); font-size: 13px;
-}
-.fw-steps > li a:hover { text-decoration: underline; }
-.fw-steps > li a .ext { width: 13px; height: 13px; }
 
 .fw-divider { height: 1px; background: var(--line); margin-top: clamp(48px,7vw,86px); }
 

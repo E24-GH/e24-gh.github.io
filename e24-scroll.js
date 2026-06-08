@@ -31,4 +31,24 @@
   if (location.hash.indexOf("#faq-") === 0) {
     setTimeout(function () { openTarget(location.hash.slice(1)); }, 60);
   }
+
+  /* ----- image load-fade: non-hero images fade in once they finish loading ----- */
+  (function () {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    var imgs = document.querySelectorAll("img");
+    Array.prototype.forEach.call(imgs, function (img) {
+      // skip hero imagery — it should be present immediately
+      if (img.closest(".hero, .hero-stage, .hero-sound")) return;
+      img.classList.add("fade-img");
+      function show() { img.classList.add("loaded"); }
+      if (img.complete && img.naturalWidth > 0) {
+        // already cached — reveal on next frame so the transition can run
+        requestAnimationFrame(function () { requestAnimationFrame(show); });
+      } else {
+        img.addEventListener("load", show, { once: true });
+        img.addEventListener("error", show, { once: true });
+      }
+    });
+  })();
 })();
