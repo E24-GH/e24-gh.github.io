@@ -64,7 +64,7 @@
 
 /* code */
 .fw-page code {
-  font-family: var(--font-mono); font-size: .86em; background: var(--paper-3);
+  font-family: var(--font-code); font-size: .86em; background: var(--paper-3);
   border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; color: var(--ink);
   word-break: break-all;
 }

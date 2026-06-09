@@ -27,7 +27,10 @@
   --nav-h: 50px;
 
   --font-jp: "Zen Kaku Gothic New", system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, monospace;
+  /* DIN Condensed = logo, labels, keycap legends, numbers (was Space Mono) */
+  --font-mono: "D-DIN Condensed", "Saira SemiCondensed", system-ui, sans-serif;
+  /* literal code / filenames stay monospaced */
+  --font-code: "Space Mono", ui-monospace, monospace;
   --font-pixel: "DotGothic16", monospace;
   --ease: cubic-bezier(.2,.7,.2,1);
 }
@@ -99,7 +102,7 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 .gnav-inner.solo { justify-content: center; }
 .gnav .brand {
   display: inline-flex; align-items: baseline; gap: 1px;
-  font-weight: 900; font-size: 21px; letter-spacing: -.01em; color: var(--ink); text-decoration: none; line-height: 1;
+  font-family: var(--font-mono); font-weight: 700; font-size: 24px; letter-spacing: .02em; color: var(--ink); text-decoration: none; line-height: 1;
   transition: opacity .2s;
 }
 .gnav .brand:hover { opacity: .7; }
@@ -107,7 +110,7 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 .gnav span.brand:hover { opacity: 1; }
 .gnav .brand .e { }
 .gnav .brand .num { color: var(--accent); }
-.gnav .brand .dot { color: var(--accent); font-size: 21px; }
+.gnav .brand .dot { color: var(--accent); font-size: 24px; }
 .gnav .glinks { display: flex; align-items: center; gap: clamp(14px, 2.4vw, 34px); margin: 0 auto; }
 .gnav .glinks a {
   font-size: 13px; font-weight: 500; color: var(--ink-2); text-decoration: none;
@@ -233,7 +236,7 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 .gfoot { background: var(--paper); border-top: 1px solid var(--line); padding: 56px 0 40px; font-size: 13px; color: var(--ink-2); }
 .gfoot .top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
 .gfoot .brandcol { max-width: 280px; }
-.gfoot .brandcol .bm { font-weight: 900; font-size: 26px; letter-spacing: -.01em; }
+.gfoot .brandcol .bm { font-family: var(--font-mono); font-weight: 700; font-size: 30px; letter-spacing: .02em; }
 .gfoot .brandcol .bm .num { color: var(--accent); }
 .gfoot .brandcol p { color: var(--ink-3); margin-top: 10px; font-size: 13px; line-height: 1.7; }
 .gfoot .cols { display: flex; gap: clamp(34px, 6vw, 80px); flex-wrap: wrap; }

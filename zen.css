@@ -27,7 +27,10 @@
   --r-sm: 12px;
 
   --font-jp: "Zen Kaku Gothic New", system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, monospace;
+  /* DIN Condensed = logo, labels, keycap legends, numbers (was Space Mono) */
+  --font-mono: "D-DIN Condensed", "Saira SemiCondensed", system-ui, sans-serif;
+  /* literal code / filenames stay monospaced */
+  --font-code: "Space Mono", ui-monospace, monospace;
   --font-pixel: "DotGothic16", monospace;
 
   --ease: cubic-bezier(.2,.7,.2,1);
@@ -455,7 +458,7 @@ section { position: relative; }
   display: grid; place-items: center;
 }
 .faq-body code {
-  font-family: var(--font-mono); font-size: .88em; background: var(--paper-3);
+  font-family: var(--font-code); font-size: .88em; background: var(--paper-3);
   border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; color: var(--ink);
 }
 .reset-hint { color: var(--ink-2); font-size: 14.5px; margin-top: 14px; }
