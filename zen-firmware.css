@@ -33,8 +33,8 @@
 .fw-sec h2 { font-size: clamp(26px, 3.4vw, 42px); margin: 12px 0 16px; letter-spacing: -.01em; line-height: 1.12; }
 .fw-sec h3 { font-size: clamp(19px, 2.2vw, 24px); margin: 36px 0 12px; }
 .fw-sec > .wrap > p { color: var(--ink-2); font-size: 17px; line-height: 1.9; max-width: 70ch; }
-.fw-sec p a, .fw-list a { color: var(--accent); font-weight: 700; text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); }
-.fw-sec p a:hover, .fw-list a:hover { border-bottom-color: var(--accent); }
+.fw-sec p a, .fw-list a, .fw-steps a { color: var(--accent); font-weight: 700; text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); }
+.fw-sec p a:hover, .fw-list a:hover, .fw-steps a:hover { border-bottom-color: var(--accent); }
 
 .fw-divider { height: 1px; background: var(--line); margin-top: clamp(48px,7vw,86px); }
 
@@ -111,6 +111,13 @@
 
 /* clickable figures + lightbox */
 .fw-fig img { cursor: zoom-in; transition: border-color .2s var(--ease); }
+/* scroll fade-in: transition on the .loaded END state, with enough specificity
+   to beat `.fw-fig img`; the un-loaded base stays instant so it hides with no flash */
+.fw-fig img.fade-img.loaded {
+  transition: opacity 1.1s cubic-bezier(.25,.46,.45,.94),
+              transform 1.1s cubic-bezier(.25,.46,.45,.94),
+              border-color .2s var(--ease);
+}
 .fw-fig img:hover { border-color: var(--accent); }
 .fw-fig figcaption .zoom-tag {
   display: inline-flex; align-items: center; gap: 5px; margin-left: 8px;

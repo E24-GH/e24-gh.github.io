@@ -32,22 +32,55 @@
     setTimeout(function () { openTarget(location.hash.slice(1)); }, 60);
   }
 
-  /* ----- image load-fade: non-hero images fade in once they finish loading ----- */
+  /* ----- image fade-in: non-hero images fade in when they scroll into view,
+     but only once they've finished loading (so slow/late images never pop) ----- */
   (function () {
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
-    var imgs = document.querySelectorAll("img");
-    Array.prototype.forEach.call(imgs, function (img) {
-      // skip hero imagery — it should be present immediately
-      if (img.closest(".hero, .hero-stage, .hero-sound")) return;
+    var imgs = Array.prototype.filter.call(
+      document.querySelectorAll("img"),
+      function (img) { return !img.closest(".hero, .hero-stage, .hero-sound"); }
+    );
+    if (!imgs.length) return;
+
+    function reveal(img) {
+      // play the fade only when BOTH the image is loaded AND it's in view
+      if (img._loaded && img._inview && !img.classList.contains("loaded")) {
+        img.classList.add("loaded");
+      }
+    }
+
+    var io = ("IntersectionObserver" in window)
+      ? new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target._inview = true;
+              reveal(e.target);
+              io.unobserve(e.target);
+            }
+          });
+        }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 })
+      : null;
+
+    imgs.forEach(function (img) {
       img.classList.add("fade-img");
-      function show() { img.classList.add("loaded"); }
+      function onLoad() {
+        img._loaded = true;
+        reveal(img);
+      }
       if (img.complete && img.naturalWidth > 0) {
-        // already cached — reveal on next frame so the transition can run
-        requestAnimationFrame(function () { requestAnimationFrame(show); });
+        img._loaded = true;
       } else {
-        img.addEventListener("load", show, { once: true });
-        img.addEventListener("error", show, { once: true });
+        img.addEventListener("load", onLoad, { once: true });
+        img.addEventListener("error", onLoad, { once: true });
+      }
+      if (io) {
+        io.observe(img);
+      } else {
+        // no IntersectionObserver: fall back to load-based reveal
+        img._inview = true;
+        if (img._loaded) requestAnimationFrame(function () { reveal(img); });
+        else img.addEventListener("load", function () { reveal(img); }, { once: true });
       }
     });
   })();

@@ -128,9 +128,13 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 .reveal.d3 { transition-delay: .24s; }
 .reveal.d4 { transition-delay: .32s; }
 
-/* non-hero images fade in once they finish loading */
-.fade-img { opacity: 0; transform: translateY(10px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
-.fade-img.loaded { opacity: 1; transform: none; }
+/* non-hero images fade in once they scroll into view (transition lives on the
+   .loaded END state so the JS-added hidden state snaps in instantly with no flash) */
+.fade-img { opacity: 0; transform: translateY(16px); }
+.fade-img.loaded {
+  opacity: 1; transform: none;
+  transition: opacity 1.1s cubic-bezier(.25,.46,.45,.94), transform 1.1s cubic-bezier(.25,.46,.45,.94);
+}
 @media (prefers-reduced-motion: reduce) {
   .fade-img { opacity: 1; transform: none; transition: none; }
 }
@@ -403,6 +407,11 @@ section { position: relative; }
 .spec th { text-align: left; padding: 20px 18px 20px 0; font-weight: 700; width: 240px; vertical-align: top; font-size: 15px; }
 .spec td { padding: 20px 0; color: var(--ink-2); font-size: 16px; vertical-align: top; }
 .spec .mono { font-family: var(--font-mono); font-size: 13px; color: var(--ink-3); }
+.spec .spec-note { display: block; margin-top: 8px; font-size: 13px; line-height: 1.7; color: var(--ink-3); }
+.spec .spec-note:first-of-type { margin-top: 12px; }
+.spec .spec-note a { color: var(--accent); font-weight: 700; text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); }
+.spec .spec-note a:hover { border-bottom-color: var(--accent); }
+.spec .spec-note a .ext { width: 12px; height: 12px; margin-left: 3px; vertical-align: -1px; }
 @media (max-width:600px){ .spec th { width: 130px; font-size: 14px; } }
 
 /* ============================================================
