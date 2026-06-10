@@ -32,6 +32,35 @@
     setTimeout(function () { openTarget(location.hash.slice(1)); }, 60);
   }
 
+  /* ----- subnav hamburger (mobile) ----- */
+  (function () {
+    var subnav = document.querySelector(".subnav");
+    if (!subnav) return;
+    var burger = subnav.querySelector(".subnav-burger");
+    var links = subnav.querySelector(".links");
+    if (!burger || !links) return;
+    function setOpen(open) {
+      subnav.classList.toggle("menu-open", open);
+      burger.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    burger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setOpen(!subnav.classList.contains("menu-open"));
+    });
+    links.addEventListener("click", function (e) {
+      if (e.target.closest("a")) setOpen(false);
+    });
+    document.addEventListener("click", function (e) {
+      if (subnav.classList.contains("menu-open") && !subnav.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+    window.addEventListener("resize", function () {
+      if (window.innerWidth > 760) setOpen(false);
+    });
+  })();
+
   /* ----- image fade-in: non-hero images fade in when they scroll into view,
      but only once they've finished loading (so slow/late images never pop) ----- */
   (function () {

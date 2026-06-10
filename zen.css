@@ -281,7 +281,7 @@ section { position: relative; }
 /* ============================================================
    KEYMAP (interactive)
    ============================================================ */
-.keymap-wrap { background: var(--paper-2); border-radius: var(--r-lg); border: 1px solid var(--line); padding: clamp(24px,4vw,52px); }
+.keymap-wrap { background: var(--paper-2); border-radius: var(--r-lg); border: 1px solid var(--line); padding: clamp(24px,4vw,52px); container-type: inline-size; }
 .keymap-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; align-items: center; }
 .keymap-controls .label { font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); letter-spacing: .08em; margin-right: 6px; }
 .cat-btn {
@@ -294,7 +294,20 @@ section { position: relative; }
 .cat-btn:hover { border-color: var(--ink); color: var(--ink); }
 .cat-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 
-.keymap-wrap .board { display: flex; flex-direction: row; gap: clamp(8px,1.6vw,28px); justify-content: center; align-items: flex-start; flex-wrap: nowrap; max-width: 100%; background: transparent; }
+/* board scales to its container width (cqi) so the split layout is never clipped */
+.keymap-wrap .board {
+  display: flex; flex-direction: row; gap: min(28px, 3cqi);
+  justify-content: center; align-items: flex-start; flex-wrap: nowrap;
+  max-width: 100%; background: transparent;
+  --u: min(52px, 6.95cqi);
+}
+/* narrow containers: stack the two halves so keys stay readable */
+@container (max-width: 560px) {
+  .keymap-wrap .board {
+    flex-direction: column; align-items: center; gap: 22px;
+    --u: min(46px, 13.2cqi);
+  }
+}
 .half { position: relative; flex: 0 0 auto; }
 .key {
   position: absolute;
