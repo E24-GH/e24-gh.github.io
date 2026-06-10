@@ -45,12 +45,23 @@
   <div class="hero-glow"></div>
   <div class="hero-stage reveal d3">
     <button id="heroSound" class="hero-sound" type="button" aria-label="キーボードをさわって打鍵音を聞く">
-      <img src="../assets/zen-hero.png" draggable="false" alt="ZEN — 白いキーキャップと朱色のアクセントキー、右手側にトラックボールを備えた左右分割キーボード">
+      <span class="hero-img-wrap">
+        <img class="hero-img is-active" data-variant="white" src="../assets/zen-hero.webp" draggable="false" alt="ZEN — 白いキーキャップと朱色のアクセントキー、右手側にトラックボールを備えた左右分割キーボード">
+        <img class="hero-img" data-variant="black" src="../assets/zen-hero-black.webp" draggable="false" alt="ZEN — 黒いキーキャップとピンクのアクセントキー、右手側にトラックボールを備えた左右分割キーボード">
+      </span>
       <span class="hero-sound-hint">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M16 8.5a4 4 0 0 1 0 7M19 6a8 8 0 0 1 0 12"/></svg>
         さわって打鍵音
       </span>
     </button>
+    <div class="hero-colors" role="group" aria-label="本体カラーを選ぶ">
+      <button class="hero-color is-active" type="button" data-variant="white" aria-pressed="true" aria-label="ホワイト">
+        <span class="sw sw-white"></span>
+      </button>
+      <button class="hero-color" type="button" data-variant="black" aria-pressed="false" aria-label="ブラック">
+        <span class="sw sw-black"></span>
+      </button>
+    </div>
   </div>
   <div class="wrap">
     <div class="hero-spec-row reveal">
@@ -121,7 +132,7 @@
         </div>
       </div>
       <div class="feat-media">
-        <img src="../assets/zen-battery.png" alt="シルク印刷風に ALKALINE BATTERY 04 と入った、白い単4乾電池" style="object-fit:contain;object-position:center;">
+        <img src="../assets/zen-battery.webp" alt="シルク印刷風に ALKALINE BATTERY 04 と入った、白い単4乾電池" style="object-fit:contain;object-position:center;">
       </div>
     </div>
 
@@ -151,7 +162,7 @@
         </div>
       </div>
       <div class="feat-media" style="background:#ECECEC;">
-        <img src="../assets/zen-bumpers.png" alt="白・赤・黄・緑・青と並んだ、付け替え式のカラフルなZENのバンパー" style="object-fit:contain;object-position:center;">
+        <img src="../assets/zen-bumpers.webp" alt="白・赤・黄・緑・青と並んだ、付け替え式のカラフルなZENのバンパー" style="object-fit:contain;object-position:center;">
       </div>
     </div>
   </div>
@@ -522,6 +533,7 @@
 
 <script src="../zen-keymap.js"></script>
 <script src="../zen-sound.js"></script>
+<script src="../zen-hero-color.js"></script>
 <script src="../e24-scroll.js"></script>
 </body>
 </html>

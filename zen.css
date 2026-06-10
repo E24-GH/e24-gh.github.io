@@ -176,7 +176,7 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 .hero .lead { max-width: 600px; margin: 0 auto 34px; }
 .hero .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
 .hero-stage { position: relative; margin-top: 10px; }
-.hero-stage img { width: 100%; max-width: 1240px; margin: 0 auto; will-change: transform; }
+.hero-stage .hero-img-wrap { width: 100%; max-width: 1240px; margin: 0 auto; }
 .hero-glow {
   position: absolute; inset: auto 0 -6% 0; height: 60%;
   background: radial-gradient(60% 100% at 50% 100%, var(--accent-soft), transparent 70%);
@@ -517,15 +517,20 @@ footer.foot .mono { font-family: var(--font-mono); letter-spacing: .08em; }
 @media (max-width:600px){ .km-editor-note { margin-left:0; width:100%; } }
 /* hero tap-to-sound */
 .hero-sound { display: block; width: 100%; padding: 0; border: none; background: none; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; }
-.hero-sound img {
-  width: 100%; transition: transform .12s var(--ease);
+.hero-img-wrap { position: relative; display: block; width: 100%; max-width: 1240px; margin: 0 auto; aspect-ratio: 1920 / 1080; }
+.hero-img {
+  position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain;
   user-select: none; -webkit-user-select: none;
   -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; user-drag: none;
   -webkit-touch-callout: none; pointer-events: none;
+  opacity: 0;
 }
-.hero-sound:active img { transform: scale(.992); }
+.hero-img.is-active { opacity: 1; z-index: 2; }
+.hero-img:not(.is-active) { z-index: 1; }
+.hero-stage.color-anim .hero-img { transition: transform .12s var(--ease), opacity .5s var(--ease); }
+.hero-sound:active .hero-img.is-active { transform: scale(.992); }
 .hero-sound-hint {
-  position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%);
+  position: absolute; left: 50%; bottom: 17%; transform: translateX(-50%);
   display: inline-flex; align-items: center; gap: 7px;
   font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: #fff;
   background: rgba(27,26,23,.78); backdrop-filter: blur(6px);
@@ -538,6 +543,34 @@ footer.foot .mono { font-family: var(--font-mono); letter-spacing: .08em; }
 .hero-sound.tapped .hero-sound-hint { opacity: 0; transition: opacity .5s var(--ease); animation: none; }
 @keyframes hintpulse { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-4px); } }
 @media (prefers-reduced-motion: reduce){ .hero-sound-hint { animation: none; } }
+
+/* hero color switcher */
+.hero-colors {
+  position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px; pointer-events: auto;
+  padding: 5px; border-radius: 999px;
+  background: rgba(130,130,135,.14); backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+}
+.hero-color {
+  width: 30px; height: 30px; padding: 0; border-radius: 999px; position: relative;
+  background: none; border: none; cursor: pointer; display: grid; place-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-color .sw {
+  width: 20px; height: 20px; border-radius: 999px; display: block;
+  box-shadow: 0 0 0 1px rgba(20,20,25,.12) inset, 0 1px 3px rgba(20,20,25,.18);
+  transition: transform .18s var(--ease);
+}
+.hero-color .sw-white { background: linear-gradient(155deg, #ffffff, #e9e9ec); }
+.hero-color .sw-black { background: linear-gradient(155deg, #3a3a3e, #1c1c1f); box-shadow: 0 0 0 1px rgba(255,255,255,.1) inset, 0 1px 3px rgba(20,20,25,.3); }
+.hero-color::after {
+  content: ""; position: absolute; inset: 0; border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--accent); opacity: 0; transform: scale(.82);
+  transition: opacity .18s var(--ease), transform .18s var(--ease);
+}
+.hero-color.is-active::after { opacity: 1; transform: scale(1); }
+.hero-color:not(.is-active) .sw { opacity: .82; }
+.hero-color:not(.is-active):hover .sw { transform: scale(1.12); opacity: 1; }
 
 .key.sm { font-size: calc(var(--u) * .15); }
 .key.lyr { background: rgba(20,20,25,.045); border-style: dashed; border-color: rgba(20,20,25,.32); color: var(--ink-3); }
