@@ -78,7 +78,7 @@ img { display: block; max-width: 100%; }
   color: var(--ink-3);
 }
 
-h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wrap: balance; }
+h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wrap: balance; word-break: auto-phrase; }
 
 .display {
   font-size: clamp(44px, 8.4vw, 116px);
@@ -87,7 +87,7 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
   letter-spacing: -.02em;
 }
 
-.h2 { font-size: clamp(26px, 3.4vw, 42px); }
+.h2 { font-size: clamp(26px, 3.4vw, 42px); word-break: auto-phrase; }
 .lead { font-size: clamp(17px, 1.8vw, 22px); color: var(--ink-2); line-height: 1.85; }
 
 .accent { color: var(--accent); }
@@ -194,7 +194,14 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 .hero-spec-row .spec-ico { width: 36px; height: 36px; color: var(--accent); }
 .hero-spec-row .lab { font-family: var(--font-jp); font-size: 17px; font-weight: 700; color: var(--ink); letter-spacing: .01em; }
 .hero-spec-row .sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; color: var(--ink-3); }
-@media (max-width:560px){ .hero-spec-row .item { padding: 20px 22px; min-width: 44%; } }
+@media (max-width:560px){
+  .hero-spec-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .hero-spec-row .item { min-width: 0; padding: 22px 14px; border-right: none; }
+  /* equal-width columns → center divider lines up across both rows */
+  .hero-spec-row .item:nth-child(odd) { border-right: 1px solid var(--line); }
+  .hero-spec-row .item:nth-child(1),
+  .hero-spec-row .item:nth-child(2) { border-bottom: 1px solid var(--line); }
+}
 
 /* ============================================================
    MARQUEE / silkscreen statement
@@ -232,6 +239,7 @@ section { position: relative; }
 .feat h3 { font-size: clamp(26px,3.4vw,42px); margin-bottom: 18px; }
 .feat p { color: var(--ink-2); font-size: 17px; line-height: 1.9; }
 .feat .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
+.feat .feat-note { font-size: 15px; color: var(--ink-3); margin-top: 14px; }
 .feat-media {
   border-radius: var(--r-lg); overflow: hidden; background: #ECECEC;
   position: relative; aspect-ratio: 4/3;
@@ -440,7 +448,7 @@ section { position: relative; }
 }
 .faq-item summary {
   list-style: none; cursor: pointer; padding: 22px clamp(20px,3vw,28px);
-  font-weight: 700; font-size: 17px; color: var(--ink);
+  font-weight: 700; font-size: 17px; color: var(--ink); word-break: auto-phrase;
   display: flex; align-items: center; justify-content: space-between; gap: 18px;
   transition: color .2s var(--ease);
 }
@@ -491,6 +499,9 @@ section { position: relative; }
 .dl-link:hover { background: var(--accent-d); transform: translateY(-2px); box-shadow: 0 10px 24px -10px var(--accent); }
 .dl-link svg { width: 17px; height: 17px; }
 .dl-link .ext { width: 13px; height: 13px; opacity: .7; margin-left: -2px; }
+.dl-link.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-2); }
+.dl-link.ghost:hover { background: var(--paper-3); color: var(--ink); border-color: var(--ink-3); box-shadow: none; }
+.dl-row { display: flex; flex-wrap: wrap; gap: 12px; }
 .faq-item[open] summary { color: var(--accent); }
 
 .trouble { margin-top: clamp(48px,7vw,80px); }
@@ -584,7 +595,7 @@ footer.foot .mono { font-family: var(--font-mono); letter-spacing: .08em; }
 @keyframes keyflip { 0%{ transform: translateY(-2px); opacity:.25 } 100%{ opacity:1 } }
 
 /* ---------- assembly steps ---------- */
-.steps { list-style: none; max-width: 760px; margin: 0 auto; }
+.steps { list-style: none; max-width: 760px; margin: 0; }
 .step { display: flex; gap: 22px; align-items: flex-start; padding: 24px 4px; border-bottom: 1px solid var(--line); }
 .step:last-child { border-bottom: none; }
 .step-n { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color:#fff; display:grid; place-items:center; font-family: var(--font-mono); font-weight:700; font-size: 20px; box-shadow: 0 8px 18px -9px var(--accent); }

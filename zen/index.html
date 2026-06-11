@@ -9,10 +9,13 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-2649HNYM9E');
 </script>
-<title>ZEN — 右手にトラックボールを載せた、左右分割キーボード</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="theme-color" content="#F0512B">
+<title>ZEN — ちょうどいいキーボード — ワイヤレストラックボール付き分割キーボード</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=Saira+SemiCondensed:wght@500;600;700&family=DotGothic16&display=swap" rel="stylesheet">
@@ -124,7 +127,7 @@
     <div class="feat flip reveal">
       <div class="feat-text">
         <span class="tdeco"></span>
-        <h3>指先ひとつで、<span class="accent">すいすい</span></h3>
+        <h3>打つ・動かすが<span class="accent">自然につながる</span></h3>
         <p>自然に手を置いた時の親指の位置にトラックボールがあります。<br>文字を打つことと、ポインタを動かすことが、自然につながります。</p>
         <div class="tags">
           <span class="chip">手を大きく動かさない</span><span class="chip">打つ・動かすがつながる</span>
@@ -171,8 +174,21 @@
         <span class="tdeco"></span>
         <h3>バンパーで、<span class="accent">気分を着替える</span></h3>
         <p>本体のふちを彩るバンパーをその日の気分やデスクの雰囲気に合わせて、着替え。いつもの道具が、ちょっと新鮮に見えてきます。</p>
+        <p class="feat-note">STL データを配布しています。3D プリンターをお持ちの方は、印刷してお楽しみください。お持ちでない方は、Booth でも販売していますのでご利用ください。</p>
         <div class="tags">
           <span class="chip">付け替え式</span><span class="chip">カラーいろいろ</span><span class="chip">気分で選ぶ</span>
+        </div>
+        <div class="dl-row">
+          <a class="dl-link" href="https://github.com/E24-GH/zen-firmware/tree/main/3d-models" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            STL データを入手（GitHub）
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          </a>
+          <a class="dl-link ghost" href="https://e24key.booth.pm/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+            Booth で購入
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          </a>
         </div>
       </div>
       <div class="feat-media" style="background:#ECECEC;">
@@ -188,7 +204,7 @@
     <div class="section-head reveal">
       <span class="tdeco"></span>
       <h2 class="h2"><span class="accent">自分専用</span>キーマップ</h2>
-      <p class="lead">ZEN は ZMK ファームウェアを採用。購入後はブラウザの Keymap Editor から、すべてのキーとレイヤーを自由に書き換えられます。下の配置は、あくまで一例です。</p>
+      <p class="lead">ZEN は ZMK ファームウェアを採用。購入後はブラウザの Keymap Editor から、すべてのキーとレイヤーを自由に書き換えられます。下の配置は、キットに最初から書き込まれているデフォルトの一例です。</p>
       <a class="fw-link" href="firmware.html" target="_blank" rel="noopener" style="margin-top:18px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span>Keymap Editor の使い方・セットアップガイド</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
     </div>
 
@@ -196,8 +212,9 @@
       <div class="keymap-controls">
         <span class="label">LAYER</span>
         <button class="cat-btn active" data-layer="0">ベース</button>
-        <button class="cat-btn" data-layer="1">数字・記号</button>
-        <button class="cat-btn" data-layer="2">移動・Fn</button>
+        <button class="cat-btn" data-layer="1">マウス</button>
+        <button class="cat-btn" data-layer="2">数字・記号</button>
+        <button class="cat-btn" data-layer="3">Fn・テンキー</button>
         <span class="km-editor-note">＋ Keymap Editor で自由に編集</span>
       </div>
 
@@ -208,8 +225,8 @@
 
       <div class="keymap-legend">
         <div class="it"><span class="sw" style="background:transparent;border-color:rgba(20,20,25,.22);"></span>キー</div>
-        <div class="it"><span class="sw" style="background:transparent;border-style:dashed;border-color:rgba(20,20,25,.32);"></span>レイヤー / Fn</div>
-        <div class="it"><span class="sw" style="background:var(--accent);border-color:var(--accent);"></span>アクセントキー</div>
+        <div class="it"><span class="sw" style="background:rgba(20,20,25,.045);border-style:dashed;border-color:rgba(20,20,25,.32);"></span>レイヤー切替キー</div>
+        <div class="it"><span class="sw" style="background:transparent;border-color:rgba(20,20,25,.22);opacity:.26;"></span>薄い＝このレイヤーでは変化なし</div>
         <div class="it"><span class="sw" style="background:radial-gradient(circle at 38% 32%,#fff,#DCDCE1);border-color:var(--key-sh);"></span>トラックボール</div>
       </div>
       <p class="keymap-hint" id="km-info">→ レイヤーを切り替えると、同じキーの役割が変わります。ZMK ならこの割り当ても、すべて自由に。</p>
@@ -326,7 +343,8 @@
     <div class="section-head reveal">
       <span class="tdeco"></span>
       <h2 class="h2">組み立て</h2>
-      <p class="lead">はんだ付けや基板の組み立ては必要ありません。用意したパーツを取り付けて、つなぐだけ。</p>
+      <p class="lead">はんだ付けや基板の組み立ては必要ありません。
+用意したパーツを取り付けて、つなぐだけです。</p>
     </div>
     <ol class="steps reveal d1">
       <li class="step"><div class="step-n">1</div><div class="step-body"><h4>ファームウェアを書き込む</h4><p>別途用意した BMP Boost に、ファームウェアを書き込みます。<span class="note">※ データ通信対応の USB Type-C ケーブルで接続して書き込みます</span></p><a class="fw-link" href="firmware.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span>セットアップガイドを見る</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div></li>
@@ -334,7 +352,7 @@
       <li class="step"><div class="step-n">3</div><div class="step-body"><h4>パーツを取り付ける</h4><p>キースイッチ、キーキャップ、トラックボール、単4電池を取り付けます。<span class="note">※ キースイッチをはめ込む際は向きに注意してください。ピンが曲がる・折れる、ソケットの接触部が曲がる可能性がありますので、真上方向からゆっくりと押し込んでください。初回は硬い場合があります。</span></p></div></li>
       <li class="step"><div class="step-n">4</div><div class="step-body"><h4>Bluetooth で接続する</h4><p>右手キーボードのスイッチを ON、続けて左手を ON の順で電源を入れ、PC / Mac の Bluetooth 設定画面を開いてください。「ZEN」と表示された機器を接続するとペアリングされます。これで完成です。</p></div></li>
     </ol>
-    <div class="setup-note reveal d2">※ はんだ付けや基板の組み立て作業は不要です。</div>
+    <div class="setup-note reveal d2">※ はんだ付けや基板の組み立て作業は不要です</div>
   </div>
 </section>
 
@@ -369,7 +387,7 @@
     <div class="section-head reveal">
       <span class="tdeco"></span>
       <h2 class="h2">よくある質問</h2>
-      <p class="lead">製品のことから、組み立て・接続のつまずきまで。気になる点をまとめました。</p>
+      <p class="lead">製品のことから、組み立て・接続のつまずきまで、気になる点をまとめました。</p>
     </div>
 
     <div class="faq-list reveal d1">
@@ -405,6 +423,11 @@
       </details>
 
       <details class="faq-item">
+        <summary>LED の点滅・点灯にはどんな意味がありますか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>ステータス LED は、主に PC / Mac との Bluetooth 接続状態の目安を表示します。Bluetooth 接続待機中は一定間隔で点滅し、接続が確立したタイミングで短時間点灯します。</p><p class="faq-caution">※ 左右間の接続状態や、現在の Bluetooth チャンネル番号を直接表示するものではありません。</p><p class="faq-caution">※ 上記は、こちらで用意しているデフォルトのファームウェアを使用した場合の挙動です。ファームウェアを書き換えたり設定を変更した場合は、LED の点灯・点滅や Bluetooth 接続時の挙動が異なる場合があります。</p></div>
+      </details>
+
+      <details class="faq-item">
         <summary>電池はどれくらい持ちますか？<span class="faq-mark"></span></summary>
         <div class="faq-body"><p>接続している端末や使用状況によって大きく異なりますが、単4電池で数カ月は使い続けられるよう設計しています。</p></div>
       </details>
@@ -436,8 +459,8 @@
         </details>
 
         <details class="faq-item">
-          <summary>Bluetooth で接続できない場合は？<span class="faq-mark"></span></summary>
-          <div class="faq-body"><p>PC やスマートフォン側の Bluetooth 設定から、古い ZEN のペアリング情報を削除してください。その後、ZEN の電源を入れ直し、再度ペアリングしてください。近くに複数の接続先がある場合は、不要な機器の Bluetooth を一時的に OFF にすると接続しやすくなる場合があります。</p><p class="reset-hint">改善しない場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をお試しください。</p></div>
+          <summary>Bluetooth で接続できない・不安定な場合は？<span class="faq-mark"></span></summary>
+          <div class="faq-body"><p>接続先の古いペアリング情報を削除し、ZEN の電源を入れ直してください。電池残量が少ない場合も不安定になることがあるため、新しい電池でも確認してください。</p><p>ZEN が表示されるのに接続できない場合は、BT操作レイヤーで BT_CLR_ALL を実行し、接続先側でも ZEN を削除してから再ペアリングしてください。別の PC やスマートフォンで試すと、接続先環境の影響かどうかも確認できます。</p><p>それでも改善しない場合は、お手数ですがファームウェアリセットを行ってください。</p><p class="reset-hint">手順は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をご覧ください。</p></div>
         </details>
 
         <details class="faq-item">
@@ -447,7 +470,7 @@
 
         <details class="faq-item">
           <summary>一部のキーだけ反応しない場合は？<span class="faq-mark"></span></summary>
-          <div class="faq-body"><p>キースイッチが奥まで差し込まれているか、ピンが曲がっていないかを確認してください。別のキースイッチに差し替えて反応する場合は、スイッチ側の問題である可能性があります。キーマップを変更している場合は、初期状態のファームウェアでも確認してください。</p><p>また、ソケット内の接触パーツが変形してしまった可能性もあります。その場合は、下記のリンクを参考に調整してみてください。</p><a class="dl-link" href="https://www.reddit.com/r/MechanicalKeyboards/comments/md2rzk/lpt_on_fixing_kailh_hotswap_socket_contacts/?tl=ja" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18s-1.5 0-3-1.5S4 13 5.5 11.5l2-2a3.5 3.5 0 0 1 5 0M15 6s1.5 0 3 1.5S20 11 18.5 12.5l-2 2a3.5 3.5 0 0 1-5 0"/></svg><span>ソケット接点の調整方法を見る</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>
+          <div class="faq-body"><p>キースイッチが奥まで差し込まれているか、ピンが曲がっていないかを確認してください。別のキースイッチに差し替えて反応する場合は、スイッチ側の問題である可能性があります。キーマップを変更している場合は、初期状態のファームウェアでも確認してください。</p><p>また、ソケット内の接触パーツが変形してしまった可能性もあります。その場合は、下記のリンクを参考に調整してみてください。</p><a class="dl-link" href="https://inax88.hatenablog.com/entry/2025/02/12/214257" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18s-1.5 0-3-1.5S4 13 5.5 11.5l2-2a3.5 3.5 0 0 1 5 0M15 6s1.5 0 3 1.5S20 11 18.5 12.5l-2 2a3.5 3.5 0 0 1-5 0"/></svg><span>ソケット接点の調整方法を見る</span><svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>
         </details>
 
         <details class="faq-item">
@@ -463,11 +486,6 @@
         <details class="faq-item">
           <summary>LED が光らない場合は？<span class="faq-mark"></span></summary>
           <div class="faq-body"><p>ステータス LED は、ファームウェアの状態や接続状態によって点灯条件が変わる場合があります。</p></div>
-        </details>
-
-        <details class="faq-item">
-          <summary>USB では動くが Bluetooth では不安定な場合は？<span class="faq-mark"></span></summary>
-          <div class="faq-body"><p>接続先の古いペアリング情報を削除し、ZEN の電源を入れ直してください。電池残量が少ない場合も不安定になることがあるため、新しい電池でも確認してください。別の PC やスマートフォンで試すと、接続先環境の影響かどうかを確認できます。<br>それでも改善しない場合は、お手数ですがファームウェアリセットを行ってください。</p><p class="reset-hint">手順は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をご覧ください。</p></div>
         </details>
 
         <details class="faq-item">

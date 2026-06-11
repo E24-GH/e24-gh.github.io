@@ -9,7 +9,7 @@
   color: var(--accent); font-weight: 700; display: inline-flex; align-items: center; gap: .5em;
 }
 .fw-hero .eyebrow-mono::before { content: "//"; }
-.fw-hero h1 { font-size: clamp(30px, 4.4vw, 52px); line-height: 1.12; margin: 18px 0 0; letter-spacing: -.01em; }
+.fw-hero h1 { font-size: clamp(30px, 4.4vw, 52px); line-height: 1.12; margin: 18px 0 0; letter-spacing: -.01em; word-break: auto-phrase; }
 .fw-hero .lead { max-width: 700px; margin-top: 18px; font-size: 17px; line-height: 1.9; }
 
 /* table of contents */
@@ -30,8 +30,8 @@
 .fw-sec { padding: clamp(48px, 7vw, 86px) 0 0; scroll-margin-top: calc(var(--nav-h) + 64px); }
 .fw-sec .sec-num { font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 700; letter-spacing: .08em; display: flex; align-items: center; gap: 12px; }
 .fw-sec .sec-num::before { content: ""; width: 34px; height: 5px; border-radius: 3px; background: var(--accent); flex: none; }
-.fw-sec h2 { font-size: clamp(26px, 3.4vw, 42px); margin: 12px 0 16px; letter-spacing: -.01em; line-height: 1.12; }
-.fw-sec h3 { font-size: clamp(19px, 2.2vw, 24px); margin: 36px 0 12px; }
+.fw-sec h2 { font-size: clamp(26px, 3.4vw, 42px); margin: 12px 0 16px; letter-spacing: -.01em; line-height: 1.12; word-break: auto-phrase; }
+.fw-sec h3 { font-size: clamp(19px, 2.2vw, 24px); margin: 36px 0 12px; word-break: auto-phrase; }
 .fw-sec > .wrap > p { color: var(--ink-2); font-size: 17px; line-height: 1.9; max-width: 70ch; }
 .fw-sec p a, .fw-list a, .fw-steps a { color: var(--accent); font-weight: 700; text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); }
 .fw-sec p a:hover, .fw-list a:hover, .fw-steps a:hover { border-bottom-color: var(--accent); }
@@ -54,6 +54,7 @@
 .fw-steps > li {
   position: relative; padding: 12px 0 12px 46px; color: var(--ink-2); font-size: 16.5px; line-height: 1.75;
   border-bottom: 1px solid var(--line-2); counter-increment: fwstep;
+  word-break: auto-phrase;
 }
 .fw-steps > li:last-child { border-bottom: none; }
 .fw-steps > li::before {
@@ -66,8 +67,17 @@
 .fw-page code {
   font-family: var(--font-code); font-size: .86em; background: var(--paper-3);
   border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; color: var(--ink);
-  word-break: break-all;
+  /* keep short tokens (e.g. zen-firmware) whole; only break a token that alone
+     would overflow the line, instead of splitting every chip mid-word */
+  word-break: keep-all; overflow-wrap: anywhere;
 }
+
+/* Japanese body text: break at natural phrase boundaries (not mid-word) */
+.fw-sec > .wrap > p,
+.fw-list li,
+.fw-fig figcaption,
+.fw-panel,
+.fw-tcard p { word-break: auto-phrase; }
 
 /* figures (screenshots) */
 .fw-fig { margin: 24px 0 0; }
@@ -93,11 +103,19 @@
 /* file chips */
 .fw-files { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px; max-width: 70ch; }
 .fw-files li {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: baseline; gap: 12px;
   background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 13px 16px;
 }
-.fw-files li svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+.fw-files li svg { width: 18px; height: 18px; color: var(--accent); flex: none; position: relative; top: 3px; }
 .fw-files code { background: transparent; border: none; padding: 0; font-size: 14px; }
+.fw-files .fw-file-text { display: flex; align-items: baseline; gap: 12px; flex: 1; min-width: 0; }
+.fw-files .fw-file-desc { color: var(--ink-2); font-size: 13px; margin-left: auto; padding-left: 16px; white-space: nowrap; flex: none; }
+.fw-files-label { font-size: 14px; font-weight: 700; color: var(--ink); margin: 24px 0 0; }
+@media (max-width: 560px){
+  .fw-files li { flex-wrap: wrap; }
+  .fw-files .fw-file-text { flex-wrap: wrap; }
+  .fw-files .fw-file-desc { margin-left: 30px; padding-left: 0; white-space: normal; }
+}
 
 /* trouble cards */
 .fw-trouble { display: grid; gap: 14px; margin-top: 18px; }

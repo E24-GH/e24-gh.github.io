@@ -9,9 +9,12 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-2649HNYM9E');
 </script>
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="theme-color" content="#F0512B">
 <title>ZEN — ファームウェア セットアップガイド</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -81,7 +84,7 @@
       <ul class="fw-list">
         <li>GitHub アカウント</li>
         <li>ZEN 本体</li>
-        <li>BMP Boost（左右ぶん）</li>
+        <li>BMP Boost（左右）</li>
         <li>データ通信対応の USB Type-C ケーブル</li>
         <li>Mac / PC</li>
       </ul>
@@ -217,9 +220,14 @@
       </figure>
       <p>ダウンロードした zip ファイルの中には、以下の UF2 ファイルが入っています。</p>
       <ul class="fw-files">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><code>settings_reset-bmp_boost-zmk.uf2</code></li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><code>zen_right_trackball_pmw3610_central.uf2</code></li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><code>zen_left_peripheral.uf2</code></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>settings_reset-bmp_boost-zmk.uf2</code><span class="fw-file-desc">リセット用</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_right_trackball_pmw3610_central.uf2</code><span class="fw-file-desc">右手用（トラックボール側）</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_left_peripheral.uf2</code><span class="fw-file-desc">左手用</span></span></li>
+      </ul>
+      <p class="fw-files-label">その他、カスタマイズ用のファームウェア</p>
+      <ul class="fw-files">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_right_trackball_paw3222_central.uf2</code><span class="fw-file-desc">トラックボールのセンサー PAW3222 用</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_right_trackpad_central.uf2</code><span class="fw-file-desc">トラックパッド用</span></span></li>
       </ul>
       <div class="fw-divider"></div>
     </div>
