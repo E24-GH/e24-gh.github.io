@@ -84,7 +84,7 @@
       <ul class="fw-list">
         <li>GitHub アカウント</li>
         <li>ZEN 本体</li>
-        <li>BMP Boost（左右）</li>
+        <li>対応コントローラ（左右）</li>
         <li>データ通信対応の USB Type-C ケーブル</li>
         <li>Mac / PC</li>
       </ul>
@@ -241,20 +241,20 @@
 
       <h3>通常の書き込み</h3>
       <ol class="fw-steps">
-        <li>右手側の BMP Boost をブートローダーモードにします。</li>
+        <li>右手側の対応コントローラをブートローダーモードにします。</li>
         <li><code>zen_right_trackball_pmw3610_central.uf2</code> を書き込みます。</li>
-        <li>左手側の BMP Boost をブートローダーモードにします。</li>
+        <li>左手側の対応コントローラをブートローダーモードにします。</li>
         <li><code>zen_left_peripheral.uf2</code> を書き込みます。</li>
       </ol>
 
-      <h3>Bluetooth 接続がうまくいかない場合</h3>
+      <h3>接続がうまくいかない場合</h3>
       <ol class="fw-steps">
-        <li>Mac / PC の Bluetooth 設定から <code>ZEN</code> を削除します。</li>
+        <li>Mac / PC の接続設定から <code>ZEN</code> を削除します。</li>
         <li><code>settings_reset-bmp_boost-zmk.uf2</code> を書き込みます。</li>
         <li>USB を外します。</li>
         <li>ZEN の電源を入れます。</li>
         <li>もう一度、通常ファームウェアを書き込みます。</li>
-        <li>Mac / PC の Bluetooth 設定から <code>ZEN</code> を接続します。</li>
+        <li>Mac / PC の接続設定から <code>ZEN</code> を接続します。</li>
       </ol>
       <div class="fw-divider"></div>
     </div>
@@ -263,7 +263,7 @@
   <!-- trouble -->
   <section class="fw-sec" id="trouble">
     <div class="wrap">
-      <div class="sec-num">?? — TROUBLESHOOTING</div>
+      <div class="sec-num">07 — TROUBLESHOOTING</div>
       <h2>困ったとき</h2>
       <div class="fw-trouble">
         <div class="fw-tcard">
@@ -279,7 +279,7 @@
           <p>fork したリポジトリの <code>Actions</code> タブを開き、GitHub Actions を有効化してください。</p>
         </div>
         <div class="fw-tcard">
-          <h3>Bluetooth 接続が不安定</h3>
+          <h3>接続が不安定</h3>
           <p>一度 <code>settings_reset-bmp_boost-zmk.uf2</code> を書き込んでから、左右の通常ファームウェアを書き直してください。Mac / PC 側に残っている古い <code>ZEN</code> のペアリング情報も削除してください。</p>
         </div>
       </div>
