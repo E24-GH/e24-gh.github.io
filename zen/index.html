@@ -191,8 +191,17 @@
           </a>
         </div>
       </div>
-      <div class="feat-media" style="background:#ECECEC;">
-        <img src="../assets/zen-bumpers.webp" alt="白・赤・黄・緑・青と並んだ、付け替え式のカラフルなZENのバンパー" style="object-fit:contain;object-position:center;">
+      <div class="feat-media bumper-carousel" style="background:#ECECEC;" data-carousel>
+        <div class="carousel-track">
+          <img class="carousel-slide is-active" src="../assets/zen-bumpers-1.webp" alt="黒・グレー・白・ピンク・水色・オレンジと並んだ、付け替え式のカラフルなZENのバンパー" style="object-fit:contain;object-position:center;">
+          <img class="carousel-slide" src="../assets/zen-bumpers-2.webp" alt="6色のバンパーパーツを正面から並べたようす" style="object-fit:contain;object-position:center;">
+        </div>
+        <button class="carousel-arrow prev" type="button" aria-label="前の画像">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button class="carousel-arrow next" type="button" aria-label="次の画像">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -367,6 +376,8 @@
       <table class="spec">
         <tr><th>種類</th><td>左右分割型ワイヤレスキーボード（トラックボール搭載）</td></tr>
         <tr><th>キー数</th><td>左右合計 50キー</td></tr>
+        <tr><th>本体サイズ</th><td>縦 100 × 横 144 mm <span class="mono">（片手側）</span></td></tr>
+        <tr><th>高さ</th><td>本体 10 mm <span class="mono">/ キートップ含 19.8 mm / トラックボール含 29.8 mm</span></td></tr>
         <tr><th>ファームウェア</th><td>ZMK <span class="mono">/ Keymap Editor でキー配置を自由に編集</span></td></tr>
         <tr><th>ポインティング</th><td>右手側トラックボール</td></tr>
         <tr><th>対応センサー</th><td>PMW3610 <span class="mono">/ PAW3222</span>
@@ -566,6 +577,7 @@
 <script src="../zen-keymap.js?v=20260612"></script>
 <script src="../zen-sound.js"></script>
 <script src="../zen-hero-color.js"></script>
+<script src="../zen-carousel.js"></script>
 <script src="../e24-scroll.js"></script>
 </body>
 </html>

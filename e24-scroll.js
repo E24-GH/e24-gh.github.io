@@ -68,7 +68,7 @@
     if (reduce) return;
     var imgs = Array.prototype.filter.call(
       document.querySelectorAll("img"),
-      function (img) { return !img.closest(".hero, .hero-stage, .hero-sound"); }
+      function (img) { return !img.closest(".hero, .hero-stage, .hero-sound, .bumper-carousel"); }
     );
     if (!imgs.length) return;
 
