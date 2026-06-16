@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2649HNYM9E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2649HNYM9E');
+</script>
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="theme-color" content="#F0512B">
+<title>ZEN — 組み立てガイド</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=Saira+SemiCondensed:wght@500;600;700&family=DotGothic16&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
+<link rel="stylesheet" href="../e24.css">
+<link rel="stylesheet" href="../zen.css">
+<link rel="stylesheet" href="../zen-firmware.css">
+<link rel="stylesheet" href="../zen-howto.css">
+</head>
+<body>
+
+<!-- GLOBAL NAV -->
+<nav class="gnav">
+  <div class="gnav-inner solo">
+    <span class="brand" aria-label="e24"><span class="e">e</span><span class="num">24</span><span class="dot">.</span></span>
+  </div>
+</nav>
+
+<!-- PRODUCT SUBNAV -->
+<div class="subnav">
+  <div class="subnav-inner">
+    <div class="name">ZEN<small>ゼン</small><span class="tagline">組み立てガイド</span></div>
+    <div class="subnav-end">
+      <nav class="links" id="subnavLinks">
+        <a href="index.html" class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>製品ページ</a>
+        <a href="index.html#faq">FAQ</a>
+        <div class="owner-group">
+          <span class="og-label">購入者向け</span>
+          <a href="firmware.html">ファームウェア</a>
+          <a href="assembly.html">組み立て方</a>
+        </div>
+      </nav>
+      <div class="subnav-owner">
+        <button class="subnav-owner-btn" type="button" aria-haspopup="true" aria-expanded="false">
+          <svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          購入者向け
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="subnav-owner-menu">
+          <div class="oh">購入者向けメニュー</div>
+          <a href="firmware.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>ファームウェア</a>
+          <a href="assembly.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.7-.7-2.5z"/></svg>組み立て方</a>
+        </div>
+      </div>
+      <a href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener" class="buy-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        購入
+      </a>
+      <button class="subnav-burger" type="button" aria-label="メニューを開閉" aria-expanded="false" aria-controls="subnavLinks">
+        <span class="bz"><i></i><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main class="fw-page" data-screen-label="組み立てガイド">
+
+  <!-- HERO -->
+  <header class="fw-hero">
+    <div class="wrap">
+      <span class="eyebrow-mono">ASSEMBLY GUIDE</span>
+      <h1>組み立てガイド</h1>
+      <p class="lead">ZEN は、組み立て済みの状態でお届けします。お手元で一度分解し、ご用意いただいたキースイッチ・キーキャップ・トラックボール・対応コントローラ・電池を取り付けて、自分仕様に仕上げてください。</p>
+
+      <div class="fw-panel warn">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>作業の前に</div>
+        <strong>アクリルパーツは割れやすい素材です。</strong>ネジは手回しでゆっくりと、無理な力をかけずに作業してください。外したパーツやネジは紛失しないよう、トレーなどにまとめておくと安心です。
+      </div>
+
+      <nav class="fw-toc" aria-label="目次">
+        <a href="#prepare"><span class="n">0</span><span class="t">用意するもの</span></a>
+        <a href="#disassemble"><span class="n">1</span><span class="t">分解する</span></a>
+        <a href="#assemble"><span class="n">2</span><span class="t">組み立てる</span></a>
+        <a href="#trouble"><span class="n">?</span><span class="t">困ったとき</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 0. prepare -->
+  <section class="fw-sec" id="prepare">
+    <div class="wrap">
+      <div class="sec-num">00 — PREPARE</div>
+      <h2>用意するもの</h2>
+      <p class="ho-lead">組み立てに必要なパーツを手元にそろえます。対応コントローラ・電池・キースイッチ・キーキャップ・トラックボールは別途ご用意ください。</p>
+
+      <div class="ho-steps">
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">1</span><h3>パーツを用意する</h3></div>
+            <p>対応コントローラ・電池・キーキャップ・キースイッチ・トラックボールを用意してください。</p>
+            <ul class="ho-parts">
+              <li>対応コントローラ</li>
+              <li>電池</li>
+              <li>キースイッチ</li>
+              <li>キーキャップ</li>
+              <li>トラックボール</li>
+            </ul>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/1.webp" alt="ZEN 本体と、対応コントローラ・電池・キースイッチ・キーキャップ・トラックボールなどのパーツ" loading="lazy"><figcaption>必要なパーツを手元にそろえます。</figcaption></figure>
+          </div>
+        </div>
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 1. disassembly -->
+  <section class="fw-sec" id="disassemble">
+    <div class="wrap">
+      <div class="sec-num">01 — DISASSEMBLY</div>
+      <h2>分解する</h2>
+      <p class="ho-lead">お届け時の状態から、各カバーとパーツを順番に外していきます。はめ込み式のカバーは、片側からゆっくり力をかけるのがコツです。</p>
+
+      <div class="ho-steps">
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">2</span><h3>背面のネジを外す</h3></div>
+            <p>背面のネジをすべて外します。</p>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/2.webp" alt="ZEN 背面のネジを外しているようす" loading="lazy"><figcaption>背面のネジをすべて外します。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">3</span><h3>トラックボールカバーを外す</h3></div>
+            <p>表面のトラックボールカバーを外します。</p>
+            <div class="ho-note">ねじ式になっています。反時計回りに回すと外れます。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/3.webp" alt="トラックボールカバーを反時計回りに回して外すようす" loading="lazy"><figcaption>反時計回りに回して外します。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">4</span><h3>電池カバーを外す</h3></div>
+            <p>表面の電池カバーを外します。</p>
+            <div class="ho-note">はめ込み式になっています。片側からゆっくりと持ち上げると外れます。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/4.webp" alt="電池カバーを片側から持ち上げて外すようす" loading="lazy"><figcaption>片側からゆっくり持ち上げて外します。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">5</span><h3>コントローラーカバーを外す</h3></div>
+            <p>表面のコントローラーカバーを外します。</p>
+            <div class="ho-note">はめ込み式になっています。片側からゆっくりと持ち上げると外れます。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/5.webp" alt="コントローラーカバーを片側から持ち上げて外すようす" loading="lazy"><figcaption>片側からゆっくり持ち上げて外します。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">6</span><h3>背面のパーツをすべて外す</h3></div>
+            <p>背面にして、アクリルケース・バンパー・トッププレート・電源スイッチを一度すべて外します。</p>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/6.webp" alt="背面のアクリルケース・バンパー・トッププレート・電源スイッチを外したようす" loading="lazy"><figcaption>アクリルケース・バンパー・トッププレート・電源スイッチを外します。</figcaption></figure>
+          </div>
+        </div>
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 2. assembly -->
+  <section class="fw-sec" id="assemble">
+    <div class="wrap">
+      <div class="sec-num">02 — ASSEMBLY</div>
+      <h2>組み立てる</h2>
+      <p class="ho-lead">ご用意いただいたパーツを取り付けながら、本体を組み上げていきます。コンスルーの向きと、フレキシブルケーブルの取り回しに注意して進めてください。</p>
+
+      <div class="ho-steps">
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">7</span><h3>コンスルーを取り付ける</h3></div>
+            <p>対応コントローラにコンスルーを取り付けます。</p>
+            <div class="ho-note">コンスルーには上下の向きがあります。画像の赤枠側を対応コントローラに差し込みます。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/7-1.webp" alt="対応コントローラにコンスルーを合わせるようす" loading="lazy"><figcaption>対応コントローラにコンスルーを取り付けます。</figcaption></figure>
+            <figure class="fw-fig"><img src="../assets/howto/7-consul-direction.webp" alt="コンスルーと対応コントローラ。赤枠が差し込む向きを示している" loading="lazy"><figcaption>赤枠側を対応コントローラに差し込みます。上下の向きに注意してください。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">8</span><h3>対応コントローラを差し込む</h3></div>
+            <p>基板とトッププレートを重ねて、トッププレートの上から対応コントローラを差し込みます。</p>
+            <div class="ho-note">穴の位置を見ながら、慎重に押し込んでください。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/7-2.webp" alt="基板とトッププレートを重ね、上から対応コントローラを差し込むようす" loading="lazy"><figcaption>穴の位置を合わせて押し込みます。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">9</span><h3>キースイッチを取り付ける</h3></div>
+            <p>このタイミングで、すべてのキースイッチを取り付けます。</p>
+            <div class="ho-note">初回は硬く感じますが、ピンが折れないように慎重に押し込んでください。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/8.webp" alt="基板にキースイッチを取り付けているようす" loading="lazy"><figcaption>すべてのキースイッチを取り付けます。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">10</span><h3>保護シートを剥がす</h3></div>
+            <p>アクリルケースには傷保護のシートが貼ってあります。両面とも剥がしてください。</p>
+            <div class="ho-note">剥がしづらい場合は、少し湿らせると剥がしやすくなります。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/9.webp" alt="アクリルケースの保護シートを剥がすようす" loading="lazy"><figcaption>両面の保護シートを剥がします。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">11</span><h3>バンパーを重ねる</h3></div>
+            <p>アクリルケースの上にバンパーを重ねます。</p>
+            <div class="ho-note">しっかりとはめ込むようにしてください。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/10.webp" alt="アクリルケースの上にバンパーを重ねるようす" loading="lazy"><figcaption>アクリルケースの上にバンパーを重ねます。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">12</span><h3>電源スイッチを差し込む</h3></div>
+            <p>電源スイッチをバンパーに差し込みます。</p>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/11.webp" alt="電源スイッチをバンパーに差し込むようす" loading="lazy"><figcaption>電源スイッチをバンパーに差し込みます。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">13</span><h3>フレキシブルケーブルの取り回し</h3></div>
+            <p>トラックボールセンサーのフレキシブルケーブルが、スペーサーネジに挟まらないように注意しながら組み立ててください。</p>
+            <div class="ho-note">うまく回避できない場合は、写真のように軽く折り曲げてしまっても大丈夫です。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/12.webp" alt="トラックボールセンサーのフレキシブルケーブル周辺" loading="lazy"><figcaption>ケーブルがスペーサーネジに挟まらないよう取り回します。</figcaption></figure>
+            <figure class="fw-fig"><img src="../assets/howto/13.webp" alt="フレキシブルケーブルを取り回しながら組み立てるようす" loading="lazy"><figcaption>回避できない場合は軽く折り曲げても大丈夫です。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">14</span><h3>背面のネジを取り付ける</h3></div>
+            <p>背面のネジを取り付けます。</p>
+            <div class="ho-note">アクリルは割れやすいので、手回しでゆっくりと軽く締めてください。</div>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/14.webp" alt="背面のネジを手回しで締めているようす" loading="lazy"><figcaption>手回しでゆっくり、軽く締めます。</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="ho-step">
+          <div class="ho-body">
+            <div class="ho-head"><span class="ho-n">15</span><h3>外したパーツを取り付ける</h3></div>
+            <p>外していたパーツ（コントローラーカバー・トラックボール・電池カバーなど）を、それぞれ取り付けます。これで組み立ては完成です。</p>
+          </div>
+          <div class="ho-figs">
+            <figure class="fw-fig"><img src="../assets/howto/15.webp" alt="外していたパーツを取り付けているようす" loading="lazy"><figcaption>外したパーツをそれぞれ戻します。</figcaption></figure>
+            <figure class="fw-fig"><img src="../assets/howto/16.webp" alt="コントローラーカバーを取り付けるようす" loading="lazy"><figcaption>コントローラーカバーを取り付けます。</figcaption></figure>
+            <figure class="fw-fig"><img src="../assets/howto/17.webp" alt="トラックボールをはめ込むようす" loading="lazy"><figcaption>トラックボールをはめ込みます。</figcaption></figure>
+          </div>
+        </div>
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- trouble -->
+  <section class="fw-sec" id="trouble">
+    <div class="wrap">
+      <div class="sec-num">03 — TROUBLESHOOTING</div>
+      <h2>困ったとき</h2>
+
+      <h3>フレキシブルケーブルが外れてしまったら</h3>
+      <ol class="ho-trouble-steps">
+        <li>ソケットの黒い部分を持ち上げてから、ケーブルを差し込みます。</li>
+        <li>差し込んだあと、持ち上げた部分を下げて固定します。</li>
+      </ol>
+      <div class="fw-figs">
+        <figure class="fw-fig"><img src="../assets/howto/18-2.webp" alt="ソケットの黒い部分を持ち上げているようす" loading="lazy"><figcaption>ソケットの黒い部分を持ち上げます。</figcaption></figure>
+        <figure class="fw-fig"><img src="../assets/howto/18-1.webp" alt="フレキシブルケーブルをソケットに差し込むようす" loading="lazy"><figcaption>ケーブルを差し込み、固定します。</figcaption></figure>
+      </div>
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>ヒント</div>
+        ソケットの詳しい仕様は、<a href="https://www.hirose.com/ja/product/document?clcode=&productname=&series=FH19C__FH19SC&documenttype=Catalog&lang=ja&documentid=D31611_ja" target="_blank" rel="noopener">ヒロセ電機 FH19C / FH19SC データシート</a>をご参照ください。
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- GLOBAL FOOTER -->
+<footer class="gfoot">
+  <div class="wrap">
+    <div class="top">
+      <div class="brandcol">
+        <div class="bm">e<span class="num">24</span></div>
+        <p>毎日ふれる道具に、ちょっと嬉しいを。<br>キーボードと、その周辺をつくっています。</p>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h4>ZEN</h4>
+          <a href="index.html#feature">特徴</a>
+          <a href="index.html#layout">キー配列</a>
+          <a href="index.html#kit">必要なもの</a>
+          <a href="index.html#spec">スペック</a>
+        </div>
+        <div class="col">
+          <h4>ガイド</h4>
+          <a href="assembly.html">組み立てガイド</a>
+          <a href="firmware.html">ファームウェア セットアップ</a>
+          <a href="https://nickcoutsos.github.io/keymap-editor/" target="_blank" rel="noopener">Keymap Editor</a>
+        </div>
+        <div class="col">
+          <h4>e24</h4>
+          <a href="index.html">製品ページ</a>
+          <a href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener">BOOTH</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 e24. All rights reserved.</span>
+      <span class="mono">// EVERY KEYSTROKE A NEW IDEA.</span>
+    </div>
+  </div>
+</footer>
+
+<button id="toTop" class="to-top" aria-label="ページ上部へ戻る">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+  <span class="lbl">上へ戻る</span>
+</button>
+
+<script src="../e24-scroll.js"></script>
+<script src="../zen-lightbox.js"></script>
+</body>
+</html>

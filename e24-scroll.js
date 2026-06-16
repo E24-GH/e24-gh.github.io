@@ -61,6 +61,28 @@
     });
   })();
 
+  /* ----- subnav 購入者向け dropdown ----- */
+  (function () {
+    var owner = document.querySelector(".subnav-owner");
+    if (!owner) return;
+    var btn = owner.querySelector(".subnav-owner-btn");
+    if (!btn) return;
+    function setOpen(open) {
+      owner.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setOpen(!owner.classList.contains("open"));
+    });
+    document.addEventListener("click", function (e) {
+      if (owner.classList.contains("open") && !owner.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+  })();
+
   /* ----- image fade-in: non-hero images fade in when they scroll into view,
      but only once they've finished loading (so slow/late images never pop) ----- */
   (function () {
