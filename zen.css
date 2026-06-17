@@ -429,12 +429,13 @@ section { position: relative; }
   min-width: 0;
 }
 .rec:hover { border-color: var(--accent); transform: translateY(-2px); background: var(--paper-2); }
-.rec .rec-name { font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; }
+.rec .rec-name { font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; }
 .rec .rec-shop { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .02em; white-space: nowrap; }
 .rec .ext { width: 13px; height: 13px; color: var(--accent); flex: none; }
 @media (max-width: 760px){
   .kit-row { grid-template-columns: 1fr; gap: 18px; }
   .rec .rec-name, .rec .rec-shop { white-space: normal; }
+  .rec .rec-name { max-width: none; overflow: visible; }
 }
 
 .included-banner {
