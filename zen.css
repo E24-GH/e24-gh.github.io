@@ -203,7 +203,7 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
   .hero-spec-row .item:nth-child(2) { border-bottom: 1px solid var(--line); }
 }
 .cg-note {
-  margin: 0 auto 22px; text-align: center; white-space: nowrap;
+  margin: 22px auto 22px; text-align: center; white-space: nowrap;
   font-size: 12px; line-height: 1.7; color: var(--ink-3);
 }
 @media (max-width: 720px){
