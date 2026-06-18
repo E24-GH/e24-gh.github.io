@@ -160,7 +160,7 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 .subnav .buy-btn:hover { background: var(--accent-d); color: #fff; transform: translateY(-1px); }
 .subnav .buy-btn svg { width: 15px; height: 15px; }
 
-/* 購入者専用 dropdown (soft-gated buyer links) */
+/* 購入者向け dropdown */
 .subnav-owner { position: relative; display: inline-flex; }
 .subnav-owner-btn {
   display: inline-flex; align-items: center; gap: 6px;
