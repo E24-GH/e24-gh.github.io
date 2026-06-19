@@ -645,5 +645,7 @@ footer.foot .mono { font-family: var(--font-mono); letter-spacing: .08em; }
   transition: transform .2s var(--ease), background .2s var(--ease);
 }
 .fw-link:hover { background: #000; transform: translateY(-2px); }
+.setup-links { display: flex; flex-wrap: wrap; gap: 12px; max-width: 760px; margin: 22px 0 0; }
+.setup-links .fw-link { margin-top: 0; }
 .fw-link .ext { opacity: .65; margin-left: 1px; }
 .setup-note { max-width: 760px; margin: 26px auto 0; font-family: var(--font-mono); font-size: 13px; color: var(--accent-d); text-align: center; background: var(--accent-soft); border-radius: 999px; padding: 12px 22px; }
