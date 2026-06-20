@@ -47,6 +47,22 @@
   .ho-step { grid-template-columns: 1fr; gap: 22px; }
 }
 
+/* full-width step (no figures) */
+.ho-step.solo { grid-template-columns: 1fr; }
+
+/* closing message */
+.ho-outro {
+  margin-top: clamp(40px, 5vw, 60px); padding: clamp(28px, 4vw, 40px);
+  background: var(--paper-3); border: 1px solid var(--line); border-radius: var(--r-lg);
+  text-align: center;
+}
+.ho-outro .badge {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--accent); font-weight: 700;
+}
+.ho-outro h3 { font-size: clamp(20px, 2.4vw, 26px); margin: 10px 0 0; letter-spacing: -.01em; }
+.ho-outro p { color: var(--ink-2); font-size: 16px; line-height: 1.85; margin: 12px auto 0; max-width: 46ch; word-break: auto-phrase; }
+
 /* troubleshooting: reattach steps with figures */
 .ho-trouble-steps { list-style: none; padding: 0; margin: 4px 0 0; counter-reset: tstep; max-width: 72ch; }
 .ho-trouble-steps li {

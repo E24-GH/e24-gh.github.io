@@ -257,11 +257,13 @@
       <h2>ファームウェアを書き込む</h2>
 
       <h3>通常の書き込み</h3>
+      <p>右手側・左手側、それぞれ別のファームウェアを書き込みます。まずは右手側から行います。</p>
       <ol class="fw-steps">
-        <li>右手側の対応コントローラをブートローダーモードにします。</li>
-        <li><code>zen_right_trackball_pmw3610_central.uf2</code> を書き込みます。</li>
-        <li>左手側の対応コントローラをブートローダーモードにします。</li>
-        <li><code>zen_left_peripheral.uf2</code> を書き込みます。</li>
+        <li>右手側の対応コントローラを、電源スイッチを OFF にした状態で、USB ケーブルで Mac / PC と接続します。これでブートローダーモードになります。<span class="s-note">電源スイッチは、向かって奥側が OFF の状態です。</span></li>
+        <li><code>BLEMICROPRO</code> というフォルダが表示されるので、これを開きます。<span class="s-note">表示されない場合は、USB ケーブルがデータ通信に対応しているか確認してください。</span></li>
+        <li>ダウンロードした zip ファイルを解凍し、その中の <code>zen_right_trackball_pmw3610_central.uf2</code> を <code>BLEMICROPRO</code> フォルダにコピーして書き込みます。<span class="s-note">書き込み後、ドライブの取り外しに関する通知が表示される場合がありますが、書き込みは正常に完了しています。</span></li>
+        <li>続いて左手側の対応コントローラを、同じ手順でブートローダーモードにします。</li>
+        <li><code>zen_left_peripheral.uf2</code> を <code>BLEMICROPRO</code> フォルダにコピーして書き込みます。</li>
       </ol>
 
       <h3>接続がうまくいかない場合</h3>

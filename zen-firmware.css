@@ -57,6 +57,11 @@
   word-break: auto-phrase;
 }
 .fw-steps > li:last-child { border-bottom: none; }
+.fw-steps .s-note {
+  display: block; margin-top: 7px; padding-left: 16px; position: relative;
+  font-size: 14px; line-height: 1.7; color: var(--ink-3); word-break: auto-phrase;
+}
+.fw-steps .s-note::before { content: "\203b"; position: absolute; left: 0; top: 0; color: var(--accent); }
 .fw-steps > li::before {
   content: counter(fwstep); position: absolute; left: 0; top: 11px;
   width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff;

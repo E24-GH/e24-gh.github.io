@@ -397,7 +397,9 @@
         <tr><th>種類</th><td>左右分割型ワイヤレスキーボード（トラックボール搭載）</td></tr>
         <tr><th>キー数</th><td>左右合計 50キー</td></tr>
         <tr><th>本体サイズ</th><td>縦 100 × 横 144 mm <span class="mono">（片手側）</span></td></tr>
-        <tr><th>高さ</th><td>本体 10 mm <span class="mono">/ キートップ含 19.8 mm / トラックボール含 29.8 mm</span></td></tr>
+        <tr><th>高さ</th><td>本体 10 mm <span class="mono">/ キートップ含 20 mm / トラックボール含 30 mm</span>
+          <span class="spec-note">※ キートップやトラックボールにより誤差があります。</span>
+        </td></tr>
         <tr><th>対応スイッチ</th><td>Kailh Choc v2 <span class="mono">/ MX互換ステム・ホットスワップ対応</span>
           <span class="spec-note">※ スイッチは、製品ごとの形状・寸法により取り付けできない場合があります。</span>
         </td></tr>
@@ -409,10 +411,11 @@
         <tr><th>対応センサー</th><td>PMW3610 <span class="mono">/ PAW3222</span>
           <span class="spec-note">※ 付属しているセンサーは PMW3610 です。</span>
           <span class="spec-note">※ PAW3222 をご希望の場合は <a href="https://booth.pm/ja/items/6520217" target="_blank" rel="noopener">こちら<svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a> からご購入ください。</span>
+          <span class="spec-note">※ PAW3222 を使用する場合は、台座用の STL データを <a href="https://github.com/E24-GH/zen-firmware/tree/main/3d-models" target="_blank" rel="noopener">こちら<svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a> からダウンロードし、ご自身で 3D プリンターを使って制作していただく必要があります。</span>
         </td></tr>
         <tr><th>接続方式</th><td>ワイヤレス <span class="mono">/ 対応コントローラ</span></td></tr>
         <tr><th>電源</th><td>単4アルカリ乾電池（リポバッテリー不使用）</td></tr>
-        <tr><th>対応コントローラ</th><td>別途ご用意</td></tr>
+        <tr><th>対応コントローラ</th><td>BLE Micro Pro <span class="mono">/ Type-C版・昇圧回路搭載版（BMP Boost）</span></td></tr>
       </table>
     </div>
   </div>
@@ -441,12 +444,12 @@
 
       <details class="faq-item">
         <summary>はんだ付けは必要ですか？<span class="faq-mark"></span></summary>
-        <div class="faq-body"><p>頒布予定キットでは、購入者さまによるはんだ付けは不要な構成を想定しています。必要な作業内容は頒布時の組立ガイドに記載します。</p></div>
+        <div class="faq-body"><p>頒布予定キットでは、購入者さまによるはんだ付けは不要です。</p></div>
       </details>
 
       <details class="faq-item">
         <summary>別途用意するものはありますか？<span class="faq-mark"></span></summary>
-        <div class="faq-body"><p>対応コントローラ・キースイッチ・キーキャップ・19mm トラックボール・単4電池は別途用意する想定です。最終的な同梱物は頒布ページで案内します。</p></div>
+        <div class="faq-body"><p>詳しくは<a href="#kit">ご用意いただくもの</a>をご覧ください。</p></div>
       </details>
 
       <details class="faq-item">
@@ -466,7 +469,12 @@
 
       <details class="faq-item">
         <summary>電池はどれくらい持ちますか？<span class="faq-mark"></span></summary>
-        <div class="faq-body"><p>接続している端末や使用状況によって大きく異なりますが、単4電池で数カ月は使い続けられるよう設計しています。</p></div>
+        <div class="faq-body"><p>接続している端末や使用状況によって大きく異なりますが、単4電池で数カ月は使い続けられるよう設計しています。なお、右手の central 側の方が電力消費が多いため、先に使用できなくなります。</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>電源は手前・奥どちらが ON の状態ですか？<span class="faq-mark"></span></summary>
+        <div class="faq-body"><p>左右どちらも、手前が ON、奥が OFF の状態です。</p></div>
       </details>
 
       <details class="faq-item">
@@ -497,7 +505,7 @@
 
         <details class="faq-item">
           <summary>電源が入らない、または反応しない場合は？<span class="faq-mark"></span></summary>
-          <div class="faq-body"><p>まず、電池の向きと残量を確認してください。次に、電源スイッチが ON になっているか、対応コントローラが正しい向きで差し込まれているかを確認してください。可能であれば USB 接続でも反応するか確認してください。</p></div>
+          <div class="faq-body"><p>まず、電池の向きと残量を確認してください。次に、電源スイッチが ON になっているか、対応コントローラが正しい向きで差し込まれているかを確認してください。電源スイッチは、向かって手前が ON の状態です。可能であれば USB 接続でも反応するか確認してください。</p></div>
         </details>
 
         <details class="faq-item">
@@ -507,7 +515,7 @@
 
         <details class="faq-item">
           <summary>片側だけ反応しない場合は？<span class="faq-mark"></span></summary>
-          <div class="faq-body"><p>反応しない側の電源・電池残量・接続状態を確認してください。デバイスとの接続の場合は、一度ペアリング情報を削除して再接続してください。USB 接続で左右それぞれの動作を確認すると、接続側の問題か本体側の問題かを切り分けやすくなります。</p><p class="reset-hint">改善しない場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をお試しください。</p></div>
+          <div class="faq-body"><p>まず、反応しない側の電源・電池残量・接続状態を確認してください。右側を ON にしてから、左側を ON にしてください。左右間の接続確立待ち時間は短いため、左手側が未接続になっている可能性があります。それでも解決しない場合は、デバイスとのペアリング情報を削除して再接続してください。また、USB 接続で左右それぞれの動作を確認すると、接続側の問題か本体側の問題かを切り分けやすくなります。</p><p class="reset-hint">改善しない場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>をお試しください。</p></div>
         </details>
 
         <details class="faq-item">
@@ -517,7 +525,7 @@
 
         <details class="faq-item">
           <summary>トラックボールが動かない場合は？<span class="faq-mark"></span></summary>
-          <div class="faq-body"><p>19mm ボールが正しく乗っているか、ボールやセンサー周辺にホコリがないかを確認してください。ボールの色や素材によって反応が変わる場合があるため、他のボールや明るい色のボールでも試してください。USB 接続で動作するか確認すると、デバイスとの接続側の問題かどうかを切り分けやすくなります。</p></div>
+          <div class="faq-body"><p>ボールと支持部にホコリや汚れがないか確認してください。ボールを一度外して、センサーが浮いていたり、ズレていたりしないか確認してください。光沢の強いボールや色の濃いボールでは、センサーの反応が不安定になる場合があります。デバイスとの接続で不安定な場合は、USB 接続でも同じ症状が出るか確認してください。</p></div>
         </details>
 
         <details class="faq-item">
@@ -532,7 +540,7 @@
 
         <details class="faq-item">
           <summary>スリープ復帰後に反応しない場合は？<span class="faq-mark"></span></summary>
-          <div class="faq-body"><p>いずれかのキーを押して数秒待ってください。トラックボールを動かすだけでなく、キー入力も試してください。復帰しない場合は電源を入れ直してください。</p><p class="reset-hint">頻発する場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>もお試しください。</p></div>
+          <div class="faq-body"><p>いずれかのキーを押して数秒待ってください。トラックボールを動かすだけでなく、キー入力も試してください。復帰しない場合は、右側の電源を入れ、次に左側の電源を入れてください。電源スイッチは、向かって手前が ON の状態です。</p><p class="reset-hint">頻発する場合は、<a href="#faq-reset" class="reset-link">設定リセット・ペアリング情報の初期化</a>もお試しください。</p></div>
         </details>
 
         <details class="faq-item">
