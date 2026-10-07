@@ -289,6 +289,20 @@
       <h2>困ったとき</h2>
       <div class="fw-trouble">
         <div class="fw-tcard">
+          <h3>トラックボールが動かない</h3>
+          <p>キー入力はできるのにトラックボールが動かない場合は、まずデフォルトファームウェアを書き込み、初期状態で動作するか確認してください。</p>
+          <a class="dl-link" href="../assets/fw/zen-default-firmware.zip" download="zen-default-firmware.zip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            <span>デフォルトファームウェアをダウンロード</span>
+          </a>
+          <ol class="fw-steps">
+            <li>ダウンロードした zip ファイルを解凍します。</li>
+            <li>右手側へ <code>zen_right_trackball_pmw3610_central.uf2</code> を書き込みます。</li>
+            <li>左手側へ <code>zen_left_peripheral.uf2</code> を書き込みます。</li>
+            <li>左右から USB ケーブルを外して電源を入れ、トラックボールの動作を確認します。<span class="s-note">書き込むとキー配置は初期状態に戻ります。詳しい手順は「<a href="#flash">ファームウェアを書き込む</a>」を確認してください。</span></li>
+          </ol>
+        </div>
+        <div class="fw-tcard">
           <h3>Keymap Editor で App Disabled と表示される</h3>
           <p>GitHub App が使えるリポジトリに、自分の fork した <code>zen-firmware</code> が含まれていない状態です。画面の <code>Add Repository</code> から fork したリポジトリを追加してください。</p>
         </div>
