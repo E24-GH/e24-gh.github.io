@@ -282,6 +282,12 @@ h1,h2,h3 { font-weight: 900; line-height: 1.12; letter-spacing: -.01em; text-wra
 }
 .tile h2 { font-size: clamp(40px, 7vw, 88px); font-weight: 900; letter-spacing: -.02em; line-height: 1.02; }
 .tile.small h2 { font-size: clamp(30px, 4vw, 48px); }
+.tile h2.zen-wordmark {
+  font-family: "Ductile Display", sans-serif;
+  font-weight: 400;
+  letter-spacing: .06em;
+  margin-top: .2em;
+}
 .tile .t-sub { font-size: clamp(18px, 2.3vw, 27px); color: var(--ink-2); margin-top: 12px; max-width: 22ch; line-height: 1.45; font-weight: 500; }
 .tile.dark .t-sub { color: rgba(255,255,255,.72); }
 .tile.small .t-sub { font-size: clamp(15px, 1.7vw, 19px); }
