@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Unlisted on purpose: the firmware buyers get does not include the config
+       bridge this talks to, so the page would only frustrate anyone who found
+       it. Nothing links here, and search engines are asked to stay away. Drop
+       this line and link it from the ZEN page once the bridge ships. -->
+  <meta name="robots" content="noindex, nofollow" />
+  <title>ZEN Configurator</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <div class="brand-eyebrow"><span class="brand-mark">e24.</span><span>ZEN Keymap Editor</span></div>
+        <h1>ZEN Configurator</h1>
+      </div>
+      <div class="header-right">
+        <span id="status-bar"></span>
+        <span id="connection-status"></span>
+        <span class="usb-button-wrap">
+          <span class="usb-tooltip">Central側のキーボード（通常:右）のみを接続してください</span>
+          <button id="connect-button" type="button">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v6M15 3v6M7 9h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5z"/><path d="M12 18v3"/></svg>
+            <span id="connect-button-label">USB接続</span>
+          </button>
+        </span>
+        <div class="settings-wrap">
+          <button id="settings-button" type="button" title="設定" aria-label="設定">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.7a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.09a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.03z"/></svg>
+          </button>
+          <div id="settings-dropdown" class="settings-dropdown" hidden>
+            <div class="settings-dropdown-label">バックアップ</div>
+            <button id="export-btn" type="button">設定をJSONで書き出す</button>
+            <button id="import-btn" type="button">JSONから復元</button>
+            <input id="import-file" type="file" accept="application/json" hidden />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="divider-row">
+      <span class="bar"></span>
+      <span class="line"></span>
+      <span id="rule-note" class="note"></span>
+    </div>
+
+    <div class="profile-toolbar">
+      <span class="profile-toolbar-label">Profile</span>
+      <span class="info-icon">
+        <span class="info-icon-dot">i</span>
+        <span class="info-tooltip">キーマップ+トラックボール設定をまとめて切替・このブラウザに保存</span>
+      </span>
+      <div id="profile-list" class="profile-list"></div>
+      <div class="profile-toolbar-spacer"></div>
+      <input type="text" id="profile-name-input" placeholder="プロファイル名(例: 作業用)" />
+      <button type="button" id="profile-save-btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6h7V4M8 20v-6h8v6"/></svg>
+        現在の状態を保存
+      </button>
+      <span id="profile-status" class="hint"></span>
+      <span id="backup-status" class="hint"></span>
+    </div>
+
+    <nav class="main-tabs">
+      <button class="main-tab active" data-tab="keymap" type="button">キーマップ</button>
+      <button class="main-tab" data-tab="trackball" type="button">トラックボール/トラックパッド</button>
+    </nav>
+
+    <section class="view active" data-view="keymap">
+      <div id="layer-tabs"></div>
+      <div id="keymap-actions"></div>
+      <div class="keymap-layout">
+        <div class="keyboard-card">
+          <div class="keyboard-card-header">
+            <div id="keyboard-heading" class="keyboard-card-heading"></div>
+            <div id="keyboard-meta" class="keyboard-card-meta"></div>
+          </div>
+          <div id="keymap-grid"></div>
+          <div class="keyboard-legend">
+            <span>▽ = 未設定(ブランク)</span><span>MO = 押している間レイヤー</span><span>MT = ホールド/タップ</span>
+          </div>
+        </div>
+        <div id="binding-editor"></div>
+      </div>
+    </section>
+
+    <section class="view" data-view="trackball">
+      <div id="live-pointer-panel"></div>
+      <div id="trackball-panel"></div>
+    </section>
+
+    <footer>
+      <span id="footer-note">変更はこの画面内のみに保持されます(未接続)</span>
+      <span id="sync-status"></span>
+    </footer>
+  </div>
+
+  <script src="keycodes.js"></script>
+  <script src="protocol.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
