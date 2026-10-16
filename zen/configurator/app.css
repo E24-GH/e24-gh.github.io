@@ -854,6 +854,43 @@ nav.main-tabs {
   white-space: nowrap;
 }
 
+/* Two-line keys: the character it types, then its ZMK name. The glyph leads
+   because that is what the buyer is looking for; the name stays so the picker
+   doubles as the place you learn what to write in a keymap. */
+.key-picker-key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 5px 2px;
+  min-height: 38px;
+  line-height: 1.1;
+}
+
+.key-picker-glyph {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.key-picker-code {
+  font-size: 8.5px;
+  color: var(--ink-3);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.key-picker-key.selected .key-picker-glyph,
+.key-picker-key.selected .key-picker-code {
+  color: #fff;
+}
+
 .key-picker-key.selected,
 .choice-btn.selected {
   background: var(--accent);

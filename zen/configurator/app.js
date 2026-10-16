@@ -117,6 +117,42 @@ const KEY_PICKER_GROUPS = [
   { label: "メディア", keys: ["K_VOL_UP", "K_VOL_DN", "K_MUTE", "K_PLAY_PAUSE", "K_NEXT", "K_PREV"] },
 ];
 
+// What each keycode actually prints on a keycap, for the picker's buttons.
+// ZMK's names read fine once you know them and are opaque before that: DLLR,
+// ASTRK and LBRC are "$", "*" and "{" to anyone who has ever looked at a
+// keyboard. Show the glyph; renderKeycodeGrid keeps the ZMK name underneath so
+// the mapping stays learnable, searchable and copy-pasteable into a keymap.
+// Keys not listed here (letters, F-keys) already read as themselves.
+const KEY_DISPLAY = {
+  N1: "1", N2: "2", N3: "3", N4: "4", N5: "5",
+  N6: "6", N7: "7", N8: "8", N9: "9", N0: "0",
+
+  MINUS: "-", EQUAL: "=", LEFT_BRACKET: "[", RIGHT_BRACKET: "]", BSLH: "\\",
+  SEMI: ";", APOS: "'", GRAVE: "`", COMMA: ",", DOT: ".", FSLH: "/",
+
+  EXCL: "!", AT: "@", HASH: "#", DLLR: "$", PRCNT: "%", CARET: "^",
+  AMPS: "&", ASTRK: "*", LPAR: "(", RPAR: ")", UNDER: "_", PLUS: "+",
+  TILDE: "~", PIPE: "|", LBRC: "{", RBRC: "}", COLON: ":", DQT: '"',
+  LT: "<", GT: ">", QMARK: "?",
+
+  TAB: "Tab", ENTER: "Enter", BSPC: "\u232b", DELETE: "Del",
+  ESCAPE: "Esc", SPACE: "Space", CAPS: "Caps", INSERT: "Ins",
+
+  UP: "\u2191", DOWN: "\u2193", LEFT: "\u2190", RIGHT: "\u2192",
+  HOME: "Home", END: "End", PAGE_UP: "PgUp", PAGE_DOWN: "PgDn",
+
+  LSHFT: "\u21e7\u5de6", RSHFT: "\u21e7\u53f3", LCTRL: "Ctrl\u5de6", RCTRL: "Ctrl\u53f3",
+  LALT: "Alt\u5de6", RALT: "Alt\u53f3", LGUI: "\u2318\u5de6", RGUI: "\u2318\u53f3",
+
+  KP_N1: "1", KP_N2: "2", KP_N3: "3", KP_N4: "4", KP_N5: "5",
+  KP_N6: "6", KP_N7: "7", KP_N8: "8", KP_N9: "9", KP_N0: "0",
+  KP_DOT: ".", KP_SLASH: "/", KP_MULTIPLY: "*", KP_MINUS: "-",
+  KP_PLUS: "+", KP_ENTER: "Enter",
+
+  K_VOL_UP: "\u97f3\u91cf+", K_VOL_DN: "\u97f3\u91cf\u2212", K_MUTE: "\u6d88\u97f3",
+  K_PLAY_PAUSE: "\u518d\u751f", K_NEXT: "\u6b21\u3078", K_PREV: "\u524d\u3078",
+};
+
 // Maps the picker's 4 modifier toggles (each off/left/right) to the LC/RC-
 // style wrapper names encodeBinding's parseModifiedKeycode understands.
 const MOD_UI = {
@@ -588,6 +624,15 @@ function renderModifierToggles(container, mods, onChange) {
   });
 }
 
+// Search both ways round: "DLLR" for anyone who knows ZMK, "$" for anyone who
+// is just looking at their keyboard. Same for 音量 vs K_VOL_UP.
+function keyMatchesQuery(keyName, query) {
+  if (!query) return true;
+  if (keyName.includes(query)) return true;
+  const glyph = KEY_DISPLAY[keyName];
+  return !!glyph && glyph.toUpperCase().includes(query);
+}
+
 function renderKeycodeGrid(container, selectedKeyName, search, onPick) {
   container.innerHTML = "";
   const query = search.trim().toUpperCase();
@@ -596,7 +641,7 @@ function renderKeycodeGrid(container, selectedKeyName, search, onPick) {
   // "RSHFT"), so a name-string match would miss the highlight.
   const selectedValue = selectedKeyName ? KEYCODE_VALUES[selectedKeyName] : undefined;
   KEY_PICKER_GROUPS.forEach((group) => {
-    const matches = group.keys.filter((k) => !query || k.includes(query));
+    const matches = group.keys.filter((k) => keyMatchesQuery(k, query));
     if (matches.length === 0) return;
     const groupEl = document.createElement("div");
     groupEl.className = "key-picker-group";
@@ -607,14 +652,27 @@ function renderKeycodeGrid(container, selectedKeyName, search, onPick) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "key-picker-key" + (KEYCODE_VALUES[keyName] === selectedValue ? " selected" : "");
-      btn.textContent = keyName.replace(/^KP_N/, "KP");
+      btn.title = keyName;
+      const glyph = KEY_DISPLAY[keyName];
+      if (glyph && glyph !== keyName) {
+        // Two lines: what it types, and what it is called in a keymap.
+        const top = document.createElement("span");
+        top.className = "key-picker-glyph";
+        top.textContent = glyph;
+        const sub = document.createElement("span");
+        sub.className = "key-picker-code";
+        sub.textContent = keyName;
+        btn.append(top, sub);
+      } else {
+        btn.textContent = keyName;
+      }
       btn.addEventListener("click", () => onPick(keyName));
       grid.appendChild(btn);
     });
     groupEl.appendChild(grid);
     container.appendChild(groupEl);
   });
-  if (query && !KEY_PICKER_GROUPS.some((g) => g.keys.some((k) => k.includes(query)))) {
+  if (query && !KEY_PICKER_GROUPS.some((g) => g.keys.some((k) => keyMatchesQuery(k, query)))) {
     container.innerHTML = '<p class="hint">一致するキーがありません</p>';
   }
 }
