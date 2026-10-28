@@ -282,24 +282,51 @@ function decodeBindingEntry(bytes, offset) {
 
 // --- Transport ---------------------------------------------------------------
 
-class ZenConfigClient {
+const BAUD_RATE = 115200;
+
+// Same page, two ways to reach the keyboard. In a browser that is Web Serial;
+// in the desktop shell it is a Rust-side port, because WKWebView has no
+// navigator.serial and a menubar item has to keep polling with no window open.
+// Both expose write / startReading / close, and everything below this line --
+// framing, encoding, decoding -- is shared, so there is one implementation of
+// the wire format rather than two that drift apart.
+
+class WebSerialTransport {
   constructor(port) {
     this.port = port;
     this.reader = null;
     this.writer = null;
-    this.rxBuffer = new Uint8Array(0);
-    this.pending = null; // { resolve, reject, expectedCommand }
-    this.readLoopPromise = null;
+    this.loop = null;
   }
 
-  static async requestAndOpen() {
+  static supported() {
+    return typeof navigator !== "undefined" && !!navigator.serial;
+  }
+
+  static async request() {
     const port = await navigator.serial.requestPort();
-    await port.open({ baudRate: 115200 });
-    const client = new ZenConfigClient(port);
-    client.writer = port.writable.getWriter();
-    client.reader = port.readable.getReader();
-    client.readLoopPromise = client._readLoop();
-    return client;
+    await port.open({ baudRate: BAUD_RATE });
+    return new WebSerialTransport(port);
+  }
+
+  startReading(onChunk, onError) {
+    this.writer = this.port.writable.getWriter();
+    this.reader = this.port.readable.getReader();
+    this.loop = (async () => {
+      try {
+        while (true) {
+          const { value, done } = await this.reader.read();
+          if (done) return;
+          if (value) onChunk(value);
+        }
+      } catch (error) {
+        onError(error);
+      }
+    })();
+  }
+
+  async write(bytes) {
+    await this.writer.write(bytes);
   }
 
   async close() {
@@ -309,7 +336,7 @@ class ZenConfigClient {
       // ignore
     }
     try {
-      await this.readLoopPromise;
+      await this.loop;
     } catch (_e) {
       // ignore
     }
@@ -320,20 +347,108 @@ class ZenConfigClient {
     }
     await this.port.close();
   }
+}
 
-  async _readLoop() {
-    try {
-      while (true) {
-        const { value, done } = await this.reader.read();
-        if (done) return;
-        if (value) this._ingest(value);
-      }
-    } catch (error) {
-      if (this.pending) {
-        this.pending.reject(error);
-        this.pending = null;
-      }
+class TauriTransport {
+  constructor(invoke, path) {
+    this.invoke = invoke;
+    this.path = path;
+    this.running = false;
+    this.loop = null;
+  }
+
+  static supported() {
+    // Test for the thing we actually call, not just for "is this Tauri" --
+    // window.__TAURI__ only exists when withGlobalTauri is on, and without a
+    // bundler there is no @tauri-apps/api import to fall back to.
+    return typeof window !== "undefined" && typeof window.__TAURI__?.core?.invoke === "function";
+  }
+
+  static async request() {
+    const { invoke } = window.__TAURI__.core;
+    const ports = await invoke("list_ports");
+    if (ports.length === 0) {
+      throw new Error("キーボードが見つかりません。USBで接続してください");
     }
+    // One CDC-ACM port is the normal case. More than one means another serial
+    // device is plugged in too, so ask rather than guess wrong.
+    const chosen = ports.length === 1 ? ports[0] : await pickPort(ports);
+    await invoke("open_port", { path: chosen.path, baudRate: BAUD_RATE });
+    return new TauriTransport(invoke, chosen.path);
+  }
+
+  startReading(onChunk, onError) {
+    this.running = true;
+    this.loop = (async () => {
+      while (this.running) {
+        try {
+          // Returns empty on timeout, which is just an idle port.
+          const chunk = await this.invoke("read_port", { timeoutMs: 50 });
+          if (chunk.length > 0) onChunk(new Uint8Array(chunk));
+        } catch (error) {
+          if (this.running) onError(new Error(String(error)));
+          return;
+        }
+      }
+    })();
+  }
+
+  async write(bytes) {
+    await this.invoke("write_port", { data: Array.from(bytes) });
+  }
+
+  async close() {
+    this.running = false;
+    try {
+      await this.loop;
+    } catch (_e) {
+      // ignore
+    }
+    await this.invoke("close_port");
+  }
+}
+
+// Replaced by the app shell with a real chooser; the plain fallback keeps the
+// browser build from depending on anything the desktop shell provides.
+let pickPort = async (ports) => ports[0];
+function setPortPicker(fn) {
+  pickPort = fn;
+}
+
+function activeTransportClass() {
+  if (TauriTransport.supported()) return TauriTransport;
+  if (WebSerialTransport.supported()) return WebSerialTransport;
+  return null;
+}
+
+class ZenConfigClient {
+  constructor(transport) {
+    this.transport = transport;
+    this.rxBuffer = new Uint8Array(0);
+    this.pending = null; // { resolve, reject, expectedCommand }
+  }
+
+  static async requestAndOpen() {
+    const Transport = activeTransportClass();
+    if (!Transport) {
+      throw new Error("このブラウザはWeb Serialに対応していません（Chrome/Edgeをお使いください）");
+    }
+    const transport = await Transport.request();
+    const client = new ZenConfigClient(transport);
+    transport.startReading(
+      (chunk) => client._ingest(chunk),
+      (error) => {
+        if (client.pending) {
+          client.pending.reject(error);
+          client.pending = null;
+        }
+      },
+    );
+    return client;
+  }
+
+  async close() {
+    await this.transport.close();
   }
 
   _ingest(chunk) {
@@ -400,7 +515,7 @@ class ZenConfigClient {
       this.pending = { resolve, reject, expectedCommand: command };
     });
 
-    await this.writer.write(encodeFrame(command, payloadBytes));
+    await this.transport.write(encodeFrame(command, payloadBytes));
 
     const timeout = new Promise((_resolve, reject) =>
       setTimeout(() => reject(new Error("Timed out waiting for device response")), 3000),
