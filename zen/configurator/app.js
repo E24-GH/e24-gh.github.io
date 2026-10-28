@@ -26,7 +26,8 @@ const FEATURES = {
   trackballAngle: true,
   inertia: false,
   autoMouse: false,
-  btManage: false, // profile list / pairing / per-profile clear
+  // Bluetooth is no longer a flag either: GET_BLE_PROFILES either answers or
+  // it does not, and renderBluetooth() says which. See state.bleProfiles.
 };
 
 // --- Physical layout, transcribed from config/info.json (LAYOUT.layout) ----
@@ -334,6 +335,11 @@ const state = {
   liveKeymap: false,
   status: null,
   statusInterval: null,
+  // The keyboard's Bluetooth profiles, or null when this firmware has none to
+  // report (older build, or a split peripheral). Never guessed at locally:
+  // which channels are registered is something only the keyboard knows.
+  bleProfiles: null,
+  btBusy: false,
 
   // UI chrome.
   themeOpen: false,
@@ -543,6 +549,7 @@ async function connect() {
     } catch (_error) {
       state.status = null; // older firmware without GET_STATUS — non-fatal
     }
+    await refreshBleProfiles();
     startStatusPolling();
 
     toast(state.liveKeymap
@@ -631,6 +638,7 @@ async function disconnect() {
   state.client = null;
   state.liveKeymap = false;
   state.status = null;
+  state.bleProfiles = null;
   state.keymap = sampleKeymap();
   state.saved = sampleKeymap();
   state.pointer = { ...POINTER_DEFAULTS };
@@ -656,6 +664,7 @@ function startStatusPolling() {
     if (state.busy) return;
     try {
       state.status = await state.client.getStatus();
+      if (state.bleProfiles) state.bleProfiles = await state.client.getBleProfiles();
       render();
     } catch (_error) {
       // Transient read failure — keep showing the last known status.
@@ -706,6 +715,39 @@ async function writePointer(patch) {
       toast(error.message, true);
     }
   }
+  render();
+}
+
+/** Re-read the profile table. A firmware that does not have the command
+ * answers "unknown command"; a peripheral answers "not supported". Either way
+ * the tab falls back to explaining that rather than showing invented rows. */
+async function refreshBleProfiles() {
+  if (!state.client) {
+    state.bleProfiles = null;
+    return;
+  }
+  try {
+    state.bleProfiles = await state.client.getBleProfiles();
+  } catch (_error) {
+    state.bleProfiles = null;
+  }
+}
+
+/** Bluetooth actions take effect on the keyboard the moment they are clicked
+ * -- they are not part of what the save bar tracks -- so they are serialised
+ * behind a busy flag rather than letting a second click race the first. */
+async function bleAction(action, index) {
+  if (!state.client || state.btBusy) return;
+  state.btBusy = true;
+  render();
+  try {
+    state.bleProfiles = await state.client.bleAction(action, index);
+    state.status = await state.client.getStatus();
+  } catch (error) {
+    toast(error.message, true);
+    await refreshBleProfiles();
+  }
+  state.btBusy = false;
   render();
 }
 
@@ -1678,50 +1720,74 @@ function renderPointer() {
 // --- Render: bluetooth ------------------------------------------------------
 
 function renderBluetooth() {
-  const s = state.status;
-  const active = state.client && s && s.activeProfile != null ? s.activeProfile : -1;
+  const table = state.bleProfiles;
 
-  const rows = [0, 1, 2, 3, 4].map((i) => {
-    const isActive = i === active;
-    // Without firmware support there is no way to tell "paired" from "free",
-    // so every channel but the active one is shown as unknown rather than
-    // guessed at.
-    const title = isActive ? `チャンネル ${i + 1}` : `チャンネル ${i + 1}`;
-    const status = isActive
-      ? (s && s.connected ? "この機器につながっています" : "最後に使ったチャンネル")
-      : (FEATURES.btManage ? "登録済み・待機中" : "登録の状態はまだ読み取れません");
-    return `<div class="${cls("bt-row", isActive && "is-active", !isActive && !FEATURES.btManage && "is-free")}">
+  // No profile table means the keyboard cannot tell us -- old firmware, or a
+  // peripheral. Say which rather than drawing five rows of guesses.
+  if (!table) {
+    const why = !state.client
+      ? "キーボードをつなぐと、登録されている機器が表示されます。"
+      : state.status && state.status.role === "peripheral"
+        ? "左手側には接続先の登録がありません。右手側（トラックボールのある方）をつないでください。"
+        : "このキーボードのファームウェアは、接続先の読み取りに対応していません。ファームウェアを更新してください。";
+    return `<div class="stack">
+        <section class="card bt-main">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span class="group-icon">${svg(ICON.bt, 16, 1.9)}</span>
+            <span class="group-title">接続先のチャンネル</span>
+          </div>
+          <div class="notice">${svg(ICON.warn, 15, 2)}<span>${esc(why)}</span></div>
+        </section>
+      </div>`;
+  }
+
+  const bonded = table.profiles.filter((p) => p.bonded).length;
+  const busy = state.btBusy ? "disabled" : "";
+
+  const rows = table.profiles.map((p) => {
+    const isActive = p.index === table.activeIndex;
+    const title = p.bonded ? `チャンネル ${p.index + 1}` : "空きチャンネル";
+    let status;
+    if (isActive && p.connected) status = "この機器につながっています";
+    else if (isActive && p.bonded) status = "最後に使ったチャンネル・未接続";
+    else if (isActive) status = "登録待ちです。つなぎたい機器のBluetooth設定で「ZEN」を選んでください";
+    else if (p.connected) status = "登録済み・接続中";
+    else if (p.bonded) status = "登録済み・待機中";
+    else status = "まだ何も登録されていません";
+
+    return `<div class="${cls("bt-row", isActive && "is-active", !p.bonded && "is-free")}">
         <span class="bt-bar"></span>
-        <span class="ch-lcd"><span class="c">CH</span><span class="n">${i + 1}</span></span>
+        <span class="ch-lcd"><span class="c">CH</span><span class="n">${p.index + 1}</span></span>
         <div style="flex:1;min-width:0">
           <div class="bt-title">${title}</div>
-          <div class="bt-status"><i></i>${status}</div>
+          <div class="bt-status"><i></i>${esc(status)}</div>
         </div>
-        ${FEATURES.btManage ? `<button type="button" class="btn-danger-plain" ${act("bt-clear", String(i))}>登録を消す</button>` : ""}
-        ${FEATURES.btManage && !isActive ? `<button type="button" class="btn-sm" ${act("bt-select", String(i))}>これに切り替える</button>` : ""}
+        ${p.bonded ? `<button type="button" class="btn-danger-plain" ${act("bt-clear", String(p.index))} ${busy}>登録を消す</button>` : ""}
+        ${!isActive ? `<button type="button" class="btn-sm" ${act("bt-select", String(p.index))} ${busy}>${p.bonded ? "これに切り替える" : "ここに登録する"}</button>` : ""}
+        ${isActive && p.connected ? `<button type="button" class="btn-sm" ${act("bt-disconnect", String(p.index))} ${busy}>切断する</button>` : ""}
         ${isActive ? '<span class="bt-badge">使用中</span>' : ""}
       </div>`;
   }).join("");
 
   return `<div class="stack">
-      ${FEATURES.btManage ? "" : pendingNotice("Bluetoothの登録操作")}
       <div class="bt-wrap">
         <section class="card bt-main">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
             <span class="group-icon">${svg(ICON.bt, 16, 1.9)}</span>
             <span class="group-title">接続先のチャンネル</span>
-            <span class="card-note">${state.client ? (active >= 0 ? `いま使っているのは ${active + 1} 番です` : "USBで出力中です") : "キーボードをつなぐと表示されます"}</span>
+            <span class="card-note">${table.count}つのうち ${bonded} つ登録済み</span>
           </div>
-          <div class="${cls(!FEATURES.btManage && "pending")}">${rows}</div>
-          <div class="bt-foot">キーボードの「接続先」キー（例：レイヤー3の BT1〜5）でも切り替えられます。番号はキーボード右手の表示と同じです。</div>
+          ${rows}
+          <div class="bt-foot">キーボードの「接続先」キー（例：レイヤー3の BT1〜${table.count}）でも切り替えられます。番号はここの表示と同じです。</div>
         </section>
         <aside class="bt-side">
           <div class="bt-aside">
             <span class="lead">${svg(ICON.bolt, 14)}ここでの操作はすぐキーボードに反映されます。「キーボードに保存」は不要です。</span>
-            <button type="button" class="btn-danger ${cls(!FEATURES.btManage && "pending")}" ${act("bt-clear-all")}>${svg(ICON.trash, 13)}すべての登録を消す</button>
+            <button type="button" class="btn-danger" ${act("bt-clear-all")} ${bonded === 0 || state.btBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}すべての登録を消す</button>
           </div>
         </aside>
       </div>
+      ${state.btConfirm ? renderBtConfirm(bonded) : ""}
     </div>`;
 }
 
@@ -1833,7 +1899,6 @@ function render() {
         <button type="button" ${act("toast-close")} aria-label="閉じる">${svg(ICON.close, 12, 2.4)}</button>
       </div></div>` : ""}
       ${renderSaveBar(counts)}
-      ${state.btConfirm ? renderBtConfirm() : ""}
     </div>`;
 
   document.getElementById("app").innerHTML = body;
@@ -1849,12 +1914,12 @@ function render() {
   }
 }
 
-function renderBtConfirm() {
+function renderBtConfirm(bonded) {
   return `<div class="modal-back" ${act("bt-cancel")}>
       <div class="modal" role="alertdialog" aria-modal="true" data-act="noop" data-stop>
         <div class="modal-icon">${svg(ICON.warn, 20)}</div>
         <h2>すべての登録を消しますか？</h2>
-        <p>登録済みの機器との接続がすべて解除されます。もう一度使うには、それぞれの機器で登録し直す必要があります。この操作は取り消せません。</p>
+        <p>登録済みの ${bonded} 台との接続がすべて解除されます。もう一度使うには、それぞれの機器で登録し直す必要があります。この操作は取り消せません。</p>
         <div class="modal-actions">
           <button type="button" class="modal-cancel" ${act("bt-cancel")}>キャンセル</button>
           <button type="button" class="modal-confirm" ${act("bt-clear-all-confirm")}>すべて消す</button>
@@ -1966,13 +2031,14 @@ const CLICK = {
     render();
   },
 
+  "bt-select": (a) => bleAction(BLE_ACTION.SELECT, Number(a)),
+  "bt-disconnect": (a) => bleAction(BLE_ACTION.DISCONNECT, Number(a)),
+  "bt-clear": (a) => bleAction(BLE_ACTION.CLEAR, Number(a)),
   "bt-clear-all": () => { state.btConfirm = true; render(); },
   "bt-cancel": () => { state.btConfirm = false; render(); },
   "bt-clear-all-confirm": () => {
-    // Wire this to a BT_CLR_ALL command once the firmware has one.
     state.btConfirm = false;
-    toast("Bluetoothの登録操作は、まだキーボード側が対応していません", true);
-    render();
+    bleAction(BLE_ACTION.CLEAR_ALL, 0);
   },
 
   "toast-close": () => { state.toast = ""; render(); },

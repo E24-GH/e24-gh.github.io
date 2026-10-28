@@ -24,6 +24,16 @@ const CMD = {
   SAVE_KEYMAP: 0x13,
   DISCARD_KEYMAP: 0x14,
   GET_STATUS: 0x20,
+  GET_BLE_PROFILES: 0x21,
+  BLE_ACTION: 0x22,
+};
+
+// CMD_BLE_ACTION's first payload byte. Mirrors enum zen_config_ble_action.
+const BLE_ACTION = {
+  SELECT: 0,
+  DISCONNECT: 1,
+  CLEAR: 2,
+  CLEAR_ALL: 3,
 };
 
 const STATUS = {
@@ -41,6 +51,8 @@ const BEHAVIOR_NAME_LEN = 16;
 const BINDING_SIZE = BEHAVIOR_NAME_LEN + 4 + 4;
 const POINTER_PAYLOAD_SIZE = 8;
 const STATUS_PAYLOAD_SIZE = 7;
+const BLE_PROFILES_MAX = 8;
+const BLE_PROFILES_PAYLOAD_SIZE = 2 + BLE_PROFILES_MAX;
 const TRANSPORT_NAMES = { 0: "USB", 1: "BLE" };
 const ROLE_NAMES = { 0: "standalone", 1: "central", 2: "peripheral" };
 
@@ -262,6 +274,24 @@ function decodePointerPayload(bytes) {
     invertScroll: (bytes[5] & 4) !== 0,
     rotationDegrees: bytes[0] >= 2 ? view.getInt8(6) : 0,
   };
+}
+
+/** Matches include/zen_config_wire.h's ZEN_CONFIG_WIRE_BLE_PROFILES_PAYLOAD_SIZE.
+ *
+ * The count comes from the keyboard rather than being assumed here: ZMK
+ * derives it from CONFIG_BT_MAX_PAIRED minus the split peripherals it
+ * reserves, so it is a property of the firmware that is running. */
+function decodeBleProfilesPayload(bytes) {
+  const count = Math.min(bytes[0], BLE_PROFILES_MAX);
+  const profiles = [];
+  for (let i = 0; i < count; i++) {
+    profiles.push({
+      index: i,
+      bonded: (bytes[2 + i] & 1) !== 0,
+      connected: (bytes[2 + i] & 2) !== 0,
+    });
+  }
+  return { count, activeIndex: bytes[1] === 0xff ? null : bytes[1], profiles };
 }
 
 /** Matches include/zen_config_wire.h's ZEN_CONFIG_WIRE_STATUS_PAYLOAD_SIZE layout. */
@@ -601,6 +631,23 @@ class ZenConfigClient {
   async saveKeymap() {
     const { status } = await this.request(CMD.SAVE_KEYMAP);
     if (status !== 0) throw new Error(`SAVE_KEYMAP failed: ${STATUS[status]}`);
+  }
+
+  /** The keyboard's Bluetooth profiles, or a throw if this firmware has none
+   * (an older build answers "unknown command"; a split peripheral answers
+   * "not supported"). */
+  async getBleProfiles() {
+    const { status, data } = await this.request(CMD.GET_BLE_PROFILES);
+    if (status !== 0) throw new Error(`GET_BLE_PROFILES failed: ${STATUS[status]}`);
+    return decodeBleProfilesPayload(data);
+  }
+
+  /** Runs one profile action and returns the profile list as it is afterwards,
+   * so the caller never has to guess what changed. */
+  async bleAction(action, index = 0) {
+    const { status, data } = await this.request(CMD.BLE_ACTION, new Uint8Array([action, index]));
+    if (status !== 0) throw new Error(`BLE_ACTION failed: ${STATUS[status]}`);
+    return decodeBleProfilesPayload(data);
   }
 
   async discardKeymap() {
