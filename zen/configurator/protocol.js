@@ -18,6 +18,8 @@ const CMD = {
   SET_POINTER: 0x02,
   SAVE_POINTER: 0x03,
   RESET_POINTER: 0x04,
+  GET_AUTO_MOUSE: 0x05,
+  SET_AUTO_MOUSE: 0x06,
   GET_KEYMAP_META: 0x10,
   GET_LAYER: 0x11,
   SET_BINDING: 0x12,
@@ -50,6 +52,7 @@ const STATUS = {
 const BEHAVIOR_NAME_LEN = 16;
 const BINDING_SIZE = BEHAVIOR_NAME_LEN + 4 + 4;
 const POINTER_PAYLOAD_SIZE = 8;
+const AUTO_MOUSE_PAYLOAD_SIZE = 6;
 const STATUS_PAYLOAD_SIZE = 7;
 const BLE_PROFILES_MAX = 8;
 const BLE_PROFILES_PAYLOAD_SIZE = 2 + BLE_PROFILES_MAX;
@@ -238,8 +241,11 @@ function encodeFrame(command, payloadBytes) {
 }
 
 // Matches ZEN_POINTER_SETTINGS_VERSION. Version 2 added the trackball
-// rotation in byte 6; version 1 left that byte reserved and zero.
-const POINTER_SETTINGS_VERSION = 2;
+// rotation in byte 6 (version 1 left that byte reserved and zero); version 3
+// added the auto-mouse settings, which have their own commands and so do not
+// change the pointer payload at all.
+const POINTER_SETTINGS_VERSION = 3;
+const POINTER_SETTINGS_VERSION_WITH_ROTATION = 2;
 const ROTATION_MIN = -45;
 const ROTATION_MAX = 45;
 
@@ -256,7 +262,7 @@ function encodePointerPayload(settings) {
   view.setUint16(3, settings.scrollSpeed, true);
   bytes[5] =
     (settings.invertX ? 1 : 0) | (settings.invertY ? 2 : 0) | (settings.invertScroll ? 4 : 0);
-  if (version >= 2) {
+  if (version >= POINTER_SETTINGS_VERSION_WITH_ROTATION) {
     const degrees = Math.round(settings.rotationDegrees ?? 0);
     view.setInt8(6, Math.max(ROTATION_MIN, Math.min(ROTATION_MAX, degrees)));
   }
@@ -272,7 +278,28 @@ function decodePointerPayload(bytes) {
     invertX: (bytes[5] & 1) !== 0,
     invertY: (bytes[5] & 2) !== 0,
     invertScroll: (bytes[5] & 4) !== 0,
-    rotationDegrees: bytes[0] >= 2 ? view.getInt8(6) : 0,
+    rotationDegrees: bytes[0] >= POINTER_SETTINGS_VERSION_WITH_ROTATION ? view.getInt8(6) : 0,
+  };
+}
+
+/** Matches include/zen_config_wire.h's ZEN_CONFIG_WIRE_AUTO_MOUSE_PAYLOAD_SIZE. */
+function encodeAutoMousePayload(settings) {
+  const bytes = new Uint8Array(AUTO_MOUSE_PAYLOAD_SIZE);
+  const view = new DataView(bytes.buffer);
+  bytes[0] = settings.version ?? POINTER_SETTINGS_VERSION;
+  bytes[1] = settings.enabled ? 1 : 0;
+  view.setUint16(2, settings.timeoutMs, true);
+  view.setUint16(4, settings.idleMs, true);
+  return bytes;
+}
+
+function decodeAutoMousePayload(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  return {
+    version: bytes[0],
+    enabled: bytes[1] !== 0,
+    timeoutMs: view.getUint16(2, true),
+    idleMs: view.getUint16(4, true),
   };
 }
 
@@ -596,6 +623,20 @@ class ZenConfigClient {
     const { status, data } = await this.request(CMD.RESET_POINTER);
     if (status !== 0) throw new Error(`RESET_POINTER failed: ${STATUS[status]}`);
     return decodePointerPayload(data);
+  }
+
+  /** Auto-mouse settings, or a throw on firmware that predates them. They
+   * share a settings record with the pointer settings, so savePointerSettings()
+   * and resetPointerSettings() cover these too. */
+  async getAutoMouse() {
+    const { status, data } = await this.request(CMD.GET_AUTO_MOUSE);
+    if (status !== 0) throw new Error(`GET_AUTO_MOUSE failed: ${STATUS[status]}`);
+    return decodeAutoMousePayload(data);
+  }
+
+  async setAutoMouse(settings) {
+    const { status } = await this.request(CMD.SET_AUTO_MOUSE, encodeAutoMousePayload(settings));
+    if (status !== 0) throw new Error(`SET_AUTO_MOUSE failed: ${STATUS[status]}`);
   }
 
   async getKeymapMeta() {

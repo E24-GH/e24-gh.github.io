@@ -25,7 +25,8 @@ const FEATURES = {
   // firmware, which GET_POINTER reports. See angleSupported().
   trackballAngle: true,
   inertia: false,
-  autoMouse: false,
+  // Auto-mouse is capability-detected too; see autoMouseSupported().
+  autoMouse: true,
   // Bluetooth is no longer a flag either: GET_BLE_PROFILES either answers or
   // it does not, and renderBluetooth() says which. See state.bleProfiles.
 };
@@ -285,12 +286,20 @@ function lsSet(key, value) {
 // The settings the firmware stores today, plus the ones the UI shows greyed
 // out until the firmware gains them. Only POINTER_WIRE_KEYS are ever sent,
 // counted as unsaved, or written to a preset.
-const POINTER_WIRE_KEYS = ["pointerSpeed", "scrollSpeed", "invertX", "invertY", "invertScroll", "angle"];
+// Auto-mouse shares a settings record with the pointer settings on the
+// keyboard -- one save, one reset -- but has its own read/write commands, so
+// it needs its own slice of the key list.
+const AUTO_MOUSE_KEYS = ["autoMouse", "amBack", "amAfter"];
+const POINTER_ONLY_KEYS = ["pointerSpeed", "scrollSpeed", "invertX", "invertY", "invertScroll", "angle"];
+const POINTER_WIRE_KEYS = [...POINTER_ONLY_KEYS, ...AUTO_MOUSE_KEYS];
 const POINTER_DEFAULTS = {
   pointerSpeed: 100, scrollSpeed: 100, invertX: false, invertY: false, invertScroll: false,
-  angle: 0, inertia: false, glide: 50, autoMouse: false, amAfter: 100, amBack: 500,
+  // These have to match ZEN_POINTER_SETTINGS_*_DEFAULT: with nothing connected
+  // the page is standing in for a keyboard, and showing auto-mouse as off when
+  // the firmware ships it on would be a lie until the moment you plug in.
+  angle: 0, inertia: false, glide: 50, autoMouse: true, amAfter: 0, amBack: 500,
 };
-// Settings version the connected keyboard speaks (1 = no trackball rotation).
+// Settings versions the connected keyboard speaks.
 const POINTER_VERSION_WITH_ROTATION = 2;
 
 const SAMPLE_COMBOS = [
@@ -323,6 +332,9 @@ const state = {
   pointer: { ...POINTER_DEFAULTS },
   savedPointer: { ...POINTER_DEFAULTS },
   pointerVersion: POINTER_VERSION_WITH_ROTATION,
+  // Whether the connected keyboard answered GET_AUTO_MOUSE at all. Null means
+  // nothing is connected, so the controls behave like the other offline ones.
+  autoMouseSupported: null,
 
   combos: SAMPLE_COMBOS.map((c) => ({ ...c, keys: c.keys.slice() })),
   comboSel: null,
@@ -542,6 +554,14 @@ async function connect() {
     const pointer = await state.client.getPointerSettings();
     state.pointerVersion = pointer.version;
     state.pointer = { ...POINTER_DEFAULTS, ...fromDeviceSettings(pointer) };
+
+    try {
+      Object.assign(state.pointer, fromAutoMouseSettings(await state.client.getAutoMouse()));
+      state.autoMouseSupported = true;
+    } catch (_error) {
+      state.autoMouseSupported = false;
+    }
+
     state.savedPointer = { ...state.pointer };
 
     try {
@@ -601,6 +621,30 @@ function fromDeviceSettings(settings) {
   };
 }
 
+/** App field names -> the shape protocol.js puts on the wire for auto-mouse. */
+function toAutoMouseSettings() {
+  return {
+    version: state.pointerVersion,
+    enabled: state.pointer.autoMouse,
+    timeoutMs: state.pointer.amBack,
+    idleMs: state.pointer.amAfter,
+  };
+}
+
+function fromAutoMouseSettings(settings) {
+  return {
+    autoMouse: settings.enabled,
+    amBack: settings.timeoutMs,
+    amAfter: settings.idleMs,
+  };
+}
+
+/** Can auto-mouse be set right now? Firmware predating it answers "unknown
+ * command"; with nothing connected the controls stay live like the rest. */
+function autoMouseSupported() {
+  return !state.client || state.autoMouseSupported === true;
+}
+
 /** Can the trackball angle be set right now? Older firmware has no such
  * setting; with nothing connected there is nothing to say otherwise, so the
  * control stays live and behaves like the rest of the offline settings. */
@@ -644,6 +688,7 @@ async function disconnect() {
   state.pointer = { ...POINTER_DEFAULTS };
   state.savedPointer = { ...POINTER_DEFAULTS };
   state.pointerVersion = POINTER_VERSION_WITH_ROTATION;
+  state.autoMouseSupported = null;
   state.layer = 0;
   state.active = false;
   toast("キーボードとの接続を切りました");
@@ -705,17 +750,28 @@ async function writeBinding(bindingString) {
   render();
 }
 
-/** Change pointer settings: pushed to the keyboard immediately when connected. */
+/** Change pointer settings: pushed to the keyboard immediately when connected.
+ * Only the half of the record the change actually touches is sent. */
 async function writePointer(patch) {
   Object.assign(state.pointer, patch);
   if (state.client) {
+    const touchesAutoMouse = Object.keys(patch).some((k) => AUTO_MOUSE_KEYS.includes(k));
     try {
-      await state.client.setPointerSettings(toDeviceSettings());
+      if (touchesAutoMouse) await state.client.setAutoMouse(toAutoMouseSettings());
+      else await state.client.setPointerSettings(toDeviceSettings());
     } catch (error) {
       toast(error.message, true);
     }
   }
   render();
+}
+
+/** Push the whole of state.pointer, for the paths that replace all of it at
+ * once (discarding, loading a preset) rather than nudging one field. */
+async function pushAllSettings() {
+  if (!state.client) return;
+  await state.client.setPointerSettings(toDeviceSettings());
+  if (state.autoMouseSupported) await state.client.setAutoMouse(toAutoMouseSettings());
 }
 
 /** Re-read the profile table. A firmware that does not have the command
@@ -796,7 +852,7 @@ async function discardChanges() {
       }
       if (pointerChangeCount() > 0) {
         state.pointer = { ...state.pointer, ...pickWire(state.savedPointer) };
-        await state.client.setPointerSettings(toDeviceSettings());
+        await pushAllSettings();
       }
       toast("キーボードに保存されている設定に戻しました");
     } else {
@@ -819,6 +875,11 @@ async function resetPointer() {
     try {
       const fresh = await state.client.resetPointerSettings();
       state.pointer = { ...state.pointer, ...fromDeviceSettings(fresh) };
+      /* RESET_POINTER clears the whole record, auto-mouse included, so read
+       * back what the keyboard now holds rather than assuming. */
+      if (state.autoMouseSupported) {
+        Object.assign(state.pointer, fromAutoMouseSettings(await state.client.getAutoMouse()));
+      }
       toast("マウス操作をはじめの設定に戻しました");
     } catch (error) {
       toast(error.message, true);
@@ -906,7 +967,7 @@ async function applySnapshot(data, label) {
 
     if (data.pointer) {
       Object.assign(state.pointer, pickWire(data.pointer));
-      if (state.client) await state.client.setPointerSettings(toDeviceSettings());
+      await pushAllSettings();
     }
     state.ed = parseInto(state.keymap[state.layer].bindings[state.sel]);
     toast(`${label}を読み込みました${state.client ? "（まだキーボードには保存していません）" : ""}`);
@@ -991,6 +1052,8 @@ const SLIDERS = {
     min: 10, max: 100, step: 5, ends: ["短め", "普通", "長め"],
     fmt: (v) => `${v}%`, word: (v) => (v <= 35 ? "短め" : v <= 70 ? "普通" : "長め"),
   },
+  // Ranges mirror ZEN_POINTER_SETTINGS_AUTO_MOUSE_* in zen_pointer_settings.h;
+  // the keyboard rejects a payload outside them.
   amAfter: {
     min: 0, max: 500, step: 10, ends: ["0 ms", "250 ms", "500 ms"],
     fmt: (v) => `${v} ms`, word: (v) => (v <= 60 ? "短め" : v <= 150 ? "ふつう" : "長め"),
@@ -1698,12 +1761,12 @@ function renderPointer() {
       <div class="group">
         ${groupHead(ICON.auto, "オートマウス", "マウス用レイヤーへの自動切り替え")}
         ${settingRow({
-          title: "自動で切り替える", dirty: dirty("autoMouse"), first: true, disabled: !FEATURES.autoMouse,
+          title: "自動で切り替える", dirty: dirty("autoMouse"), first: true, disabled: !autoMouseSupported(),
           desc: "ボールを動かしている間だけ、マウス用のレイヤーに切り替えます。クリック用のキーをすぐ押せます"
-            + (FEATURES.autoMouse ? "" : '<br><span style="color:var(--warn)">※ ファームウェア対応待ちです</span>'),
+            + (autoMouseSupported() ? "" : '<br><span style="color:var(--warn)">※ キーボードのファームウェアが古いため、この設定は使えません</span>'),
           control: switchHtml(d.autoMouse, "toggle-autoMouse") + `<span class="switch-state">${d.autoMouse ? "オン" : "オフ"}</span>`,
         })}
-        <div class="${cls("rows-dep", (!d.autoMouse || !FEATURES.autoMouse) && "is-off")}">
+        <div class="${cls("rows-dep", (!d.autoMouse || !autoMouseSupported()) && "is-off")}">
           ${settingRow({
             title: "キー入力の直後は切り替えない", desc: "文字を打っている最中に手が触れて切り替わるのを防ぐ時間",
             dirty: dirty("amAfter"), control: sliderHtml("amAfter", d.amAfter),
