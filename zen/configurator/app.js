@@ -14,21 +14,22 @@
 
 // --- What this firmware can actually do ------------------------------------
 //
-// Flip a flag to true once the matching firmware command exists (and wire it
-// up in the place marked with the same name). Until then the UI for it is
-// visible but inert, with a notice saying so, rather than silently pretending.
+// Nearly everything is capability-detected at runtime now: the keyboard either
+// answers the command or it does not, which is more honest than a flag someone
+// has to remember to flip when the firmware changes.
+//
+//   trackball angle   angleSupported()      (pointer settings version)
+//   auto-mouse        autoMouseSupported()  (does GET_AUTO_MOUSE answer?)
+//   Bluetooth         state.bleProfiles     (does GET_BLE_PROFILES answer?)
+//   combos            canEditCombos()       (not a keyboard feature at all --
+//                                            they are compiled into the
+//                                            firmware from keymap.keymap)
 const FEATURES = {
-  keymap: true, // SET_BINDING / SAVE_KEYMAP / DISCARD_KEYMAP
-  pointer: true, // GET/SET/SAVE/RESET_POINTER (speed, scroll, 3 inversions)
-  combos: false, // no combo command in zen_config_wire.h yet
-  // The app has it; whether the connected keyboard does depends on its
-  // firmware, which GET_POINTER reports. See angleSupported().
-  trackballAngle: true,
+  // Deliberately not offered for the trackball: the ball already coasts on its
+  // own, so software inertia would stack on top of real sensor motion. It is a
+  // trackpad feature, and the trackpad build's CONFIG_IQS7211E_SCROLLER_INERTIA
+  // is not wired to the settings yet.
   inertia: false,
-  // Auto-mouse is capability-detected too; see autoMouseSupported().
-  autoMouse: true,
-  // Bluetooth is no longer a flag either: GET_BLE_PROFILES either answers or
-  // it does not, and renderBluetooth() says which. See state.bleProfiles.
 };
 
 // --- Physical layout, transcribed from config/info.json (LAYOUT.layout) ----
@@ -263,6 +264,7 @@ const LS = {
   theme: "zen-configurator-theme",
   layerNames: "zen-configurator-layer-names",
   profiles: "zen-configurator-profiles",
+  keymapPath: "zen-configurator-keymap-path",
 };
 
 function lsGet(key, fallback) {
@@ -302,11 +304,8 @@ const POINTER_DEFAULTS = {
 // Settings versions the connected keyboard speaks.
 const POINTER_VERSION_WITH_ROTATION = 2;
 
-const SAMPLE_COMBOS = [
-  { id: 1, layer: 0, keys: [19, 20], out: "&kp ESCAPE", term: 50 },
-  { id: 2, layer: 0, keys: [15, 16], out: "&kp TAB", term: 50 },
-  { id: 3, layer: 0, keys: [33, 34], out: "&kp ENTER", term: 50 },
-];
+// ZMK's own default when a combo has no timeout-ms of its own.
+const COMBO_DEFAULT_TIMEOUT_MS = 50;
 
 // --- State ------------------------------------------------------------------
 
@@ -336,8 +335,13 @@ const state = {
   // nothing is connected, so the controls behave like the other offline ones.
   autoMouseSupported: null,
 
-  combos: SAMPLE_COMBOS.map((c) => ({ ...c, keys: c.keys.slice() })),
+  // Combos live in config/keymap.keymap, not on the keyboard -- ZMK builds
+  // them into a const table at compile time. null means no file is loaded.
+  combos: null,
+  savedCombos: null,
   comboSel: null,
+  comboError: "",
+  comboBusy: false,
 
   layerNames: lsGet(LS.layerNames, DEFAULT_LAYER_NAMES.slice()),
   renaming: false,
@@ -891,6 +895,108 @@ async function resetPointer() {
   render();
 }
 
+// --- Combos: the keymap file ------------------------------------------------
+//
+// ZMK compiles combos into a const table from devicetree, so there is nothing
+// to send over the wire -- the app edits config/keymap.keymap and the firmware
+// is rebuilt from it. That means this is the one tab where the three-stage
+// save bar does not apply, and the one place the app writes to a file someone
+// also edits by hand.
+
+/** The desktop shell can reach the filesystem; a browser tab cannot. */
+function canEditCombos() {
+  return typeof window !== "undefined" && typeof window.__TAURI__?.core?.invoke === "function";
+}
+
+const keymapPath = () => lsGet(LS.keymapPath, null);
+
+async function pickKeymapFile() {
+  const { open } = window.__TAURI__.dialog;
+  const chosen = await open({
+    title: "keymap.keymap を選んでください",
+    multiple: false,
+    directory: false,
+    filters: [{ name: "ZMK keymap", extensions: ["keymap"] }],
+  });
+  if (!chosen) return null;
+  const path = typeof chosen === "string" ? chosen : chosen.path;
+  lsSet(LS.keymapPath, path);
+  return path;
+}
+
+/** Attaches a uid to each parsed combo so selection survives edits and
+ * reordering -- the file itself has no stable id. */
+let comboUid = 0;
+function withUids(combos) {
+  return combos.map((c) => ({ ...c, uid: ++comboUid, keyPositions: c.keyPositions.slice() }));
+}
+const copyCombos = (combos) => combos.map((c) => ({ ...c, keyPositions: c.keyPositions.slice() }));
+
+async function loadCombos({ pick = false } = {}) {
+  if (!canEditCombos()) return;
+  state.comboBusy = true;
+  state.comboError = "";
+  render();
+  try {
+    const path = pick ? await pickKeymapFile() : keymapPath();
+    if (!path) {
+      state.comboBusy = false;
+      render();
+      return;
+    }
+    const text = await window.__TAURI__.core.invoke("read_keymap", { path });
+    const parsed = parseCombos(text);
+    state.combos = withUids(parsed.combos);
+    state.savedCombos = copyCombos(state.combos);
+    state.comboSel = null;
+  } catch (error) {
+    state.comboError = String(error.message ?? error);
+    state.combos = null;
+  }
+  state.comboBusy = false;
+  render();
+}
+
+async function saveCombos() {
+  if (!canEditCombos() || !state.combos) return;
+  const path = keymapPath();
+  if (!path) return;
+  state.comboBusy = true;
+  render();
+  try {
+    const { invoke } = window.__TAURI__.core;
+    // Re-read rather than keeping the file in memory: it may well have been
+    // edited by hand since it was loaded, and only the combos block is ours.
+    const text = await invoke("read_keymap", { path });
+    await invoke("write_keymap", { path, contents: writeCombos(text, state.combos) });
+    state.savedCombos = copyCombos(state.combos);
+    toast("keymap.keymap に書き出しました。ビルドして書き込むと反映されます");
+  } catch (error) {
+    toast(String(error.message ?? error), true);
+  }
+  state.comboBusy = false;
+  render();
+}
+
+/** Combos shown on a layer. No `layers` property means every layer, which is
+ * what ZMK does, so those show up everywhere rather than being hidden. */
+function combosOnLayer(layer) {
+  if (!state.combos) return [];
+  return state.combos.filter((c) => c.layers === null || c.layers.includes(layer));
+}
+
+function comboChanged(combo) {
+  const before = (state.savedCombos ?? []).find((c) => c.uid === combo.uid);
+  if (!before) return true;
+  return JSON.stringify({ ...before, uid: 0 }) !== JSON.stringify({ ...combo, uid: 0 });
+}
+
+function comboChangeCount() {
+  if (!state.combos || !state.savedCombos) return 0;
+  const gone = state.savedCombos.filter((c) => !state.combos.some((x) => x.uid === c.uid)).length;
+  return state.combos.filter(comboChanged).length + gone;
+}
+
 // --- Presets (this computer only) -------------------------------------------
 
 function loadPresets() {
@@ -1290,7 +1396,7 @@ function renderPresetPanel() {
 function renderTabs(counts) {
   const tabs = [
     { id: "keymap", label: "キー配置", d: ICON.keyboard, dirty: counts.key > 0 },
-    { id: "combo", label: "コンボ", d: ICON.combo, dirty: false },
+    { id: "combo", label: "コンボ", d: ICON.combo, dirty: comboChangeCount() > 0 },
     { id: "pointer", label: "マウス操作", d: ICON.mousetab, dirty: counts.pointer > 0 },
     { id: "bt", label: "Bluetooth", d: ICON.bt, dirty: false },
   ];
@@ -1318,17 +1424,17 @@ function renderBoards() {
   const comboMode = state.tab === "combo";
   const layer = state.keymap[state.layer];
   const savedLayer = state.saved[state.layer];
-  const layerCombos = state.combos.filter((c) => c.layer === state.layer);
-  const selCombo = state.combos.find((c) => c.id === state.comboSel && c.layer === state.layer) || null;
+  const layerCombos = combosOnLayer(state.layer);
+  const selCombo = (state.combos ?? []).find((c) => c.uid === state.comboSel) || null;
   const bat = batteries();
 
   const keys = POS.map((p, i) => {
     const binding = layer.bindings[i];
     const d = describe(binding);
-    const inSel = comboMode && !!selCombo && selCombo.keys.includes(i);
+    const inSel = comboMode && !!selCombo && selCombo.keyPositions.includes(i);
     const sel = comboMode ? inSel : (state.active && i === state.sel);
     const changed = savedLayer && binding !== savedLayer.bindings[i];
-    const nums = comboMode ? layerCombos.map((c, ci) => (c.keys.includes(i) ? String(ci + 1) : null)).filter(Boolean) : [];
+    const nums = comboMode ? layerCombos.map((c, ci) => (c.keyPositions.includes(i) ? String(ci + 1) : null)).filter(Boolean) : [];
     const area = `${p.y + 1} / ${p.x <= 6 ? p.x + 1 : p.x - 7}`;
     const style = `grid-area:${area};font-size:${keyFontSize(d.main)}`;
     return {
@@ -1381,7 +1487,7 @@ function renderLayerRow() {
         const empty = l.bindings.every((b) => b === "&trans");
         const name = state.layerNames[i] || "";
         const dirty = state.saved[i] && l.bindings.some((b, j) => b !== state.saved[i].bindings[j]);
-        const comboN = state.combos.filter((c) => c.layer === i).length;
+        const comboN = combosOnLayer(i).length;
         return `<button type="button" class="${cls("layer-chip", on && "is-on")}" ${act("layer", String(i))} title="レイヤー ${i}${name ? "：" + esc(name) : ""}">
           <span class="${cls("layer-num", empty && !on && "is-empty")}">${i}</span>
           <span class="${cls("layer-name", !name && "is-unnamed")}">${esc(name || (empty ? "空き" : "名前なし"))}</span>
@@ -1401,7 +1507,7 @@ function renderLayerRow() {
 
 function renderBoardCard() {
   const comboMode = state.tab === "combo";
-  const selCombo = state.combos.find((c) => c.id === state.comboSel && c.layer === state.layer) || null;
+  const selCombo = (state.combos ?? []).find((c) => c.uid === state.comboSel) || null;
   const title = comboMode ? "同時押しするキーを選ぶ" : "レイヤーとキーを選ぶ";
   const hint = comboMode
     ? (selCombo ? "キーをクリックすると、選んでいるコンボに追加 / 外せます" : "下でコンボを選ぶか追加してください")
@@ -1615,75 +1721,140 @@ function renderEditorDetail() {
 // --- Render: combo ----------------------------------------------------------
 
 function renderComboPanel() {
-  const layerCombos = state.combos.filter((c) => c.layer === state.layer);
-  const sel = state.combos.find((c) => c.id === state.comboSel && c.layer === state.layer) || null;
-  const keyLabel = (i) => describe(state.keymap[state.layer].bindings[i]).main;
-  const parts = (combo) => combo.keys.map((k, j) => `${j > 0 ? '<span class="combo-plus">+</span>' : ""}<span class="combo-cap">${esc(keyLabel(k))}</span>`).join("");
+  // A browser tab cannot reach config/keymap.keymap, and there is nothing to
+  // send to the keyboard instead -- combos are compiled in.
+  if (!canEditCombos()) {
+    return `<section class="card card-pad">
+        <div class="notice">${svg(ICON.warn, 15, 2)}<span>
+          <b>コンボの編集はデスクトップアプリでのみできます。</b>
+          コンボはキーボードに送るのではなく、<code>config/keymap.keymap</code> を書き換えて
+          ファームウェアを作り直す必要があるためです。
+        </span></div>
+      </section>`;
+  }
+
+  if (!state.combos) {
+    return `<section class="card card-pad">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span class="group-icon">${svg(ICON.combo, 16, 1.9)}</span>
+          <span class="group-title">コンボ</span>
+          <span class="card-note">同時に押すと別のキーとして働きます</span>
+        </div>
+        <div class="notice">${svg(ICON.warn, 15, 2)}<span>
+          コンボは<b>キーボードではなく <code>config/keymap.keymap</code></b> に入っています。
+          そのファイルを選ぶと、いま入っているコンボを読み込んで編集できます。
+        </span></div>
+        ${state.comboError ? `<div class="notice" style="margin-top:10px;border-color:var(--danger)"><span style="color:var(--danger)">${esc(state.comboError)}</span></div>` : ""}
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+          <button type="button" class="btn btn-accent" ${act("combo-pick")} ${state.comboBusy ? "disabled" : ""}>
+            ${svg(ICON.cards, 15, 1.9)}keymap.keymap を選ぶ
+          </button>
+          ${keymapPath() ? `<span class="card-note" style="word-break:break-all">前回: ${esc(keymapPath())}</span>` : ""}
+        </div>
+      </section>`;
+  }
+
+  const layerCombos = combosOnLayer(state.layer);
+  const sel = state.combos.find((c) => c.uid === state.comboSel) || null;
+  // A combo position is often &trans on the layer the combo belongs to, and
+  // "▽" tells nobody which key to press. Fall through the way the keyboard
+  // does and show what the key actually does at rest.
+  const keyLabel = (i) => {
+    for (let l = state.layer; l >= 0; l--) {
+      const binding = state.keymap[l]?.bindings[i];
+      if (binding && binding !== "&trans") return describe(binding).main;
+    }
+    return describe(state.keymap[0].bindings[i]).main;
+  };
+  const dirty = comboChangeCount();
+
   const outLabel = (b) => {
     const d = describe(b);
     return (d.tag && d.style === "key" ? d.tag + "+" : "") + d.main;
   };
-
   const pool = (PICKER_GROUPS.find((g) => g.label === state.cat) || PICKER_GROUPS[0]).keys;
-  const curOut = sel ? sel.out.replace(/^&kp\s+/, "") : "";
+  const curOut = sel ? sel.bindings.replace(/^&kp\s+/, "") : "";
 
   return `<section class="card card-pad" style="padding-bottom:18px">
-      ${FEATURES.combos ? "" : pendingNotice("コンボ")}
-      <div class="${cls(!FEATURES.combos && "pending")}" style="${FEATURES.combos ? "" : "margin-top:14px"}">
-        <div class="combo-head">
-          <span class="t">レイヤー ${state.layer} のコンボ</span>
-          <span class="card-note">決めたキーを同時に押すと、別のキーとして働きます</span>
-          <button type="button" class="btn btn-dark" ${act("combo-add")}>${svg(ICON.plus, 14, 2.2)}新しいコンボ</button>
+      <div class="notice">${svg(ICON.bolt, 15, 2)}<span>
+        コンボは<b>キーボードに送れません</b>（ファームウェアに焼き込まれているためです）。
+        ここでの変更は <code>keymap.keymap</code> に書き出したあと、
+        <b>ビルドして書き込む</b>と反映されます。下の「キーボードに保存」は関係ありません。
+      </span></div>
+
+      <div class="combo-head" style="margin-top:14px">
+        <span class="t">レイヤー ${state.layer} のコンボ</span>
+        <span class="card-note">${layerCombos.length} 件 / ファイル全体で ${state.combos.length} 件</span>
+        <button type="button" class="btn btn-dark" ${act("combo-add")}>${svg(ICON.plus, 14, 2.2)}新しいコンボ</button>
+      </div>
+
+      <div class="combo-table">
+        <div class="combo-grid combo-th">
+          <span>No.</span><span>同時に押すキー</span><span>押したときに入力されるキー</span><span>同時押しの時間</span><span></span>
         </div>
-        <div class="combo-table">
-          <div class="combo-grid combo-th">
-            <span>No.</span><span>同時に押すキー</span><span>押したときに入力されるキー</span><span>同時押しの時間</span><span></span>
+        ${layerCombos.length === 0
+          ? '<div class="combo-empty">このレイヤーにはまだコンボがありません</div>'
+          : layerCombos.map((c, ci) => `<button type="button" class="${cls("combo-grid", "combo-row", sel && c.uid === sel.uid && "is-on")}" ${act("combo-sel", String(c.uid))}>
+              <span class="combo-n">${ci + 1}</span>
+              <span class="combo-keys">
+                ${c.keyPositions.map((k, j) => `${j > 0 ? '<span class="combo-plus">+</span>' : ""}<span class="combo-cap">${esc(keyLabel(k))}</span>`).join("")}
+                ${c.keyPositions.length < 2 ? '<span class="combo-warn">キーを2つ以上選んでください</span>' : ""}
+                ${c.layers === null ? '<span class="combo-warn" style="color:var(--ink3)">すべてのレイヤー</span>' : ""}
+              </span>
+              <span class="combo-out">${svg(ICON.arrow, 14, 2, 'style="color:var(--mute);flex:0 0 auto"')}<span class="v">${esc(outLabel(c.bindings))}</span></span>
+              <span class="combo-term">${c.timeoutMs === null ? `${COMBO_DEFAULT_TIMEOUT_MS} ms（既定）` : `${c.timeoutMs} ms`}</span>
+              <span style="display:flex;justify-content:center">${comboChanged(c) ? '<span class="dot"></span>' : ""}</span>
+            </button>`).join("")}
+      </div>
+
+      ${sel ? `<div class="combo-edit">
+        <div class="combo-panel p1">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="detail-h" style="margin:0">同時に押すキー</span>
           </div>
-          ${layerCombos.length === 0
-            ? '<div class="combo-empty">このレイヤーにはまだコンボがありません</div>'
-            : layerCombos.map((c, ci) => `<button type="button" class="${cls("combo-grid", "combo-row", sel && c.id === sel.id && "is-on")}" ${act("combo-sel", String(c.id))}>
-                <span class="combo-n">${ci + 1}</span>
-                <span class="combo-keys">${parts(c)}${c.keys.length < 2 ? '<span class="combo-warn">キーを2つ以上選んでください</span>' : ""}</span>
-                <span class="combo-out">${svg(ICON.arrow, 14, 2, 'style="color:var(--mute);flex:0 0 auto"')}<span class="v">${esc(outLabel(c.out))}</span></span>
-                <span class="combo-term">${c.term} ms</span>
-                <span style="display:flex;justify-content:center"></span>
-              </button>`).join("")}
+          <div class="combo-sel-keys">
+            ${sel.keyPositions.map((k, j) => `${j > 0 ? '<span style="color:var(--ink3);font-size:15px">+</span>' : ""}<span class="combo-sel-cap">${esc(keyLabel(k))}</span>`).join("")}
+            ${sel.keyPositions.length < 2 ? '<span class="combo-sel-cap is-empty">?</span>' : ""}
+          </div>
+          <div class="combo-hint">上のキーボードでキーをクリックすると、追加 / 外せます（2つ以上）</div>
+          ${sel.extra && sel.extra.length
+            ? `<div class="combo-hint" style="color:var(--warn)">このコンボには、この画面では編集できない設定があります（${esc(sel.extra.map((p) => p.name).join(", "))}）。書き出してもそのまま残ります。</div>`
+            : ""}
         </div>
-        ${sel ? `<div class="combo-edit">
-          <div class="combo-panel p1">
-            <div style="display:flex;align-items:center;gap:8px">
-              <span class="combo-n" style="background:var(--accent);color:var(--on-accent);width:22px;height:22px;font-size:11px">${layerCombos.findIndex((c) => c.id === sel.id) + 1}</span>
-              <span class="detail-h" style="margin:0">同時に押すキー</span>
-            </div>
-            <div class="combo-sel-keys">
-              ${sel.keys.map((k, j) => `${j > 0 ? '<span style="color:var(--ink3);font-size:15px">+</span>' : ""}<span class="combo-sel-cap">${esc(keyLabel(k))}</span>`).join("")}
-              ${sel.keys.length < 2 ? '<span class="combo-sel-cap is-empty">?</span>' : ""}
-            </div>
-            <div class="combo-hint">上のキーボードでキーをクリックすると、追加 / 外せます（2つ以上）</div>
+        <div class="combo-panel p2">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span class="detail-h" style="margin:0">押したときに入力されるキー</span>
+            <span class="card-note" style="color:var(--ink2)">${esc(sentence(sel.bindings))}</span>
           </div>
-          <div class="combo-panel p2">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-              <span class="detail-h" style="margin:0">押したときに入力されるキー</span>
-              <span class="card-note" style="color:var(--ink2)">${esc(sentence(sel.out))}</span>
-            </div>
-            <div class="cats">
-              ${PICKER_GROUPS.map((g) => `<button type="button" class="${cls("cat", g.label === state.cat && "is-on")}" ${act("cat", g.label)} style="padding:4px 9px;font-size:11.5px">${g.label}</button>`).join("")}
-            </div>
-            <div class="combo-pick">
-              ${pool.map((k) => {
-                const label = pretty(k);
-                const size = label.length <= 2 ? "14px" : label.length <= 4 ? "11.5px" : "10px";
-                return `<button type="button" class="${cls("keycap", k === curOut && "is-on")}" style="font-size:${size}" title="${esc(friendly(k))}" ${act("combo-out", k)}>${esc(label)}</button>`;
-              }).join("")}
-            </div>
+          <div class="cats">
+            ${PICKER_GROUPS.map((g) => `<button type="button" class="${cls("cat", g.label === state.cat && "is-on")}" ${act("cat", g.label)} style="padding:4px 9px;font-size:11.5px">${g.label}</button>`).join("")}
           </div>
-          <div class="combo-panel p3">
-            <span class="detail-h" style="margin:0">同時押しとみなす時間</span>
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${sliderHtml("comboTerm", sel.term)}</div>
-            <span class="combo-hint" style="margin:0">短いほど誤爆しにくく、長いほど同時押しが成功しやすくなります</span>
-            <button type="button" class="btn-danger-plain" style="align-self:flex-start;margin-top:auto" ${act("combo-delete")}>${svg(ICON.trash, 13)}このコンボを削除</button>
+          <div class="combo-pick">
+            ${pool.map((k) => {
+              const label = pretty(k);
+              const size = label.length <= 2 ? "14px" : label.length <= 4 ? "11.5px" : "10px";
+              return `<button type="button" class="${cls("keycap", k === curOut && "is-on")}" style="font-size:${size}" title="${esc(friendly(k))}" ${act("combo-out", k)}>${esc(label)}</button>`;
+            }).join("")}
           </div>
-        </div>` : ""}
+        </div>
+        <div class="combo-panel p3">
+          <span class="detail-h" style="margin:0">同時押しとみなす時間</span>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${sliderHtml("comboTerm", sel.timeoutMs ?? COMBO_DEFAULT_TIMEOUT_MS)}</div>
+          <span class="combo-hint" style="margin:0">短いほど誤爆しにくく、長いほど同時押しが成功しやすくなります</span>
+          <button type="button" class="btn-danger-plain" style="align-self:flex-start;margin-top:auto" ${act("combo-delete")}>${svg(ICON.trash, 13)}このコンボを削除</button>
+        </div>
+      </div>` : ""}
+
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:13px;font-weight:650">${dirty ? `${dirty} 件の変更が未書き出しです` : "ファイルと同じ内容です"}</div>
+          <div class="card-note" style="word-break:break-all">${esc(keymapPath() ?? "")}</div>
+        </div>
+        <button type="button" class="btn" ${act("combo-reload")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.reset, 13)}読み直す</button>
+        <button type="button" class="btn" ${act("combo-pick")} ${state.comboBusy ? "disabled" : ""}>別のファイル</button>
+        <button type="button" class="${cls("btn", dirty && "btn-accent")}" ${act("combo-save")} ${state.comboBusy || !dirty ? "disabled" : ""}>
+          ${svg(ICON.download, 15, 1.9)}keymap.keymap に書き出す
+        </button>
       </div>
     </section>`;
 }
@@ -1752,7 +1923,7 @@ function renderPointer() {
         ${settingRow({
           title: "慣性スクロール", dirty: dirty("inertia") || dirty("glide"), disabled: !FEATURES.inertia,
           desc: "はじくように転がすと、指を離したあともしばらく滑ります（トラックパッドのような動き）"
-            + (FEATURES.inertia ? "" : '<br><span style="color:var(--warn)">※ ファームウェア対応待ちです</span>'),
+            + (FEATURES.inertia ? "" : '<br><span style="color:var(--warn)">※ トラックパッド搭載版のための設定です。トラックボールはボール自体が惰性で回るので使いません</span>'),
           control: switchHtml(d.inertia, "toggle-inertia")
             + `<div class="${cls("sub-ctl", !d.inertia && "is-off")}">${sliderHtml("glide", d.glide)}</div>`,
         })}
@@ -2041,7 +2212,15 @@ const CLICK = {
   export: () => exportFile(),
   import: () => importFile(),
 
-  tab: (a) => { state.tab = a; render(); },
+  tab: (a) => {
+    state.tab = a;
+    render();
+    // First visit to the combo tab with a remembered file: load it rather than
+    // making the user press a button for something they already chose.
+    if (a === "combo" && !state.combos && !state.comboBusy && canEditCombos() && keymapPath()) {
+      loadCombos();
+    }
+  },
   layer: (a) => {
     state.layer = Number(a);
     state.search = "";
@@ -2053,9 +2232,11 @@ const CLICK = {
   key: (a) => {
     const index = Number(a);
     if (state.tab === "combo") {
-      const sel = state.combos.find((c) => c.id === state.comboSel && c.layer === state.layer);
+      const sel = state.combos && state.combos.find((c) => c.uid === state.comboSel);
       if (!sel) return;
-      sel.keys = sel.keys.includes(index) ? sel.keys.filter((k) => k !== index) : sel.keys.concat([index]);
+      sel.keyPositions = sel.keyPositions.includes(index)
+        ? sel.keyPositions.filter((k) => k !== index)
+        : sel.keyPositions.concat([index]).sort((a, b) => a - b);
       render();
       return;
     }
@@ -2072,24 +2253,30 @@ const CLICK = {
   "pick-key": (a) => { state.ed.keyName = a; writeBinding(composeBinding()); },
   cat: (a) => { state.cat = a; render(); },
 
+  "combo-pick": () => loadCombos({ pick: true }),
+  "combo-reload": () => loadCombos(),
+  "combo-save": () => saveCombos(),
   "combo-add": () => {
-    const id = Math.max(0, ...state.combos.map((c) => c.id)) + 1;
-    state.combos.push({ id, layer: state.layer, keys: [], out: "&kp ESCAPE", term: 50 });
-    state.comboSel = id;
+    const combo = {
+      uid: ++comboUid, name: null, keyPositions: [], bindings: "&kp ESCAPE",
+      layers: [state.layer], timeoutMs: COMBO_DEFAULT_TIMEOUT_MS, extra: [],
+    };
+    state.combos.push(combo);
+    state.comboSel = combo.uid;
     render();
   },
   "combo-sel": (a) => {
-    const id = Number(a);
-    state.comboSel = state.comboSel === id ? null : id;
+    const uid = Number(a);
+    state.comboSel = state.comboSel === uid ? null : uid;
     render();
   },
   "combo-out": (a) => {
-    const sel = state.combos.find((c) => c.id === state.comboSel);
-    if (sel) sel.out = `&kp ${a}`;
+    const sel = state.combos.find((c) => c.uid === state.comboSel);
+    if (sel) sel.bindings = `&kp ${a}`;
     render();
   },
   "combo-delete": () => {
-    state.combos = state.combos.filter((c) => c.id !== state.comboSel);
+    state.combos = state.combos.filter((c) => c.uid !== state.comboSel);
     state.comboSel = null;
     render();
   },
@@ -2136,8 +2323,8 @@ function init() {
       const value = Number(t.value);
       const spec = SLIDERS[key];
       if (key === "comboTerm") {
-        const sel = state.combos.find((c) => c.id === state.comboSel);
-        if (sel) sel.term = value;
+        const sel = state.combos && state.combos.find((c) => c.uid === state.comboSel);
+        if (sel) sel.timeoutMs = value;
       } else {
         state.pointer[key] = value;
       }
