@@ -1710,7 +1710,7 @@ function renderEditorDetail() {
     </div>`}
     ${pool.length === 0
       ? '<div class="no-hits">見つかりませんでした。別の言葉で探してみてください。</div>'
-      : `<div class="keygrid">
+      : `<div class="keygrid" data-scroll="keygrid">
           ${pool.map((k) => {
             const label = pretty(k);
             return `<button type="button" class="${cls("keycap", k === e.keyName && "is-on")}" style="font-size:${capSize(label)}" title="${esc(friendly(k))}" ${act("pick-key", k)}>${esc(label)}</button>`;
@@ -1829,7 +1829,7 @@ function renderComboPanel() {
           <div class="cats">
             ${PICKER_GROUPS.map((g) => `<button type="button" class="${cls("cat", g.label === state.cat && "is-on")}" ${act("cat", g.label)} style="padding:4px 9px;font-size:11.5px">${g.label}</button>`).join("")}
           </div>
-          <div class="combo-pick">
+          <div class="combo-pick" data-scroll="combo-pick">
             ${pool.map((k) => {
               const label = pretty(k);
               const size = label.length <= 2 ? "14px" : label.length <= 4 ? "11.5px" : "10px";
@@ -2110,9 +2110,22 @@ function applyTheme() {
 function render() {
   applyTheme();
 
-  // Keep the caret where it was: the whole page is rebuilt on every change,
-  // and a text field the user is typing into would otherwise lose focus on
-  // the first keystroke.
+  // The whole page is rebuilt on every change, which costs two things that
+  // have to be put back by hand.
+  //
+  // Scroll position: replacing innerHTML empties the document for an instant,
+  // the browser clamps the scroll offset to the new height of nearly nothing,
+  // and the content comes back with the page jumped to the top. Clicking a key
+  // in the picker threw you back up to the header every time, which made
+  // picking several in a row impossible.
+  const scrollY = window.scrollY;
+  const scrollers = new Map();
+  for (const el of document.querySelectorAll("[data-scroll]")) {
+    scrollers.set(el.dataset.scroll, el.scrollTop);
+  }
+
+  // Focus: a text field the user is typing into would otherwise lose it on the
+  // first keystroke.
   const focused = document.activeElement;
   const focusKey = focused && focused.dataset ? focused.dataset.f : null;
   const selStart = focusKey && focused.selectionStart;
@@ -2137,10 +2150,27 @@ function render() {
 
   document.getElementById("app").innerHTML = body;
 
+  for (const [key, top] of scrollers) {
+    const el = document.querySelector(`[data-scroll="${key}"]`);
+    if (el) el.scrollTop = top;
+  }
+  window.scrollTo(0, scrollY);
+  // Again next frame. WKWebView -- which is what the desktop app runs on, and
+  // where this was reported -- can settle the scroll offset after layout
+  // rather than during the innerHTML swap, so the synchronous call above is
+  // not always the last word. Only if it actually drifted, so this cannot
+  // fight a real scroll, and a user managing one inside a single frame while a
+  // render is in flight is not a case worth protecting.
+  requestAnimationFrame(() => {
+    if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);
+  });
+
   if (focusKey) {
     const next = document.querySelector(`[data-f="${focusKey}"]`);
     if (next) {
-      next.focus();
+      // preventScroll, or focusing scrolls the field into view and undoes the
+      // position just restored above.
+      next.focus({ preventScroll: true });
       if (typeof selStart === "number" && next.setSelectionRange && next.type !== "range") {
         try { next.setSelectionRange(selStart, selEnd); } catch (_error) { /* unsupported input type */ }
       }
