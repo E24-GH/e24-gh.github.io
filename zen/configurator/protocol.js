@@ -225,14 +225,29 @@ function encodeFrame(command, payloadBytes) {
   return frame;
 }
 
+// Matches ZEN_POINTER_SETTINGS_VERSION. Version 2 added the trackball
+// rotation in byte 6; version 1 left that byte reserved and zero.
+const POINTER_SETTINGS_VERSION = 2;
+const ROTATION_MIN = -45;
+const ROTATION_MAX = 45;
+
 function encodePointerPayload(settings) {
   const bytes = new Uint8Array(POINTER_PAYLOAD_SIZE);
   const view = new DataView(bytes.buffer);
-  bytes[0] = 1; // version
+  // Byte 0 tells the keyboard which fields this payload carries. Echo back
+  // the version the keyboard itself reported: its validator rejects a payload
+  // whose version it does not recognise, so announcing 2 to version-1
+  // firmware would break every pointer write rather than just the new field.
+  const version = settings.version ?? POINTER_SETTINGS_VERSION;
+  bytes[0] = version;
   view.setUint16(1, settings.pointerSpeed, true);
   view.setUint16(3, settings.scrollSpeed, true);
   bytes[5] =
     (settings.invertX ? 1 : 0) | (settings.invertY ? 2 : 0) | (settings.invertScroll ? 4 : 0);
+  if (version >= 2) {
+    const degrees = Math.round(settings.rotationDegrees ?? 0);
+    view.setInt8(6, Math.max(ROTATION_MIN, Math.min(ROTATION_MAX, degrees)));
+  }
   return bytes;
 }
 
@@ -245,6 +260,7 @@ function decodePointerPayload(bytes) {
     invertX: (bytes[5] & 1) !== 0,
     invertY: (bytes[5] & 2) !== 0,
     invertScroll: (bytes[5] & 4) !== 0,
+    rotationDegrees: bytes[0] >= 2 ? view.getInt8(6) : 0,
   };
 }
 

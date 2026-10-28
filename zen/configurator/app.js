@@ -21,7 +21,9 @@ const FEATURES = {
   keymap: true, // SET_BINDING / SAVE_KEYMAP / DISCARD_KEYMAP
   pointer: true, // GET/SET/SAVE/RESET_POINTER (speed, scroll, 3 inversions)
   combos: false, // no combo command in zen_config_wire.h yet
-  trackballAngle: false,
+  // The app has it; whether the connected keyboard does depends on its
+  // firmware, which GET_POINTER reports. See angleSupported().
+  trackballAngle: true,
   inertia: false,
   autoMouse: false,
   btManage: false, // profile list / pairing / per-profile clear
@@ -279,13 +281,16 @@ function lsSet(key, value) {
 
 // --- Pointer settings -------------------------------------------------------
 
-// The five the firmware stores today, plus the ones the UI shows greyed out
-// until the firmware gains them. Only POINTER_WIRE_KEYS are ever sent.
-const POINTER_WIRE_KEYS = ["pointerSpeed", "scrollSpeed", "invertX", "invertY", "invertScroll"];
+// The settings the firmware stores today, plus the ones the UI shows greyed
+// out until the firmware gains them. Only POINTER_WIRE_KEYS are ever sent,
+// counted as unsaved, or written to a preset.
+const POINTER_WIRE_KEYS = ["pointerSpeed", "scrollSpeed", "invertX", "invertY", "invertScroll", "angle"];
 const POINTER_DEFAULTS = {
   pointerSpeed: 100, scrollSpeed: 100, invertX: false, invertY: false, invertScroll: false,
   angle: 0, inertia: false, glide: 50, autoMouse: false, amAfter: 100, amBack: 500,
 };
+// Settings version the connected keyboard speaks (1 = no trackball rotation).
+const POINTER_VERSION_WITH_ROTATION = 2;
 
 const SAMPLE_COMBOS = [
   { id: 1, layer: 0, keys: [19, 20], out: "&kp ESCAPE", term: 50 },
@@ -316,6 +321,7 @@ const state = {
 
   pointer: { ...POINTER_DEFAULTS },
   savedPointer: { ...POINTER_DEFAULTS },
+  pointerVersion: POINTER_VERSION_WITH_ROTATION,
 
   combos: SAMPLE_COMBOS.map((c) => ({ ...c, keys: c.keys.slice() })),
   comboSel: null,
@@ -528,7 +534,8 @@ async function connect() {
     }
 
     const pointer = await state.client.getPointerSettings();
-    state.pointer = { ...POINTER_DEFAULTS, ...pickWire(pointer) };
+    state.pointerVersion = pointer.version;
+    state.pointer = { ...POINTER_DEFAULTS, ...fromDeviceSettings(pointer) };
     state.savedPointer = { ...state.pointer };
 
     try {
@@ -550,10 +557,48 @@ async function connect() {
   render();
 }
 
+/** The firmware-backed subset of a pointer-settings object, in app field
+ * names. Keys the source does not have are left out, so a preset saved before
+ * a field existed does not overwrite that field with undefined. */
 function pickWire(settings) {
   const out = {};
-  for (const k of POINTER_WIRE_KEYS) out[k] = settings[k];
+  for (const k of POINTER_WIRE_KEYS) {
+    if (settings[k] !== undefined) out[k] = settings[k];
+  }
   return out;
+}
+
+/** App field names -> the shape protocol.js puts on the wire. */
+function toDeviceSettings() {
+  const p = state.pointer;
+  return {
+    version: state.pointerVersion,
+    pointerSpeed: p.pointerSpeed,
+    scrollSpeed: p.scrollSpeed,
+    invertX: p.invertX,
+    invertY: p.invertY,
+    invertScroll: p.invertScroll,
+    rotationDegrees: p.angle,
+  };
+}
+
+/** What the keyboard reported -> app field names. */
+function fromDeviceSettings(settings) {
+  return {
+    pointerSpeed: settings.pointerSpeed,
+    scrollSpeed: settings.scrollSpeed,
+    invertX: settings.invertX,
+    invertY: settings.invertY,
+    invertScroll: settings.invertScroll,
+    angle: settings.rotationDegrees ?? 0,
+  };
+}
+
+/** Can the trackball angle be set right now? Older firmware has no such
+ * setting; with nothing connected there is nothing to say otherwise, so the
+ * control stays live and behaves like the rest of the offline settings. */
+function angleSupported() {
+  return !state.client || state.pointerVersion >= POINTER_VERSION_WITH_ROTATION;
 }
 
 async function readKeymap() {
@@ -590,6 +635,7 @@ async function disconnect() {
   state.saved = sampleKeymap();
   state.pointer = { ...POINTER_DEFAULTS };
   state.savedPointer = { ...POINTER_DEFAULTS };
+  state.pointerVersion = POINTER_VERSION_WITH_ROTATION;
   state.layer = 0;
   state.active = false;
   toast("キーボードとの接続を切りました");
@@ -655,7 +701,7 @@ async function writePointer(patch) {
   Object.assign(state.pointer, patch);
   if (state.client) {
     try {
-      await state.client.setPointerSettings(pickWire(state.pointer));
+      await state.client.setPointerSettings(toDeviceSettings());
     } catch (error) {
       toast(error.message, true);
     }
@@ -708,7 +754,7 @@ async function discardChanges() {
       }
       if (pointerChangeCount() > 0) {
         state.pointer = { ...state.pointer, ...pickWire(state.savedPointer) };
-        await state.client.setPointerSettings(pickWire(state.pointer));
+        await state.client.setPointerSettings(toDeviceSettings());
       }
       toast("キーボードに保存されている設定に戻しました");
     } else {
@@ -730,7 +776,7 @@ async function resetPointer() {
     render();
     try {
       const fresh = await state.client.resetPointerSettings();
-      state.pointer = { ...state.pointer, ...pickWire(fresh) };
+      state.pointer = { ...state.pointer, ...fromDeviceSettings(fresh) };
       toast("マウス操作をはじめの設定に戻しました");
     } catch (error) {
       toast(error.message, true);
@@ -818,7 +864,7 @@ async function applySnapshot(data, label) {
 
     if (data.pointer) {
       Object.assign(state.pointer, pickWire(data.pointer));
-      if (state.client) await state.client.setPointerSettings(pickWire(state.pointer));
+      if (state.client) await state.client.setPointerSettings(toDeviceSettings());
     }
     state.ed = parseInto(state.keymap[state.layer].bindings[state.sel]);
     toast(`${label}を読み込みました${state.client ? "（まだキーボードには保存していません）" : ""}`);
@@ -1571,8 +1617,8 @@ function renderPointer() {
         ${settingRow({
           title: "トラックボールの向き",
           desc: "キーボードを斜めに置いたとき、ボールの「上」を画面の上に合わせます。図のオレンジがボールの上、点線が画面の上です"
-            + (FEATURES.trackballAngle ? "" : '<br><span style="color:var(--warn)">※ ファームウェア対応待ちです</span>'),
-          dirty: dirty("angle"), disabled: !FEATURES.trackballAngle,
+            + (angleSupported() ? "" : '<br><span style="color:var(--warn)">※ キーボードのファームウェアが古いため、この設定は使えません</span>'),
+          dirty: dirty("angle"), disabled: !angleSupported(),
           control: angleDial + sliderHtml("angle", d.angle),
         })}
         ${settingRow({
