@@ -9,15 +9,18 @@
        this line and link it from the ZEN page once the bridge ships. -->
   <meta name="robots" content="noindex, nofollow" />
   <title>ZEN Configurator</title>
-  <link rel="stylesheet" href="app.css?v=91e50230" />
+  <link rel="stylesheet" href="app.css?v=d749cb11" />
 </head>
 <body>
   <div id="app"></div>
+  <!-- The startup animation lives outside #app: render() replaces #app wholesale
+       on every state change, which would restart it. -->
+  <div id="splash"></div>
   <input id="import-file" type="file" accept="application/json" hidden />
 
   <script src="keycodes.js?v=dee86bbc"></script>
   <script src="protocol.js?v=4d138a3c"></script>
   <script src="keymap-combos.js?v=7dd19ba8"></script>
-  <script src="app.js?v=0cad5e18"></script>
+  <script src="app.js?v=8acef5bc"></script>
 </body>
 </html>

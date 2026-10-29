@@ -172,7 +172,9 @@ const ICON = {
   undo: "M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3",
   reset: "M4 4v6h6M4.5 15a8 8 0 1 0 2-8.5L4 10",
   cards: "M4 5h16v11H4zM2 19h20",
-  palette: "M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.2-4-7.6-9-7.6z",
+  // The three "h.01" segments are the paint wells: a zero-length stroke with
+  // a round cap draws a dot, so the whole palette stays one path.
+  palette: "M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.2-4-7.6-9-7.6zM7.5 11.5h.01M10.5 7.5h.01M15.5 8.5h.01",
   warn: "M12 4l9 16H3zM12 10v4M12 17h.01",
   arrow: "M5 12h12M13 7l5 5-5 5",
   plus: "M12 5v14M5 12h14",
@@ -184,6 +186,13 @@ const ICON = {
   combo: "M4 6h6v6H4zM14 6h6v6h-6zM10 9h4M12 12v4M8 20h8",
   mousetab: "M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM8.5 9.5a4 4 0 0 1 4-2.5",
   search: "",
+};
+
+// Traced from the handoff assets (assets/ZEN-logo.svg, assets/Zlogo.svg).
+// Inline rather than <img> so the mark can take currentColor in dark mode.
+const LOGO = {
+  zen: { w: 344, h: 105, d: "M271.099 0C273.28 0 275.351 0.839805 276.918 2.40625L294.823 20.3105C296.39 21.8772 297.229 23.9494 297.229 26.1309V84.7822C297.23 89.0374 300.697 92.4527 304.9 92.4531H323.457C327.712 92.4529 331.128 88.9855 331.128 84.7822V6.27246C331.128 4.52282 331.807 2.99422 332.938 1.86328C334.012 0.788977 335.483 0.111252 337.121 0.0546875L337.129 0.0537109V0.0546875H337.347C340.793 0.0548878 343.619 2.82382 343.619 6.32715V78.3184L343.673 78.2646V78.8682C343.673 81.0495 342.833 83.1209 341.267 84.6875L323.362 102.592C321.796 104.158 319.724 104.998 317.543 104.998H310.869C308.688 104.998 306.616 104.158 305.05 102.592L287.145 84.6875C285.578 83.1209 284.738 81.0494 284.738 78.8682V20.2168C284.738 15.9613 281.271 12.545 277.067 12.5449H258.892C254.636 12.5451 251.22 16.0133 251.22 20.2168V98.7256C251.22 102.173 248.395 104.998 244.947 104.998C241.501 104.998 238.675 102.229 238.675 98.7256V26.1309C238.675 24.0047 239.514 21.8779 241.081 20.3105L258.985 2.40625C260.552 0.839631 262.624 7.82977e-05 264.806 0H271.099ZM78.7598 0.0546875C80.941 0.054801 83.0125 0.894348 84.5791 2.46094L102.483 20.3652C104.05 21.9319 104.89 24.0042 104.89 26.1855V32.8584C104.89 33.8096 104.721 34.7056 104.387 35.5986L104.388 35.5996C103.995 36.7209 103.324 37.7814 102.489 38.6719L84.5791 56.583C83.0125 58.1495 80.9409 58.9891 78.7598 58.9893H19.999C15.7437 58.9895 12.3283 62.4569 12.3281 66.6602V84.4893L12.4902 84.4355V84.7822C12.4904 89.0376 15.9587 92.4541 20.1621 92.4541H98.7256C102.17 92.4541 104.998 95.2212 104.998 98.6719C104.998 100.421 104.319 101.95 103.188 103.081C102.057 104.213 100.474 104.891 98.7803 104.891H26.1309C24.0047 104.891 21.8778 104.052 20.3105 102.484L2.40625 84.5791C0.839687 83.0125 9.78765e-05 80.941 0 78.7598V71.7607C0 71.6157 0.000590167 71.4317 0.0546875 71.2412V70.5127C0.0546863 70.487 0.0539169 70.4268 0.0644531 70.3633C0.0706053 70.3264 0.084808 70.2715 0.114258 70.2148C0.118269 70.1529 0.129143 70.0691 0.163086 69.9795V69.916C0.163086 69.8904 0.162336 69.8302 0.172852 69.7666C0.180674 69.7196 0.199577 69.6427 0.25 69.5713C0.358045 69.3056 0.465546 69.0894 0.569336 68.8818C0.627031 68.7665 0.684411 68.6656 0.738281 68.5713C0.787678 68.4848 0.832918 68.4024 0.878906 68.3125C0.893388 68.251 0.92146 68.1941 0.951172 68.1494C0.982351 68.1027 1.02435 68.0556 1.07715 68.0146C1.07947 68.0105 1.0812 68.0061 1.08301 68.0029C1.10358 67.9681 1.12851 67.9362 1.14941 67.9111C1.18057 67.8737 1.21572 67.8374 1.24219 67.8105C1.3708 67.5724 1.55089 67.3934 1.70117 67.2432C1.7743 67.17 1.84908 67.0826 1.93164 66.9863C2.01152 66.8931 2.10011 66.7905 2.18945 66.7012L20.0938 48.7959C21.6604 47.2293 23.7318 46.3897 25.9131 46.3896H84.6729C88.9282 46.3896 92.3443 42.922 92.3447 38.7188V20.1631C92.3447 15.9075 88.8764 12.4912 84.6729 12.4912H17.5576C15.9076 12.4911 14.4359 11.7513 13.3662 10.6816C12.2345 9.5499 11.5567 7.9666 11.5566 6.27246C11.5569 2.8821 14.2145 0.167754 17.5498 0.0546875H78.7598ZM217.981 46.3359C221.426 46.3359 224.254 49.1031 224.254 52.5537C224.254 54.3033 223.575 55.832 222.444 56.9629C221.313 58.0943 219.73 58.7724 218.036 58.7725H139.581C135.326 58.7726 131.909 62.2399 131.909 66.4434V84.6602L131.896 84.6982L131.855 84.8203C131.876 89.0579 135.336 92.454 139.526 92.4541H218.036C221.481 92.4543 224.309 95.2213 224.309 98.6719C224.309 100.421 223.63 101.95 222.499 103.081C221.367 104.213 219.784 104.891 218.09 104.891H145.495C143.369 104.891 141.242 104.052 139.675 102.484L121.771 84.5791C120.204 83.0125 119.364 80.941 119.364 78.7598V72.4658C119.364 70.2846 120.204 68.2131 121.771 66.6465L139.675 48.7422C141.241 47.1755 143.314 46.336 145.495 46.3359H217.981ZM218.09 0.0546875C221.536 0.0546875 224.362 2.8237 224.362 6.32715C224.362 8.07673 223.684 9.60545 222.553 10.7363C221.421 11.8677 219.838 12.5449 218.145 12.5449H139.635C135.379 12.5451 131.964 16.0134 131.964 20.2168V40.7803C131.964 42.5296 131.285 44.0577 130.154 45.1885C129.022 46.3201 127.439 46.998 125.745 46.998C122.299 46.9979 119.473 44.2288 119.473 40.7256V29.7451H119.364V26.1855C119.364 24.0594 120.203 21.9325 121.771 20.3652L139.675 2.46094C141.241 0.894286 143.314 0.0547345 145.495 0.0546875H218.09Z" },
+  z: { w: 105, h: 105, d: "M78.7598 0C80.941 0.000113525 83.0125 0.839661 84.5791 2.40625L102.483 20.3105C104.05 21.8772 104.89 23.9494 104.89 26.1309V32.8037C104.89 33.755 104.721 34.6508 104.387 35.5439L104.388 35.5449C103.995 36.6663 103.324 37.7266 102.489 38.6172L84.5791 56.5283C83.0125 58.0949 80.941 58.9345 78.7598 58.9346H19.999C15.7437 58.9348 12.3283 62.4022 12.3281 66.6055V84.4346L12.4902 84.3809V84.7275C12.4902 88.9831 15.9586 92.3994 20.1621 92.3994H98.7256C102.17 92.3994 104.998 95.1665 104.998 98.6172C104.998 100.367 104.319 101.895 103.188 103.026C102.057 104.158 100.474 104.836 98.7803 104.836H26.1309C24.0046 104.836 21.8779 103.997 20.3105 102.43L2.40625 84.5244C0.839599 82.9577 3.91485e-06 80.8865 0 78.7051V71.7061C0 71.5609 0.000494462 71.3771 0.0546875 71.1865V70.458C0.0546863 70.4323 0.0538546 70.3722 0.0644531 70.3086C0.0706157 70.2716 0.0847057 70.2169 0.114258 70.1602C0.118274 70.0981 0.129047 70.0146 0.163086 69.9248V69.8613C0.163086 69.8357 0.162274 69.7756 0.172852 69.7119C0.180683 69.6649 0.199447 69.5881 0.25 69.5166C0.358096 69.2508 0.4655 69.0348 0.569336 68.8271C0.627087 68.7117 0.684365 68.611 0.738281 68.5166C0.787731 68.4301 0.832867 68.3478 0.878906 68.2578C0.893416 68.1962 0.921396 68.1394 0.951172 68.0947C0.982386 68.048 1.02427 68.0009 1.07715 67.96C1.07954 67.9557 1.08113 67.9514 1.08301 67.9482C1.10364 67.9134 1.12847 67.8816 1.14941 67.8564C1.18064 67.819 1.2157 67.7827 1.24219 67.7559C1.37085 67.5177 1.55086 67.3388 1.70117 67.1885C1.77435 67.1153 1.84901 67.028 1.93164 66.9316C2.01157 66.8384 2.10005 66.7359 2.18945 66.6465L20.0938 48.7412C21.6604 47.1746 23.7318 46.335 25.9131 46.335H84.6729C88.9283 46.335 92.3445 42.8675 92.3447 38.6641V20.1084C92.3447 15.8528 88.8764 12.4365 84.6729 12.4365H17.5576C15.9075 12.4365 14.4359 11.6967 13.3662 10.627C12.2344 9.49513 11.5566 7.91205 11.5566 6.21777C11.5569 2.82741 14.2145 0.113061 17.5498 0H78.7598Z" },
 };
 
 const ROLES = [
@@ -222,28 +231,90 @@ const OUT_OPTS = [
 // --- Theme -----------------------------------------------------------------
 
 const DEFAULT_ACCENT = "#F0512B";
-const SWATCHES = ["#F0512B", "#E0A12B", "#3E9D63", "#1F9AA8", "#2F6FEB", "#7A5AF0", "#D6457E", "#5B5853"];
+const SWATCHES = ["#F0512B", "#1D2433", "#5B6B86", "#2F6FEB", "#1F9AA8", "#3E9D63", "#7A5AF0", "#D6457E"];
 const PALETTE = {
   light: {
-    bg: "#F6F3EE", surface: "#FFFFFF", fill: "#FAF8F5", fill2: "#F2EFEA", "line-soft": "#EFEAE3",
-    line: "#E4DED6", "line-strong": "#D9D2C8", mute: "#B4ADA4", ink: "#171614", ink2: "#57534E",
-    ink3: "#8C8781", "cap-edge": "#DCD6CE", "case-rim": "#A9A49E", inv: "#171614", "inv-fg": "#FFFFFF",
-    "inv-hover": "#3A3733", "danger-tint": "#FCEEE9", "ok-tint": "#E8F3EC",
-    "accent-ink": "color-mix(in srgb, var(--accent) 78%, #000000)",
-    "accent-tint": "color-mix(in srgb, var(--accent) 10%, #FFFFFF)",
-    "accent-soft": "color-mix(in srgb, var(--accent) 35%, #FFFFFF)",
+    page: "radial-gradient(55% 45% at 12% 8%, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 70%), radial-gradient(45% 40% at 92% 18%, rgba(196,210,226,.9) 0%, rgba(196,210,226,0) 70%), radial-gradient(50% 45% at 70% 95%, rgba(214,222,232,.9) 0%, rgba(214,222,232,0) 70%), linear-gradient(165deg, #EDF1F5 0%, #DCE3EB 100%)",
+    bg: "#E6EBF1", surface: "rgba(255,255,255,.58)", fill: "rgba(255,255,255,.42)", fill2: "rgba(225,231,239,.72)",
+    "line-soft": "rgba(21,27,43,.06)", line: "rgba(21,27,43,.09)", "line-strong": "rgba(21,27,43,.18)", mute: "#9AA3B3",
+    ink: "#151B2B", ink2: "#4A5368", ink3: "#7E879A",
+    "case-frame": "#9CA3AE", thumb: "#FFFFFF",
+    "cap-orange": "#D9483B", "cap-orange-bd": "#C23D31", "cap-orange-edge": "#9E3127",
+    "cap-edge": "rgba(21,27,43,.12)", "case-rim": "rgba(255,255,255,.95)",
+    inv: "#151B2B", "inv-fg": "#FFFFFF", "inv-hover": "#29324A", "danger-tint": "rgba(226,78,27,.10)",
+    acrylic: "linear-gradient(150deg, rgba(255,255,255,.62) 0%, rgba(255,255,255,.22) 55%, rgba(255,255,255,.38) 100%)",
+    "acrylic-edge": "rgba(255,255,255,.28)",
+    "glass-hi": "rgba(255,255,255,.85)", "glass-shadow": "rgba(28,40,64,.38)",
+    bar: "linear-gradient(180deg, rgba(21,27,43,.82) 0%, rgba(21,27,43,.92) 100%)",
+    "lcd-bg": "rgba(255,255,255,.45)", "lcd-bd": "rgba(21,27,43,.10)", "lcd-ink": "#2E3649",
+    "accent-ink": "color-mix(in srgb, var(--accent) 80%, #000000)",
+    "accent-tint": "color-mix(in srgb, var(--accent) 9%, rgba(255,255,255,.7))",
+    "accent-soft": "color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,.8))",
   },
   dark: {
-    bg: "#141312", surface: "#1F1D1B", fill: "#252321", fill2: "#2C2926", "line-soft": "#2F2C29",
-    line: "#3A3632", "line-strong": "#4D4843", mute: "#6E6862", ink: "#F2EEE9", ink2: "#C4BDB4",
-    ink3: "#958E86", "cap-edge": "#0C0B0A", "case-rim": "#57524C", inv: "#3A3632", "inv-fg": "#F2EEE9",
-    "inv-hover": "#4D4843", "danger-tint": "rgba(226,78,27,.16)", "ok-tint": "rgba(46,125,82,.24)",
-    "accent-ink": "color-mix(in srgb, var(--accent) 62%, #FFFFFF)",
-    "accent-tint": "color-mix(in srgb, var(--accent) 16%, #1F1D1B)",
-    "accent-soft": "color-mix(in srgb, var(--accent) 45%, #1F1D1B)",
+    page: "radial-gradient(55% 45% at 12% 8%, rgba(88,104,140,.35) 0%, rgba(88,104,140,0) 70%), radial-gradient(45% 40% at 92% 22%, rgba(60,78,112,.45) 0%, rgba(60,78,112,0) 70%), linear-gradient(165deg, #121722 0%, #0B0E15 100%)",
+    bg: "#10141D", surface: "rgba(34,41,58,.55)", fill: "rgba(255,255,255,.04)", fill2: "rgba(255,255,255,.07)",
+    "line-soft": "rgba(255,255,255,.06)", line: "rgba(255,255,255,.10)", "line-strong": "rgba(255,255,255,.20)", mute: "#5F6A7E",
+    ink: "#EEF2F8", ink2: "#B5BECD", ink3: "#8792A5",
+    "case-frame": "#4B5363", thumb: "#EEF2F8",
+    "cap-orange": "#C8443A", "cap-orange-bd": "#B03B32", "cap-orange-edge": "#6E2620",
+    "cap-edge": "rgba(0,0,0,.45)", "case-rim": "rgba(255,255,255,.22)",
+    inv: "#EEF2F8", "inv-fg": "#151B2B", "inv-hover": "#D5DCE7", "danger-tint": "rgba(226,78,27,.18)",
+    acrylic: "linear-gradient(150deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.03) 55%, rgba(255,255,255,.08) 100%)",
+    "acrylic-edge": "rgba(255,255,255,.05)",
+    "glass-hi": "rgba(255,255,255,.12)", "glass-shadow": "rgba(0,0,0,.6)",
+    bar: "linear-gradient(180deg, rgba(21,27,43,.86) 0%, rgba(21,27,43,.94) 100%)",
+    "lcd-bg": "rgba(255,255,255,.06)", "lcd-bd": "rgba(255,255,255,.12)", "lcd-ink": "#D5DCE7",
+    "accent-ink": "color-mix(in srgb, var(--accent) 60%, #FFFFFF)",
+    "accent-tint": "color-mix(in srgb, var(--accent) 20%, transparent)",
+    "accent-soft": "color-mix(in srgb, var(--accent) 42%, transparent)",
   },
 };
 
+// --- Keyboard colours (the "カラー" tab) -------------------------------------
+//
+// Purely cosmetic and purely local: this is the user telling the app what
+// their own ZEN looks like, so the picture on screen matches the thing on the
+// desk. None of it is ever sent to the keyboard.
+
+const MODELS = {
+  white: { label: "ホワイト", sub: "白い筐体＋グレーのバンパー", body: "#F4F4F2", bumper: "#9CA3AE", cap: "#F4F4F2", ball: "#F4F4F2" },
+  black: { label: "ブラック", sub: "バンパーまですべて黒", body: "#1C1D20", bumper: "#1E1F22", cap: "#2A2B2E", ball: "#2A2B2E" },
+};
+const BUMPERS = [["グレー", "#9CA3AE"], ["ブラック", "#1E1F22"], ["ホワイト", "#F1F1EE"], ["ブルー", "#3D7BD9"], ["スカイ", "#7EC3E8"], ["ミント", "#7CCBAA"], ["イエロー", "#E9C53A"], ["オレンジ", "#E8833A"], ["レッド", "#D9483B"], ["ピンク", "#E58BB0"], ["パープル", "#8C6FD1"]];
+const CAPS = [["ホワイト", "#F4F4F2"], ["ライトグレー", "#D9DBDF"], ["チャコール", "#55585F"], ["ブラック", "#2A2B2E"], ["ネイビー", "#27324A"], ["ベージュ", "#E9DFCC"], ["ミント", "#BFE3D2"], ["スカイ", "#C6DDF2"], ["ラベンダー", "#D7CCF0"], ["ピーチ", "#F6C9B4"]];
+const BALLS = [["パール", "#F4F4F2"], ["グレー", "#A8ADB5"], ["ブラック", "#2A2B2E"], ["レッド", "#D9483B"], ["オレンジ", "#E8833A"], ["イエロー", "#E9C53A"], ["グリーン", "#4FA36B"], ["ブルー", "#3D7BD9"], ["パープル", "#8C6FD1"], ["ピンク", "#E58BB0"]];
+const BRUSHES = [["テラコッタ", "#D49A80"], ["オレンジ", "#E8833A"], ["レッド", "#D9483B"], ["イエロー", "#E9C53A"], ["グリーン", "#4FA36B"], ["ブルー", "#3D7BD9"], ["パープル", "#8C6FD1"], ["ピンク", "#E58BB0"], ["ホワイト", "#F4F4F2"], ["ブラック", "#2A2B2E"]];
+
+// The four arrow keys ship with red caps, so they start painted.
+const ARROW_KEYS = [36, 47, 48, 49];
+const ARROW_CAP = "#D9483B";
+const DEFAULT_LOOK = {
+  model: "white", bumper: "#9CA3AE", cap: "#F4F4F2", ball: "#F4F4F2",
+  paint: Object.fromEntries(ARROW_KEYS.map((i) => [i, ARROW_CAP])),
+  brush: ARROW_CAP, reflect: true,
+};
+
+/** Plain (non-gamma) brightness, which is what "does black text read on this
+ *  keycap?" actually wants -- the WCAG curve pushes mid greys the wrong way. */
+function hexLum(hex) {
+  const n = parseInt((hex || "#FFFFFF").slice(1), 16);
+  return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+}
+
+/** A keycap painted @p hex, with its legend, edge and shadow derived from it. */
+function capLook(hex, style) {
+  const legend = hexLum(hex) < 0.55 ? "#FFFFFF" : "#151B2B";
+  const muted = style === "trans" || style === "none";
+  return {
+    bg: hex,
+    bs: "solid",
+    bd: `color-mix(in srgb, ${hex} 86%, #000000)`,
+    fg: muted ? `color-mix(in srgb, ${legend} 38%, transparent)` : legend,
+    tagFg: `color-mix(in srgb, ${legend} 70%, transparent)`,
+    shadow: `inset 0 -.55cqw 0 rgba(0,0,0,.06), 0 .45cqw 0 color-mix(in srgb, ${hex} 68%, #000000), 0 1.2cqw 1.6cqw -1cqw rgba(23,22,20,.35)`,
+  };
+}
 const validHex = (h) => /^#?[0-9A-Fa-f]{6}$/.test((h || "").trim());
 const normHex = (h) => "#" + h.trim().replace(/^#/, "").toUpperCase();
 
@@ -265,6 +336,7 @@ const LS = {
   layerNames: "zen-configurator-layer-names",
   profiles: "zen-configurator-profiles",
   keymapPath: "zen-configurator-keymap-path",
+  look: "zen-configurator-look",
 };
 
 function lsGet(key, fallback) {
@@ -365,13 +437,30 @@ const state = {
   tip: false,
   toast: "",
   toastError: false,
+  toastOut: false,
   btConfirm: false,
   busy: false,
   dark: !!theme0.dark,
   accent: validHex(theme0.accent) ? normHex(theme0.accent) : DEFAULT_ACCENT,
   hexDraft: (validHex(theme0.accent) ? normHex(theme0.accent) : DEFAULT_ACCENT).slice(1),
   hexInvalid: false,
+
+  // What the user's own keyboard looks like. Cosmetic, this computer only.
+  look: { ...DEFAULT_LOOK, ...lsGet(LS.look, {}) },
+
+  // The startup animation. "run" while it plays, "" once it has left.
+  splash: "run",
+  splashRun: 0,
 };
+
+function saveLook() {
+  lsSet(LS.look, state.look);
+}
+function setLook(patch) {
+  state.look = { ...state.look, ...patch };
+  saveLook();
+  render();
+}
 
 function sampleKeymap() {
   return SAMPLE_LAYERS.map((bindings, i) => ({
@@ -520,9 +609,20 @@ function composeBinding() {
 
 // --- Device -----------------------------------------------------------------
 
+// The notch takes itself away again after a few seconds, so a success message
+// does not sit there until the next one replaces it. An error stays: it is
+// the only record of what went wrong, and reading it is the point.
+let toastHideTimer = null;
+let toastOutTimer = null;
 function toast(message, isError) {
   state.toast = message;
   state.toastError = !!isError;
+  state.toastOut = false;
+  clearTimeout(toastHideTimer);
+  clearTimeout(toastOutTimer);
+  if (!message || isError) return;
+  toastOutTimer = setTimeout(() => { state.toastOut = true; render(); }, 3000);
+  toastHideTimer = setTimeout(() => { state.toast = ""; state.toastOut = false; render(); }, 3300);
 }
 
 async function connect() {
@@ -1143,43 +1243,49 @@ function pendingNotice(what) {
 // all stay in step.
 const SLIDERS = {
   pointerSpeed: {
-    min: 20, max: 300, step: 5, ends: ["ゆっくり", "ふつう", "速い"],
+    min: 20, max: 300, step: 5,
     fmt: (v) => `${v}%`, word: (v) => (v < 80 ? "ゆっくり" : v <= 125 ? "ふつう" : v <= 190 ? "速い" : "とても速い"),
   },
   scrollSpeed: {
-    min: 20, max: 300, step: 5, ends: ["ゆっくり", "ふつう", "速い"],
+    min: 20, max: 300, step: 5,
     fmt: (v) => `${v}%`, word: (v) => (v < 80 ? "ゆっくり" : v <= 125 ? "ふつう" : v <= 190 ? "速い" : "とても速い"),
   },
   angle: {
-    min: -45, max: 45, step: 1, ends: ["左へ 45°", "0°", "右へ 45°"],
+    min: -45, max: 45, step: 1,
     fmt: (v) => `${v > 0 ? "+" : ""}${v}°`, word: (v) => (v === 0 ? "まっすぐ" : v < 0 ? "左に傾ける" : "右に傾ける"),
   },
   glide: {
-    min: 10, max: 100, step: 5, ends: ["短め", "普通", "長め"],
+    min: 10, max: 100, step: 5,
     fmt: (v) => `${v}%`, word: (v) => (v <= 35 ? "短め" : v <= 70 ? "普通" : "長め"),
   },
   // Ranges mirror ZEN_POINTER_SETTINGS_AUTO_MOUSE_* in zen_pointer_settings.h;
   // the keyboard rejects a payload outside them.
   amAfter: {
-    min: 0, max: 500, step: 10, ends: ["0 ms", "250 ms", "500 ms"],
+    min: 0, max: 500, step: 10,
     fmt: (v) => `${v} ms`, word: (v) => (v <= 60 ? "短め" : v <= 150 ? "ふつう" : "長め"),
   },
   amBack: {
-    min: 100, max: 2000, step: 50, ends: ["0.1 秒", "1 秒", "2 秒"],
+    min: 100, max: 2000, step: 50,
     fmt: (v) => `${(v / 1000).toFixed(2)} 秒`, word: (v) => (v <= 350 ? "すぐ" : v <= 700 ? "ふつう" : "ゆっくり"),
   },
   comboTerm: {
-    min: 10, max: 200, step: 5, ends: ["短い", "100 ms", "長い"],
+    min: 10, max: 200, step: 5,
     fmt: (v) => `${v} ms`, word: (v) => (v <= 35 ? "誤爆しにくい" : v <= 80 ? "ふつう" : "押しやすい"),
   },
 };
 
+/** Where the thumb sits, 0-100%, so CSS can paint the track either side. */
+function sliderPct(key, value) {
+  const s = SLIDERS[key];
+  const pct = ((Number(value) - s.min) / (s.max - s.min)) * 100;
+  return `${Math.max(0, Math.min(100, pct))}%`;
+}
+
 function sliderHtml(key, value) {
   const s = SLIDERS[key];
   return `<div class="slider">
-      <input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${value}" data-slider="${key}" data-f="slider-${key}" />
-      <div class="ticks"></div>
-      <div class="ends"><span>${esc(s.ends[0])}</span><span>${esc(s.ends[1])}</span><span>${esc(s.ends[2])}</span></div>
+      <input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${value}"
+        style="--p:${sliderPct(key, value)}" data-slider="${key}" data-f="slider-${key}" />
     </div>
     <div class="readout" data-readout="${key}">
       <div class="v">${esc(s.fmt(value))}</div>
@@ -1213,7 +1319,8 @@ function batteries() {
 
 function batterySvg(pct) {
   const w = Math.round(15 * (pct ?? 0) / 100);
-  const color = pct == null ? "var(--line)" : pct <= 20 ? "#D64521" : pct <= 40 ? "var(--warn)" : "var(--ok)";
+  // Accent everywhere, red only when it is actually about to die.
+  const color = pct == null ? "var(--line)" : pct <= 20 ? "#D64521" : "var(--accent)";
   return `<svg viewBox="0 0 24 14" width="22" height="13">
       <rect x="1" y="1" width="19" height="12" rx="2.5" fill="none" stroke="var(--ink3)" stroke-width="1.4"/>
       <rect x="21" y="4.5" width="2" height="5" rx="1" fill="var(--ink3)"/>
@@ -1227,9 +1334,14 @@ function renderHeader() {
   const bat = batteries();
   const activeProfile = s && s.activeProfile != null ? s.activeProfile : -1;
   const isBle = s ? s.transport === "BLE" : false;
+  // Which channels are registered is only known once the keyboard has told
+  // us; without that table the dots say "in use" and nothing more.
+  const table = state.bleProfiles;
+  const bleDots = (table ? table.profiles : [0, 1, 2, 3, 4].map((index) => ({ index, bonded: false })))
+    .map((p) => ({ n: p.index + 1, bonded: !!p.bonded, active: p.index === activeProfile }));
 
   const connCard = connected
-    ? `<div class="conn-card">
+    ? `<div class="conn-card glass">
         <div class="conn-seg">
           <span class="conn-icon">${svg(ICON.usb, 15, 2.1)}</span>
           <div>
@@ -1245,8 +1357,8 @@ function renderHeader() {
               ? `<div class="conn-out">
                   <span style="color:var(--accent-ink)">${svg(ICON.bt, 13, 2.1)}</span>
                   <span class="conn-value">Bluetooth</span>
-                  <div class="ble-dots">${[0, 1, 2, 3, 4].map((i) => `
-                    <span class="${cls("ble-dot", i === activeProfile && "is-active")}" title="接続先 ${i + 1}${i === activeProfile ? "（使用中）" : ""}">${i + 1}</span>`).join("")}
+                  <div class="ble-dots">${bleDots.map((d) => `
+                    <span class="${cls("ble-dot", d.active && "is-active", !d.active && d.bonded && "is-known")}" title="接続先 ${d.n}（${d.active ? "使用中" : d.bonded ? "登録済み" : "空き"}）">${d.n}</span>`).join("")}
                   </div>
                 </div>`
               : `<div class="conn-out">
@@ -1278,13 +1390,7 @@ function renderHeader() {
       </div>`;
 
   return `<header class="hdr">
-      <div class="brand">
-        <div class="brand-mark">Z</div>
-        <div>
-          <div class="brand-title">ZEN Configurator</div>
-          <div class="brand-sub">キーボードの設定ツール</div>
-        </div>
-      </div>
+      <div class="brand">${logoSvg("zen", 15)}<span>Configurator</span></div>
       <div class="hdr-center">${connCard}</div>
       <div class="hdr-actions">
         <div class="pop-wrap">
@@ -1346,6 +1452,10 @@ function renderThemePanel() {
           <span class="solid">保存</span>
         </div>
       </div>
+      <div class="pop-foot">
+        <span class="lead">起動アニメーション</span>
+        <button type="button" class="btn-ring" ${act("splash-replay")}>${svg(ICON.reset, 12)}もう一度見る</button>
+      </div>
     </div>`;
 }
 
@@ -1391,23 +1501,36 @@ function renderPresetPanel() {
     </div>`;
 }
 
-// --- Render: tabs -----------------------------------------------------------
+// --- Render: left rail ------------------------------------------------------
 
-function renderTabs(counts) {
-  const tabs = [
-    { id: "keymap", label: "キー配置", d: ICON.keyboard, dirty: counts.key > 0 },
-    { id: "combo", label: "コンボ", d: ICON.combo, dirty: comboChangeCount() > 0 },
-    { id: "pointer", label: "マウス操作", d: ICON.mousetab, dirty: counts.pointer > 0 },
-    { id: "bt", label: "Bluetooth", d: ICON.bt, dirty: false },
-  ];
-  return `<div class="tabrow">
-      <div class="tabs">
-        ${tabs.map((t) => `<button type="button" class="${cls(state.tab === t.id && "is-on")}" ${act("tab", t.id)}>
-          ${svg(t.d, 16, 1.9)}${t.label}${t.dirty ? '<span class="dot"></span>' : ""}
-        </button>`).join("")}
-      </div>
-      <div class="tab-hint"></div>
-    </div>`;
+/** The ZEN wordmark or Z mark, inline so it can take currentColor. */
+function logoSvg(which, height, extra = "") {
+  const l = LOGO[which];
+  return `<svg viewBox="0 0 ${l.w} ${l.h}" height="${height}" ${extra} role="img" aria-label="ZEN"><path d="${l.d}" fill="currentColor"/></svg>`;
+}
+
+const TABS = [
+  { id: "keymap", short: "キー", label: "キー配置", icon: "keyboard" },
+  { id: "combo", short: "コンボ", label: "コンボ", icon: "combo" },
+  { id: "pointer", short: "マウス", label: "マウス操作", icon: "mousetab" },
+  { id: "bt", short: "BT", label: "Bluetooth", icon: "bt" },
+  { id: "color", short: "カラー", label: "キーボードの色", icon: "palette" },
+];
+
+function renderRail(counts) {
+  const dirty = {
+    keymap: counts.key > 0,
+    combo: comboChangeCount() > 0,
+    pointer: counts.pointer > 0,
+  };
+  return `<nav class="rail glass">
+      <div class="rail-mark" title="ZEN Configurator">${logoSvg("z", 20, 'width="20"')}</div>
+      ${TABS.map((t) => `<button type="button" class="${cls("rail-btn", state.tab === t.id && "is-on")}" ${act("tab", t.id)} title="${t.label}">
+        <span class="rail-icon">${svg(ICON[t.icon], 20, 1.6)}</span>
+        <span class="rail-label">${t.short}</span>
+        ${dirty[t.id] ? '<span class="rail-dot"></span>' : ""}
+      </button>`).join("")}
+    </nav>`;
 }
 
 // --- Render: keyboard -------------------------------------------------------
@@ -1420,40 +1543,103 @@ function keyFontSize(main) {
   return "2.2cqw";
 }
 
+/** The case, bumper, plate, socket and ball, as CSS variables for .board.
+ *
+ * The colour tab always shows the real colours (you are picking them); every
+ * other tab only does so while "キー設定の画面にも反映する" is on, and
+ * otherwise falls back to the neutral frosted look. */
+function boardLook() {
+  const L = state.look;
+  const use = state.tab === "color" || L.reflect;
+  const black = L.model === "black";
+  const vars = {
+    "case-bg": !use ? "var(--acrylic)" : black
+      ? "linear-gradient(150deg, rgba(42,44,50,.94) 0%, rgba(22,23,27,.92) 60%, rgba(34,36,41,.94) 100%)"
+      : "linear-gradient(150deg, rgba(255,255,255,.82) 0%, rgba(245,245,242,.62) 55%, rgba(255,255,255,.74) 100%)",
+    bumper: use ? L.bumper : "var(--case-frame)",
+    // A black case needs its inner highlight darkened or the white rim of the
+    // light theme draws a bright outline around it.
+    "case-shadow": use && black
+      ? "inset 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 .8cqw rgba(0,0,0,.18), 0 3cqw 6cqw -3.5cqw rgba(0,0,0,.55)"
+      : "inset 0 0 0 1px var(--case-rim), inset 0 1px 0 var(--glass-hi), inset 0 0 0 .8cqw var(--acrylic-edge), 0 3cqw 6cqw -3.5cqw var(--glass-shadow)",
+    "plate-bg": !use ? "var(--fill)" : black ? "#26272B" : "#FBFBF9",
+    "plate-bd": !use ? "var(--line)" : black ? "rgba(255,255,255,.06)" : "rgba(21,27,43,.08)",
+    "housing-bg": !use ? "var(--fill)" : black ? "#202125" : "#FAFAF8",
+    "ball-bg": !use
+      ? "radial-gradient(circle at 36% 30%,var(--surface) 0%,var(--fill2) 45%,var(--line-strong) 100%)"
+      : `radial-gradient(circle at 36% 30%, color-mix(in srgb, ${L.ball} 30%, #FFFFFF) 0%, ${L.ball} 52%, color-mix(in srgb, ${L.ball} 72%, #000000) 100%)`,
+    "ball-bd": !use ? "var(--line-strong)" : `color-mix(in srgb, ${L.ball} 80%, #000000)`,
+  };
+  return { use, style: Object.entries(vars).map(([k, v]) => `--${k}:${v}`).join(";") };
+}
+
+/** Background, legend and shadow for one key, in the order they win:
+ *  selection beats everything, then the painted cap, then the binding style. */
+function keyLook(d, selected, index, useLook) {
+  const CAP = "inset 0 -.55cqw 0 rgba(23,22,20,.05), 0 .45cqw 0 var(--cap-edge), 0 1.2cqw 1.6cqw -1cqw rgba(23,22,20,.35)";
+  if (selected) {
+    return {
+      bg: "var(--accent)", fg: "var(--on-accent)", bd: "var(--accent-ink)", bs: "solid",
+      tagFg: "rgba(255,255,255,.85)",
+      shadow: "inset 0 -.55cqw 0 rgba(0,0,0,.08), 0 .45cqw 0 var(--accent-ink), 0 1.4cqw 2cqw -1cqw color-mix(in srgb, var(--accent) 60%, transparent)",
+    };
+  }
+  if (useLook) return capLook(state.look.paint[index] || state.look.cap, d.style);
+  if (ARROW_KEYS.includes(index)) {
+    return {
+      bg: "var(--cap-orange)", fg: "#FFFFFF", bd: "var(--cap-orange-bd)", bs: "solid",
+      tagFg: "rgba(255,255,255,.85)",
+      shadow: "inset 0 -.55cqw 0 rgba(0,0,0,.06), 0 .45cqw 0 var(--cap-orange-edge), 0 1.2cqw 1.6cqw -1cqw rgba(23,22,20,.35)",
+    };
+  }
+  if (d.style === "trans") return { bg: "var(--fill)", fg: "var(--mute)", bd: "var(--line-strong)", bs: "dashed", tagFg: "var(--ink3)", shadow: "none" };
+  if (d.style === "none") return { bg: "var(--fill2)", fg: "var(--mute)", bd: "var(--line)", bs: "solid", tagFg: "var(--ink3)", shadow: "inset 0 .4cqw .8cqw rgba(23,22,20,.06)" };
+  if (d.style === "special") return { bg: "var(--accent-tint)", fg: "var(--ink)", bd: "var(--accent-soft)", bs: "solid", tagFg: "var(--accent-ink)", shadow: CAP.replace("var(--cap-edge)", "var(--accent-soft)") };
+  return { bg: "var(--surface)", fg: "var(--ink)", bd: "var(--line)", bs: "solid", tagFg: "var(--ink3)", shadow: CAP };
+}
+
 function renderBoards() {
   const comboMode = state.tab === "combo";
+  const colorMode = state.tab === "color";
   const layer = state.keymap[state.layer];
   const savedLayer = state.saved[state.layer];
   const layerCombos = combosOnLayer(state.layer);
   const selCombo = (state.combos ?? []).find((c) => c.uid === state.comboSel) || null;
   const bat = batteries();
+  const board = boardLook();
 
   const keys = POS.map((p, i) => {
     const binding = layer.bindings[i];
     const d = describe(binding);
     const inSel = comboMode && !!selCombo && selCombo.keyPositions.includes(i);
-    const sel = comboMode ? inSel : (state.active && i === state.sel);
-    const changed = savedLayer && binding !== savedLayer.bindings[i];
+    const sel = colorMode ? false : comboMode ? inSel : (state.active && i === state.sel);
+    const look = keyLook(d, sel, i, !sel && board.use);
+    const changed = !colorMode && savedLayer && binding !== savedLayer.bindings[i];
     const nums = comboMode ? layerCombos.map((c, ci) => (c.keyPositions.includes(i) ? String(ci + 1) : null)).filter(Boolean) : [];
-    const area = `${p.y + 1} / ${p.x <= 6 ? p.x + 1 : p.x - 7}`;
-    const style = `grid-area:${area};font-size:${keyFontSize(d.main)}`;
+    const style = [
+      `grid-area:${p.y + 1} / ${p.x <= 6 ? p.x + 1 : p.x - 7}`,
+      `font-size:${keyFontSize(d.main)}`,
+      `background:${look.bg}`, `color:${look.fg}`,
+      `border-color:${look.bd}`, `border-style:${look.bs}`,
+      `box-shadow:${look.shadow}`,
+    ].join(";");
+    const title = colorMode ? "クリックするとこのキーを塗ります" : sentence(binding);
     return {
       left: p.x <= 6,
-      html: `<button type="button" class="${cls("key", !sel && d.style === "trans" && "is-trans", !sel && d.style === "none" && "is-none", !sel && d.style === "special" && "is-special", sel && "is-sel")}"
-          style="${style}" title="${esc(sentence(binding))}" ${act("key", String(i))}>
-          ${d.tag ? `<span class="key-tag">${esc(d.tag)}</span>` : ""}
+      html: `<button type="button" class="key" style="${style}" title="${esc(title)}" ${act("key", String(i))}>
+          ${d.tag ? `<span class="key-tag" style="color:${look.tagFg}">${esc(d.tag)}</span>` : ""}
           <span class="key-main">${esc(d.main)}</span>
-          ${nums.length ? `<span class="key-badge">${esc(nums.join("·"))}</span>` : ""}
-          ${changed ? '<span class="key-dot"></span>' : ""}
+          ${nums.length ? `<span class="key-badge" style="background:${inSel ? "var(--on-accent)" : "var(--inv)"};color:${inSel ? "var(--accent)" : "var(--inv-fg)"}">${esc(nums.join("·"))}</span>` : ""}
+          ${changed ? `<span class="key-dot" style="background:${sel ? "var(--on-accent)" : "var(--accent)"}"></span>` : ""}
         </button>`,
     };
   });
 
-  const lcd = (label, value) => `<div class="lcd lcd-${label}"><span class="cap">BATTERY</span><span class="val">${value == null ? "--" : value + "%"}</span></div>`;
+  const lcd = (side, value) => `<div class="lcd lcd-${side}"><span class="cap">BATTERY</span><span class="val">${value == null ? "--" : value + "%"}</span></div>`;
 
   return `<div class="boards">
       <div class="board-wrap">
-        <div class="board">
+        <div class="board" style="${board.style}">
           <div class="plate plate-l"></div>
           ${keys.filter((k) => k.left).map((k) => k.html).join("")}
           ${lcd("l", bat.left)}
@@ -1461,7 +1647,7 @@ function renderBoards() {
         <div class="board-label">左手</div>
       </div>
       <div class="board-wrap">
-        <div class="board">
+        <div class="board" style="${board.style}">
           <div class="plate plate-r"></div>
           ${keys.filter((k) => !k.left).map((k) => k.html).join("")}
           <button type="button" class="tb" ${act("tab", "pointer")} title="マウス操作の設定へ">
@@ -1507,32 +1693,39 @@ function renderLayerRow() {
 
 function renderBoardCard() {
   const comboMode = state.tab === "combo";
+  const colorMode = state.tab === "color";
   const selCombo = (state.combos ?? []).find((c) => c.uid === state.comboSel) || null;
-  const title = comboMode ? "同時押しするキーを選ぶ" : "レイヤーとキーを選ぶ";
-  const hint = comboMode
-    ? (selCombo ? "キーをクリックすると、選んでいるコンボに追加 / 外せます" : "下でコンボを選ぶか追加してください")
-    : "今の設定が表示されています。変えたいキーをクリックしてください";
 
-  const legend = comboMode
-    ? `<div class="legend">
+  const title = colorMode ? "キーボードの色" : comboMode ? "同時押しするキーを選ぶ" : "レイヤーとキーを選ぶ";
+  const hint = colorMode
+    ? "お使いのキーボードと同じ色にすると、キー設定の画面でも同じ見た目で表示されます"
+    : comboMode
+      ? (selCombo ? "キーをクリックすると、選んでいるコンボに追加 / 外せます" : "下でコンボを選ぶか追加してください")
+      : "現在の設定が表示されています。変えたいキーをクリックしてください";
+
+  let legend = "";
+  if (comboMode) {
+    legend = `<div class="legend">
         <span><i class="k-sel">J</i>選んでいるコンボのキー</span>
         <span><i class="k-badge">2</i>そのキーを使っているコンボの番号</span>
         <span style="color:var(--ink3)">キーをクリックすると、選んでいるコンボに追加 / 外します</span>
-      </div>`
-    : `<div class="legend">
+      </div>`;
+  } else if (!colorMode) {
+    legend = `<div class="legend">
         <span><i>A</i>ふつうのキー</span>
         <span><i class="k-special">L</i>特別な動き（レイヤー・マウスなど）</span>
         <span><i class="k-trans">▽</i>下のレイヤーと同じ</span>
         <span><i class="k-none">—</i>何もしない</span>
         <span><span class="dot"></span>まだ保存していない変更</span>
       </div>`;
+  }
 
-  return `<section class="card card-pad">
-      <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">
+  return `<section class="card card-pad glass">
+      <div class="card-head">
         <span class="card-title">${title}</span>
         <span class="card-note">${hint}</span>
       </div>
-      ${renderLayerRow()}
+      ${colorMode ? "" : renderLayerRow()}
       ${renderBoards()}
       ${legend}
     </section>`;
@@ -1583,7 +1776,7 @@ function renderEditor() {
           </div>
           <div class="ed-sentence">${esc(sentence(binding))}</div>
           ${state.client && state.liveKeymap ? `<div class="ed-live">${svg(ICON.bolt, 14)}変えるとすぐキーボードで試せます</div>` : ""}
-          ${state.client && !state.liveKeymap ? '<div class="ed-live" style="color:var(--warn)">この個体はキーマップを持たないため編集できません（左手側）</div>' : ""}
+          ${state.client && !state.liveKeymap ? '<div class="ed-live" style="color:var(--danger)">この個体はキーマップを持たないため編集できません（左手側）</div>' : ""}
           <div class="ed-adv">
             <button type="button" ${act("advanced")}>${svg(state.advanced ? "M6 15l6-6 6 6" : "M9 6l6 6-6 6", 12, 2.2)}上級者向け：コードで入力</button>
             ${state.advanced ? `<input type="text" value="${esc(binding)}" spellcheck="false" data-raw data-f="raw" />` : ""}
@@ -1601,7 +1794,7 @@ function renderEditor() {
           </button>`).join("")}
         </div>
 
-        <div class="ed-detail">${renderEditorDetail()}</div>
+        <div class="ed-detail glass">${renderEditorDetail()}</div>
       </div>
     </section>`;
 }
@@ -1724,7 +1917,7 @@ function renderComboPanel() {
   // A browser tab cannot reach config/keymap.keymap, and there is nothing to
   // send to the keyboard instead -- combos are compiled in.
   if (!canEditCombos()) {
-    return `<section class="card card-pad">
+    return `<section class="card card-pad glass">
         <div class="notice">${svg(ICON.warn, 15, 2)}<span>
           <b>コンボの編集はデスクトップアプリでのみできます。</b>
           コンボはキーボードに送るのではなく、<code>config/keymap.keymap</code> を書き換えて
@@ -1734,7 +1927,7 @@ function renderComboPanel() {
   }
 
   if (!state.combos) {
-    return `<section class="card card-pad">
+    return `<section class="card card-pad glass">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
           <span class="group-icon">${svg(ICON.combo, 16, 1.9)}</span>
           <span class="group-title">コンボ</span>
@@ -1775,7 +1968,7 @@ function renderComboPanel() {
   const pool = (PICKER_GROUPS.find((g) => g.label === state.cat) || PICKER_GROUPS[0]).keys;
   const curOut = sel ? sel.bindings.replace(/^&kp\s+/, "") : "";
 
-  return `<section class="card card-pad" style="padding-bottom:18px">
+  return `<section class="card card-pad glass" style="padding-bottom:18px">
       <div class="notice">${svg(ICON.bolt, 15, 2)}<span>
         コンボは<b>キーボードに送れません</b>（ファームウェアに焼き込まれているためです）。
         ここでの変更は <code>keymap.keymap</code> に書き出したあと、
@@ -1818,7 +2011,7 @@ function renderComboPanel() {
           </div>
           <div class="combo-hint">上のキーボードでキーをクリックすると、追加 / 外せます（2つ以上）</div>
           ${sel.extra && sel.extra.length
-            ? `<div class="combo-hint" style="color:var(--warn)">このコンボには、この画面では編集できない設定があります（${esc(sel.extra.map((p) => p.name).join(", "))}）。書き出してもそのまま残ります。</div>`
+            ? `<div class="combo-hint" style="color:var(--accent-ink)">このコンボには、この画面では編集できない設定があります（${esc(sel.extra.map((p) => p.name).join(", "))}）。書き出してもそのまま残ります。</div>`
             : ""}
         </div>
         <div class="combo-panel p2">
@@ -1883,7 +2076,7 @@ function renderPointer() {
   return `<div class="stack">
       ${noDevice ? `<div class="notice">${svg(ICON.warn, 15, 2)}<span>キーボードがつながっていないため、ここでの変更は<b>この画面の中だけ</b>です。つなぐと、キーボードに入っている設定を読み込みます。</span></div>` : ""}
 
-      <div class="group">
+      <div class="group glass">
         ${groupHead(ICON.pointer, "ポインター", "画面の矢印の動き",
           `<button type="button" class="btn" ${act("pointer-reset")}>${svg(ICON.reset, 13)}はじめの設定に戻す</button>`)}
         ${settingRow({
@@ -1893,7 +2086,7 @@ function renderPointer() {
         ${settingRow({
           title: "トラックボールの向き",
           desc: "キーボードを斜めに置いたとき、ボールの「上」を画面の上に合わせます。図のオレンジがボールの上、点線が画面の上です"
-            + (angleSupported() ? "" : '<br><span style="color:var(--warn)">※ キーボードのファームウェアが古いため、この設定は使えません</span>'),
+            + (angleSupported() ? "" : '<br><span style="color:var(--accent-ink)">※ キーボードのファームウェアが古いため、この設定は使えません</span>'),
           dirty: dirty("angle"), disabled: !angleSupported(),
           control: angleDial + sliderHtml("angle", d.angle),
         })}
@@ -1909,7 +2102,7 @@ function renderPointer() {
         })}
       </div>
 
-      <div class="group">
+      <div class="group glass">
         ${groupHead(ICON.scroll, "スクロール", "ページを上下に動かすとき")}
         ${settingRow({
           title: "スクロールの速さ", desc: "スクロール中にボールを転がしたときの、ページの動く速さ",
@@ -1923,18 +2116,18 @@ function renderPointer() {
         ${settingRow({
           title: "慣性スクロール", dirty: dirty("inertia") || dirty("glide"), disabled: !FEATURES.inertia,
           desc: "はじくように転がすと、指を離したあともしばらく滑ります（トラックパッドのような動き）"
-            + (FEATURES.inertia ? "" : '<br><span style="color:var(--warn)">※ トラックパッド搭載版のための設定です。トラックボールはボール自体が惰性で回るので使いません</span>'),
+            + (FEATURES.inertia ? "" : '<br><span style="color:var(--accent-ink)">※ トラックパッド搭載版のための設定です。トラックボールはボール自体が惰性で回るので使いません</span>'),
           control: switchHtml(d.inertia, "toggle-inertia")
             + `<div class="${cls("sub-ctl", !d.inertia && "is-off")}">${sliderHtml("glide", d.glide)}</div>`,
         })}
       </div>
 
-      <div class="group">
+      <div class="group glass">
         ${groupHead(ICON.auto, "オートマウス", "マウス用レイヤーへの自動切り替え")}
         ${settingRow({
           title: "自動で切り替える", dirty: dirty("autoMouse"), first: true, disabled: !autoMouseSupported(),
           desc: "ボールを動かしている間だけ、マウス用のレイヤーに切り替えます。クリック用のキーをすぐ押せます"
-            + (autoMouseSupported() ? "" : '<br><span style="color:var(--warn)">※ キーボードのファームウェアが古いため、この設定は使えません</span>'),
+            + (autoMouseSupported() ? "" : '<br><span style="color:var(--accent-ink)">※ キーボードのファームウェアが古いため、この設定は使えません</span>'),
           control: switchHtml(d.autoMouse, "toggle-autoMouse") + `<span class="switch-state">${d.autoMouse ? "オン" : "オフ"}</span>`,
         })}
         <div class="${cls("rows-dep", (!d.autoMouse || !autoMouseSupported()) && "is-off")}">
@@ -1965,8 +2158,8 @@ function renderBluetooth() {
         ? "左手側には接続先の登録がありません。右手側（トラックボールのある方）をつないでください。"
         : "このキーボードのファームウェアは、接続先の読み取りに対応していません。ファームウェアを更新してください。";
     return `<div class="stack">
-        <section class="card bt-main">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <section class="card bt-main glass">
+          <div class="card-head">
             <span class="group-icon">${svg(ICON.bt, 16, 1.9)}</span>
             <span class="group-title">接続先のチャンネル</span>
           </div>
@@ -1980,38 +2173,38 @@ function renderBluetooth() {
 
   const rows = table.profiles.map((p) => {
     const isActive = p.index === table.activeIndex;
-    const title = p.bonded ? `チャンネル ${p.index + 1}` : "空きチャンネル";
     let status;
     if (isActive && p.connected) status = "この機器につながっています";
     else if (isActive && p.bonded) status = "最後に使ったチャンネル・未接続";
     else if (isActive) status = "登録待ちです。つなぎたい機器のBluetooth設定で「ZEN」を選んでください";
     else if (p.connected) status = "登録済み・接続中";
-    else if (p.bonded) status = "登録済み・待機中";
-    else status = "まだ何も登録されていません";
+    else if (p.bonded) status = "登録済み";
+    else status = "まだ登録されていません";
 
     return `<div class="${cls("bt-row", isActive && "is-active", !p.bonded && "is-free")}">
-        <span class="bt-bar"></span>
-        <span class="ch-lcd"><span class="c">CH</span><span class="n">${p.index + 1}</span></span>
+        <span class="bt-num">${p.index + 1}</span>
         <div style="flex:1;min-width:0">
-          <div class="bt-title">${title}</div>
-          <div class="bt-status"><i></i>${esc(status)}</div>
+          <div class="bt-title">${p.bonded ? `チャンネル ${p.index + 1}` : "空き"}</div>
+          <div class="bt-status">${esc(status)}</div>
         </div>
-        ${p.bonded ? `<button type="button" class="btn-danger-plain" ${act("bt-clear", String(p.index))} ${busy}>登録を消す</button>` : ""}
-        ${!isActive ? `<button type="button" class="btn-sm" ${act("bt-select", String(p.index))} ${busy}>${p.bonded ? "これに切り替える" : "ここに登録する"}</button>` : ""}
-        ${isActive && p.connected ? `<button type="button" class="btn-sm" ${act("bt-disconnect", String(p.index))} ${busy}>切断する</button>` : ""}
-        ${isActive ? '<span class="bt-badge">使用中</span>' : ""}
+        ${p.bonded ? `<button type="button" class="icon-only" ${act("bt-clear", String(p.index))} ${busy} title="登録を消す" aria-label="登録を消す">${svg(ICON.trash, 15, 1.7)}</button>` : ""}
+        ${!isActive ? `<button type="button" class="btn-ring" ${act("bt-select", String(p.index))} ${busy}>
+          ${svg(p.bonded ? ICON.out : ICON.plus, 13, 1.8)}${p.bonded ? "切り替える" : "登録する"}
+        </button>` : ""}
+        ${isActive && p.connected ? `<button type="button" class="btn-ring" ${act("bt-disconnect", String(p.index))} ${busy}>切断する</button>` : ""}
+        ${isActive ? '<span class="bt-badge"><i></i>使用中</span>' : ""}
       </div>`;
   }).join("");
 
   return `<div class="stack">
       <div class="bt-wrap">
-        <section class="card bt-main">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <section class="card bt-main glass">
+          <div class="card-head">
             <span class="group-icon">${svg(ICON.bt, 16, 1.9)}</span>
             <span class="group-title">接続先のチャンネル</span>
             <span class="card-note">${table.count}つのうち ${bonded} つ登録済み</span>
           </div>
-          ${rows}
+          <div class="bt-list">${rows}</div>
           <div class="bt-foot">キーボードの「接続先」キー（例：レイヤー3の BT1〜${table.count}）でも切り替えられます。番号はここの表示と同じです。</div>
         </section>
         <aside class="bt-side">
@@ -2023,6 +2216,81 @@ function renderBluetooth() {
       </div>
       ${state.btConfirm ? renderBtConfirm(bonded) : ""}
     </div>`;
+}
+
+// --- Render: keyboard colours -----------------------------------------------
+
+function swatchRow(list, current, action, hex, pickAction) {
+  const norm = (v) => (v || "").toUpperCase();
+  return `<div class="sw-row">
+      ${list.map(([name, c]) => `<button type="button" class="${cls("sw", norm(c) === norm(current) && "is-on")}"
+        style="background:${c}" title="${esc(name)}" ${act(action, c)}></button>`).join("")}
+      <label class="sw-pick" title="ほかの色を選ぶ">
+        <input type="color" value="${hex}" data-pick="${pickAction}" />
+      </label>
+      <span class="sw-hex">${esc(hex)}</span>
+    </div>`;
+}
+
+function colorRow({ title, desc, first, control }) {
+  return `<div class="${cls("color-row", first && "first")}">
+      <div class="color-label"><div class="t">${esc(title)}</div><div class="s">${esc(desc)}</div></div>
+      <div class="color-ctl">${control}</div>
+    </div>`;
+}
+
+function renderColor() {
+  const L = state.look;
+  const painted = Object.keys(L.paint).length;
+
+  const models = Object.entries(MODELS).map(([id, m]) => `
+    <button type="button" class="${cls("model-card", L.model === id && "is-on")}" ${act("look-model", id)}>
+      <span class="model-art" style="background:${m.body};border-color:${m.bumper}">
+        ${Array.from({ length: 8 }, (_, i) => `<span style="background:${i === 6 ? ARROW_CAP : m.cap}"></span>`).join("")}
+      </span>
+      <span>
+        <span class="l">${m.label}</span>
+        <span class="s">${m.sub}</span>
+      </span>
+    </button>`).join("");
+
+  return `<section class="card glass" style="padding:16px 20px 6px">
+      <div class="card-head" style="padding-bottom:10px;margin-bottom:0">
+        <span class="card-title" style="font-size:15px">あなたの ZEN に合わせる</span>
+        <span class="pop-tag">このパソコンに保存</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <span style="font-size:12.5px;color:var(--ink2)">キー設定の画面にも反映する</span>
+          ${switchHtml(L.reflect, "toggle-look-reflect")}
+        </span>
+      </div>
+      ${colorRow({
+        title: "モデル", first: true,
+        desc: "本体の色。選ぶとバンパーとキーキャップも、そのモデルの標準の色になります",
+        control: `<div class="model-grid">${models}</div>`,
+      })}
+      ${colorRow({
+        title: "バンパー", desc: "外周のバンパーの色",
+        control: swatchRow(BUMPERS, L.bumper, "look-bumper", L.bumper, "look-bumper"),
+      })}
+      ${colorRow({
+        title: "トラックボール", desc: "交換したボールの色に合わせられます",
+        control: swatchRow(BALLS, L.ball, "look-ball", L.ball, "look-ball"),
+      })}
+      ${colorRow({
+        title: "キーキャップ（全体）", desc: "すべてのキーキャップの基本の色",
+        control: swatchRow(CAPS, L.cap, "look-cap", L.cap, "look-cap"),
+      })}
+      ${colorRow({
+        title: "キーキャップ（1つずつ）",
+        desc: "色を選んでから、上のキーボードのキーをクリックすると、そのキーだけ塗れます。同じ色でもう一度クリックすると基本の色に戻ります",
+        control: swatchRow(BRUSHES, L.brush, "look-brush", L.brush, "look-brush") + `
+          <div class="paint-row">
+            <span class="n">塗ったキー：<b>${painted}</b> 個</span>
+            <button type="button" style="margin-left:8px" ${act("look-arrows")}>矢印キーを初期色に</button>
+            <button type="button" ${act("look-clear")}>塗った色をすべて戻す</button>
+          </div>`,
+      })}
+    </section>`;
 }
 
 // --- Render: save bar -------------------------------------------------------
@@ -2043,7 +2311,7 @@ function renderSaveBar(counts) {
     const pending = connected && dirty && i === 2;
     const markClass = cls(
       "step-mark",
-      done && (allDone ? "is-ok" : i === reached - 1 ? "is-cur" : "is-past"),
+      done && (allDone ? (i === 2 ? "is-ok" : "is-done") : i === reached - 1 ? "is-cur" : "is-past"),
       !done && pending && "is-pending",
     );
     const line = i > 0
@@ -2058,7 +2326,7 @@ function renderSaveBar(counts) {
   let title; let sub; let titleClass = "";
   if (!connected && !dirty) {
     title = "キーボードがつながっていません";
-    sub = "つなぐと、キーボードに入っている今の設定を読み込みます。";
+    sub = "つなぐと、キーボードに入っている現在の設定を読み込みます。";
     titleClass = "is-idle";
   } else if (!connected) {
     title = "変更はこの画面の中だけにあります";
@@ -2069,14 +2337,26 @@ function renderSaveBar(counts) {
   } else {
     title = "すべてキーボードに保存されています";
     sub = "キーボードを別のパソコンにつないでも、この設定のまま使えます。";
-    titleClass = "is-ok";
   }
 
   const chips = [];
   if (counts.key) chips.push(`キー配置 ${counts.key}か所`);
   if (counts.pointer) chips.push(`マウス操作 ${counts.pointer}項目`);
 
+  // The notch is a sibling of the bar inside the same wrapper and sits behind
+  // it, so it rises out from under the bar without moving anything.
+  const notch = state.toast
+    ? `<div class="${cls("notch", state.toastOut && "is-out", state.toastError && "is-error")}">
+        <div>
+          ${svg(state.toastError ? ICON.warn : ICON.check, 14, 2.6)}
+          ${esc(state.toast)}
+          <button type="button" ${act("toast-close")} aria-label="閉じる">${svg(ICON.close, 11, 2.4)}</button>
+        </div>
+      </div>`
+    : "";
+
   return `<div class="savebar-wrap">
+      ${notch}
       <div class="savebar">
         <div class="steps">${steps}</div>
         <div class="savebar-text">
@@ -2100,8 +2380,11 @@ function renderSaveBar(counts) {
 function applyTheme() {
   const pal = PALETTE[state.dark ? "dark" : "light"];
   const root = document.documentElement;
-  root.style.setProperty("--accent", state.accent);
-  root.style.setProperty("--on-accent", onAccentFor(state.accent));
+  // A dark accent on a dark page disappears -- #1D2433 is one of the eight
+  // swatches and would be invisible. Lift it rather than refuse to show it.
+  const lift = state.dark && hexLum(state.accent) < 0.3;
+  root.style.setProperty("--accent", lift ? `color-mix(in srgb, ${state.accent} 25%, #DCE3EE)` : state.accent);
+  root.style.setProperty("--on-accent", lift ? "#151B2B" : onAccentFor(state.accent));
   for (const [k, v] of Object.entries(pal)) root.style.setProperty(`--${k}`, v);
   root.style.colorScheme = state.dark ? "dark" : "light";
   lsSet(LS.theme, { dark: state.dark, accent: state.accent });
@@ -2132,20 +2415,24 @@ function render() {
   const selEnd = focusKey && focused.selectionEnd;
 
   const counts = { key: keyChangeCount(), pointer: pointerChangeCount() };
-  const showBoard = state.tab === "keymap" || state.tab === "combo";
+  const showBoard = state.tab === "keymap" || state.tab === "combo" || state.tab === "color";
 
-  const body = `<div class="page">
-      ${renderHeader()}
-      ${renderTabs(counts)}
-      ${showBoard ? `<div class="stack">${renderBoardCard()}${state.tab === "keymap" ? renderEditor() : renderComboPanel()}</div>` : ""}
-      ${state.tab === "pointer" ? renderPointer() : ""}
-      ${state.tab === "bt" ? renderBluetooth() : ""}
-      ${state.toast ? `<div class="toast-wrap"><div class="${cls("toast", state.toastError && "is-error")}">
-        ${svg(state.toastError ? ICON.warn : ICON.check, 15, 2.4)}
-        ${esc(state.toast)}
-        <button type="button" ${act("toast-close")} aria-label="閉じる">${svg(ICON.close, 12, 2.4)}</button>
-      </div></div>` : ""}
-      ${renderSaveBar(counts)}
+  let under = "";
+  if (state.tab === "keymap") under = renderEditor();
+  else if (state.tab === "combo") under = renderComboPanel();
+  else if (state.tab === "color") under = renderColor();
+
+  const body = `<div class="shell">
+      ${renderRail(counts)}
+      <div class="main">
+        ${renderHeader()}
+        <div style="height:16px"></div>
+        ${showBoard ? `<div class="stack">${renderBoardCard()}${under}</div>` : ""}
+        ${state.tab === "pointer" ? renderPointer() : ""}
+        ${state.tab === "bt" ? renderBluetooth() : ""}
+        <div class="grow"></div>
+        ${renderSaveBar(counts)}
+      </div>
     </div>`;
 
   document.getElementById("app").innerHTML = body;
@@ -2190,6 +2477,92 @@ function renderBtConfirm(bonded) {
         </div>
       </div>
     </div>`;
+}
+
+// --- Startup animation ------------------------------------------------------
+//
+// The ZEN wordmark fades in, "Configurator" is typed below it, backspaced, and
+// the time of day is typed in its place; then the line is select-all'd and
+// deleted and the overlay leaves.
+//
+// Driven by timers rather than the 30-odd keyframes the design prototype used,
+// because the app rebuilds #app on every state change and CSS animations
+// inside it would restart each time. The splash therefore lives in its own
+// element next to #app and is never touched by render().
+//
+// Characters are switched on and off whole (max-width 0 <-> 1.2em with no
+// transition): the stepped look is the point, so nothing is interpolated.
+
+const SPLASH = { type: 60, back: 40, start: 1450, holdBeforeBack: 550, gapAfterBack: 250, read: 2200, beforeDelete: 500, exit: 900 };
+const splashTimers = [];
+
+function splashGreeting() {
+  const h = new Date().getHours();
+  return h < 11 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
+
+function clearSplash() {
+  while (splashTimers.length) clearTimeout(splashTimers.pop());
+  const host = document.getElementById("splash");
+  if (host) host.innerHTML = "";
+  state.splash = "";
+}
+
+function runSplash() {
+  const host = document.getElementById("splash");
+  if (!host) return;
+  while (splashTimers.length) clearTimeout(splashTimers.pop());
+  state.splash = "run";
+
+  const first = Array.from("Configurator");
+  const second = Array.from(splashGreeting());
+  const chars = first.map((c, i) => `<span data-c="a${i}">${esc(c)}</span>`)
+    .concat(second.map((c, i) => `<span data-c="b${i}">${esc(c)}</span>`)).join("");
+
+  host.innerHTML = `<div class="splash" aria-hidden="true">
+      ${logoSvg("zen", 58, 'class="splash-logo is-in" width="190"')}
+      <div class="splash-line">
+        <span class="pad"></span>
+        <span class="splash-word">${chars}</span>
+        <span class="splash-caret"></span>
+      </div>
+    </div>`;
+
+  const root = host.querySelector(".splash");
+  const logo = host.querySelector(".splash-logo");
+  const word = host.querySelector(".splash-word");
+  const caret = host.querySelector(".splash-caret");
+  const at = (ms, fn) => splashTimers.push(setTimeout(fn, ms));
+  const ch = (key) => word.querySelector(`[data-c="${key}"]`);
+
+  // Someone who has seen it once should not have to sit through it again.
+  root.addEventListener("click", clearSplash);
+
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    at(300, clearSplash);
+    return;
+  }
+
+  const s = SPLASH;
+  at(900, () => { caret.classList.add("is-on", "is-blink"); });
+
+  const typed = s.start + first.length * s.type;
+  first.forEach((_c, i) => at(s.start + i * s.type, () => ch(`a${i}`).classList.add("is-in")));
+
+  const backStart = typed + s.holdBeforeBack;
+  first.forEach((_c, i) => at(backStart + (first.length - 1 - i) * s.back, () => ch(`a${i}`).classList.remove("is-in")));
+
+  const second0 = backStart + first.length * s.back + s.gapAfterBack;
+  second.forEach((_c, i) => at(second0 + i * s.type, () => ch(`b${i}`).classList.add("is-in")));
+
+  const end = second0 + second.length * s.type;
+  const select = end + s.read;
+  const del = select + s.beforeDelete;
+  at(select, () => word.classList.add("is-sel"));
+  at(del, () => word.classList.add("is-del"));
+  at(del + 350, () => { logo.classList.remove("is-in"); logo.classList.add("is-out"); });
+  at(del + s.exit, () => root.classList.add("is-gone"));
+  at(del + s.exit + 180, clearSplash);
 }
 
 // --- Events -----------------------------------------------------------------
@@ -2261,6 +2634,14 @@ const CLICK = {
   rename: () => { state.renaming = !state.renaming; render(); },
   key: (a) => {
     const index = Number(a);
+    if (state.tab === "color") {
+      // Same colour again means "unpaint": the cap goes back to the base.
+      const paint = { ...state.look.paint };
+      if (paint[index] === state.look.brush) delete paint[index];
+      else paint[index] = state.look.brush;
+      setLook({ paint });
+      return;
+    }
     if (state.tab === "combo") {
       const sel = state.combos && state.combos.find((c) => c.uid === state.comboSel);
       if (!sel) return;
@@ -2321,11 +2702,25 @@ const CLICK = {
     bleAction(BLE_ACTION.CLEAR_ALL, 0);
   },
 
-  "toast-close": () => { state.toast = ""; render(); },
+  "look-model": (a) => {
+    const m = MODELS[a];
+    setLook({ model: a, bumper: m.bumper, cap: m.cap, ball: m.ball });
+  },
+  "look-bumper": (a) => setLook({ bumper: a }),
+  "look-cap": (a) => setLook({ cap: a }),
+  "look-ball": (a) => setLook({ ball: a }),
+  "look-brush": (a) => setLook({ brush: a }),
+  "look-arrows": () => setLook({ paint: { ...state.look.paint, ...Object.fromEntries(ARROW_KEYS.map((i) => [i, ARROW_CAP])) } }),
+  "look-clear": () => setLook({ paint: {} }),
+
+  "splash-replay": () => { state.themeOpen = false; render(); runSplash(); },
+
+  "toast-close": () => { state.toast = ""; state.toastOut = false; render(); },
 };
 
 function onToggleSwitch(action) {
   const key = action.replace("toggle-", "");
+  if (key === "look-reflect") return setLook({ reflect: !state.look.reflect });
   if (POINTER_WIRE_KEYS.includes(key)) writePointer({ [key]: !state.pointer[key] });
   else { state.pointer[key] = !state.pointer[key]; render(); }
 }
@@ -2358,6 +2753,7 @@ function init() {
       } else {
         state.pointer[key] = value;
       }
+      t.style.setProperty("--p", sliderPct(key, value));
       const readout = app.querySelector(`[data-readout="${key}"]`);
       if (readout) {
         readout.querySelector(".v").textContent = spec.fmt(value);
@@ -2397,6 +2793,11 @@ function init() {
       state.pointer[key] = Number(t.value);
       return render();
     }
+    if (t.dataset.pick) {
+      const handler = CLICK[t.dataset.pick];
+      if (handler) handler(normHex(t.value));
+      return;
+    }
     if (t.hasAttribute("data-pick-color")) {
       state.accent = normHex(t.value);
       state.hexDraft = state.accent.slice(1);
@@ -2424,6 +2825,7 @@ function init() {
 
   state.ed = parseInto(state.keymap[state.layer].bindings[state.sel]);
   render();
+  runSplash();
 }
 
 document.addEventListener("DOMContentLoaded", init);
