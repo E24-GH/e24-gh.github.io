@@ -462,6 +462,65 @@ function setLook(patch) {
   render();
 }
 
+// A colour picked from the native colour panel cannot go through render().
+// The panel belongs to the <input type="color"> that opened it, and render()
+// replaces #app wholesale, so the first step of the drag destroyed that input
+// and macOS closed the panel again -- the colour was impossible to choose.
+// These two patch, in place, the few things a colour actually changes.
+const LOOK_PICK_KEY = {
+  "look-bumper": "bumper",
+  "look-ball": "ball",
+  "look-cap": "cap",
+  "look-brush": "brush",
+};
+
+function setLookLive(action, hex, source) {
+  const key = LOOK_PICK_KEY[action];
+  if (!key || !validHex(hex)) return;
+  state.look = { ...state.look, [key]: normHex(hex) };
+  saveLook();
+
+  const boards = document.querySelector("[data-boards]");
+  if (boards) boards.outerHTML = renderBoards();
+
+  for (const row of document.querySelectorAll(".sw-row")) {
+    const pick = row.querySelector("input[data-pick]");
+    const rowKey = pick && LOOK_PICK_KEY[pick.dataset.pick];
+    if (!rowKey) continue;
+    const current = normHex(state.look[rowKey]);
+    for (const sw of row.querySelectorAll(".sw")) {
+      sw.classList.toggle("is-on", normHex(sw.dataset.a || "") === current);
+    }
+    const out = row.querySelector(".sw-hex");
+    if (out) out.textContent = current;
+    // Never write back to the picker this came from: its panel is a window of
+    // its own, so the input is not necessarily focused, and touching the value
+    // under an open panel is not worth the risk. It already holds this colour.
+    if (pick !== source) pick.value = current;
+  }
+}
+
+function setAccentLive(hex) {
+  if (!validHex(hex)) return;
+  state.accent = normHex(hex);
+  state.hexDraft = state.accent.slice(1);
+  state.hexInvalid = false;
+  applyTheme();
+
+  for (const sw of document.querySelectorAll(".swatches button")) {
+    sw.classList.toggle("is-on", normHex(sw.dataset.a || "") === state.accent);
+  }
+  const swatch = document.querySelector(".hex-swatch");
+  if (swatch) swatch.style.background = state.accent;
+  const field = document.querySelector("input[data-hex]");
+  if (field && field !== document.activeElement) {
+    field.value = state.hexDraft;
+    field.classList.remove("is-bad");
+  }
+  const error = document.querySelector(".hex-error");
+  if (error) error.remove();
+}
+
 function sampleKeymap() {
   return SAMPLE_LAYERS.map((bindings, i) => ({
     name: `layer_${i}`, label: `Layer ${i}`, layerId: i, bindings: bindings.slice(),
@@ -1637,7 +1696,7 @@ function renderBoards() {
 
   const lcd = (side, value) => `<div class="lcd lcd-${side}"><span class="cap">BATTERY</span><span class="val">${value == null ? "--" : value + "%"}</span></div>`;
 
-  return `<div class="boards">
+  return `<div class="boards" data-boards>
       <div class="board-wrap">
         <div class="board" style="${board.style}">
           <div class="plate plate-l"></div>
@@ -2743,6 +2802,8 @@ function init() {
   // drag is not interrupted.
   app.addEventListener("input", (event) => {
     const t = event.target;
+    if (t.dataset.pick) return setLookLive(t.dataset.pick, t.value, t);
+    if (t.hasAttribute("data-pick-color")) return setAccentLive(t.value);
     if (t.dataset.slider) {
       const key = t.dataset.slider;
       const value = Number(t.value);
@@ -2793,17 +2854,8 @@ function init() {
       state.pointer[key] = Number(t.value);
       return render();
     }
-    if (t.dataset.pick) {
-      const handler = CLICK[t.dataset.pick];
-      if (handler) handler(normHex(t.value));
-      return;
-    }
-    if (t.hasAttribute("data-pick-color")) {
-      state.accent = normHex(t.value);
-      state.hexDraft = state.accent.slice(1);
-      state.hexInvalid = false;
-      return render();
-    }
+    if (t.dataset.pick) return setLookLive(t.dataset.pick, t.value, t);
+    if (t.hasAttribute("data-pick-color")) return setAccentLive(t.value);
     if (t.hasAttribute("data-raw")) return writeBinding(t.value);
   });
 
