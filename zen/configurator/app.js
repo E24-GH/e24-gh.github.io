@@ -502,14 +502,44 @@ const LOOK_PICK_KEY = {
   "look-brush": "brush",
 };
 
+/** Recolour the keyboard preview without rebuilding it.
+ *
+ * Rebuilding was the obvious way, but taking the preview out of the document
+ * shortens the page for an instant and the browser clamps the scroll offset to
+ * the shorter page -- putting the preview back does not undo that, so the page
+ * crept upwards on every step of a drag and carried the picker out from under
+ * the pointer. Nothing is removed here, so there is nothing to clamp.
+ *
+ * The case, bumper, plate and ball are all CSS variables on .board, so they
+ * cost one attribute each. Only the keycaps are per-element.
+ */
+function repaintBoardColours() {
+  const board = boardLook();
+  for (const el of document.querySelectorAll(".board")) {
+    el.setAttribute("style", board.style);
+  }
+  for (const el of document.querySelectorAll('.board .key[data-act="key"]')) {
+    const index = Number(el.dataset.a);
+    const binding = state.keymap[state.layer].bindings[index];
+    // Only ever reached from the colour tab, where no key is selected.
+    const look = keyLook(describe(binding), false, index, board.use);
+    el.style.background = look.bg;
+    el.style.color = look.fg;
+    el.style.borderColor = look.bd;
+    el.style.borderStyle = look.bs;
+    el.style.boxShadow = look.shadow;
+    const tag = el.querySelector(".key-tag");
+    if (tag) tag.style.color = look.tagFg;
+  }
+}
+
 function setLookLive(action, hex) {
   const key = LOOK_PICK_KEY[action];
   if (!key || !validHex(hex)) return;
   state.look = { ...state.look, [key]: normHex(hex) };
   saveLook();
 
-  const boards = document.querySelector("[data-boards]");
-  if (boards) boards.outerHTML = renderBoards();
+  repaintBoardColours();
 
   for (const row of document.querySelectorAll(".sw-row[data-row]")) {
     const rowKey = LOOK_PICK_KEY[row.dataset.row];
@@ -566,6 +596,32 @@ function applyPick(hex) {
 }
 
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+
+/** Swap part of the page out without the page jumping to the top.
+ *
+ * Taking an element out shortens the document for an instant; the browser
+ * clamps the scroll offset to the shorter page, and putting the content back
+ * does not undo that. Clicking a key threw you up to the header every time,
+ * which made picking several in a row impossible.
+ *
+ * This repairs the damage after the fact, which is all a full re-render can
+ * do. Where a smaller update will serve -- recolouring the preview, say --
+ * changing the existing nodes avoids the problem rather than correcting it.
+ */
+function keepScroll(mutate) {
+  const scrollY = window.scrollY;
+  mutate();
+  if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);
+  // Again next frame. WKWebView -- which is what the desktop app runs on, and
+  // where this was reported -- can settle the scroll offset after layout
+  // rather than during the swap, so the synchronous call above is not always
+  // the last word. Only if it actually drifted, so this cannot fight a real
+  // scroll, and a user managing one inside a single frame while a render is in
+  // flight is not a case worth protecting.
+  requestAnimationFrame(() => {
+    if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);
+  });
+}
 
 function svHex(sv, event) {
   const rect = sv.getBoundingClientRect();
@@ -1769,7 +1825,7 @@ function renderBoards() {
 
   const lcd = (side, value) => `<div class="lcd lcd-${side}"><span class="cap">BATTERY</span><span class="val">${value == null ? "--" : value + "%"}</span></div>`;
 
-  return `<div class="boards" data-boards>
+  return `<div class="boards">
       <div class="board-wrap">
         <div class="board" style="${board.style}">
           <div class="plate plate-l"></div>
@@ -2524,15 +2580,9 @@ function applyTheme() {
 function render() {
   applyTheme();
 
-  // The whole page is rebuilt on every change, which costs two things that
-  // have to be put back by hand.
-  //
-  // Scroll position: replacing innerHTML empties the document for an instant,
-  // the browser clamps the scroll offset to the new height of nearly nothing,
-  // and the content comes back with the page jumped to the top. Clicking a key
-  // in the picker threw you back up to the header every time, which made
-  // picking several in a row impossible.
-  const scrollY = window.scrollY;
+  // The whole page is rebuilt on every change, which costs three things that
+  // have to be put back by hand: the window scroll (keepScroll), the scroll
+  // offset of anything scrollable inside it, and the focus.
   const scrollers = new Map();
   for (const el of document.querySelectorAll("[data-scroll]")) {
     scrollers.set(el.dataset.scroll, el.scrollTop);
@@ -2566,21 +2616,12 @@ function render() {
       </div>
     </div>`;
 
-  document.getElementById("app").innerHTML = body;
-
-  for (const [key, top] of scrollers) {
-    const el = document.querySelector(`[data-scroll="${key}"]`);
-    if (el) el.scrollTop = top;
-  }
-  window.scrollTo(0, scrollY);
-  // Again next frame. WKWebView -- which is what the desktop app runs on, and
-  // where this was reported -- can settle the scroll offset after layout
-  // rather than during the innerHTML swap, so the synchronous call above is
-  // not always the last word. Only if it actually drifted, so this cannot
-  // fight a real scroll, and a user managing one inside a single frame while a
-  // render is in flight is not a case worth protecting.
-  requestAnimationFrame(() => {
-    if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);
+  keepScroll(() => {
+    document.getElementById("app").innerHTML = body;
+    for (const [key, top] of scrollers) {
+      const el = document.querySelector(`[data-scroll="${key}"]`);
+      if (el) el.scrollTop = top;
+    }
   });
 
   if (focusKey) {
