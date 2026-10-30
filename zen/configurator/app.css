@@ -352,12 +352,15 @@ input::placeholder { color: var(--mute); }
 }
 .seg button.is-on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(23, 22, 20, .15); }
 
-.swatches { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
 .swatches button {
-  aspect-ratio: 1; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0;
-  box-shadow: inset 0 0 0 2px var(--surface);
+  width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .12s ease;
 }
-.swatches button.is-on { border-color: var(--ink); }
+.swatches button:hover { transform: scale(1.1); }
+.swatches .sw-mark { display: none; }
+.swatches button.is-on .sw-mark { display: block; }
 
 .hex-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
 .hex-swatch {
@@ -995,18 +998,28 @@ input::placeholder { color: var(--mute); }
   box-shadow: 0 1px 2px rgba(21, 27, 43, .12), 0 0 0 1px var(--line);
 }
 
+/* A swatch is the colour and nothing else: no ring, no white collar. The line
+   around some of them is drawn per swatch (swatchEdge) and only where the
+   colour would otherwise dissolve into the panel. What is chosen is said by a
+   tick inside it, which every swatch carries and .is-on reveals -- so moving
+   the mark during a picker drag stays a class toggle. */
 .sw-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .sw {
-  width: 30px; height: 30px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 0 0 2px var(--surface), 0 0 0 2px transparent;
+  width: 24px; height: 24px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .12s ease;
 }
-.sw.is-on { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
+.sw:hover { transform: scale(1.1); }
+.sw-mark { display: none; }
+.sw.is-on .sw-mark { display: block; }
 .sw-pick {
-  position: relative; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; overflow: hidden;
-  background: conic-gradient(#E9533F, #E9C53A, #4FA36B, #1F9AA8, #3D7BD9, #8C6FD1, #E58BB0, #E9533F);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12);
+  width: 24px; height: 24px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
+  background:
+    radial-gradient(circle, #FFF 0%, rgba(255, 255, 255, .85) 14%, rgba(255, 255, 255, 0) 62%),
+    conic-gradient(from 90deg, #FF4D4D, #FFB23F, #F6E14A, #5BD26B, #3FC6D9, #4A7BF0, #9A5BF0, #F05BB8, #FF4D4D);
+  transition: transform .12s ease;
 }
-.sw-pick { border: none; padding: 0; }
+.sw-pick:hover { transform: scale(1.1); }
 
 /* Our own colour picker.
    <input type="color"> opens the OS colour panel, and in WKWebView (the
@@ -1039,8 +1052,7 @@ input::placeholder { color: var(--mute); }
 .pick-recent { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
 .pick-recent .l { font-size: 11px; color: var(--ink3); flex: 0 0 auto; }
 .pick-recent .r { display: flex; flex-wrap: wrap; gap: 5px; }
-.sw-sm { width: 18px; height: 18px; }
-.sw-sm.is-on { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 0 0 2px var(--surface), 0 0 0 3px var(--ink); }
+.sw-sm { width: 20px; height: 20px; }
 .pick-foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .pick-chip { width: 22px; height: 22px; border-radius: 7px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14); }
 .pick-val { font-family: var(--mono); font-size: 12px; color: var(--ink2); }

@@ -668,9 +668,12 @@ function setLookLive(action, hex) {
     const rowKey = lookKeyFor(row.dataset.row);
     if (!rowKey) continue;
     const acryl = row.hasAttribute("data-acryl");
-    const current = normHex(state.look[rowKey]);
+    // Not normHex: the acrylic row's value can be "NONE", which is a choice,
+    // not a colour, and normalising it turned the readout into "#NONE".
+    const current = state.look[rowKey];
+    const same = (v) => (v || "").toUpperCase() === (current || "").toUpperCase();
     for (const sw of row.querySelectorAll(".sw")) {
-      sw.classList.toggle("is-on", normHex(sw.dataset.a || "") === current);
+      sw.classList.toggle("is-on", same(sw.dataset.a));
     }
     // The swatch standing in for a colour outside the twelve is the one the
     // drag is moving, so it has to follow rather than keep the colour it was
@@ -679,6 +682,10 @@ function setLookLive(action, hex) {
     if (cur) {
       cur.dataset.a = current;
       cur.style.background = acryl ? acrylSwatch(current) : current;
+      cur.style.boxShadow = swatchEdge(current, acryl);
+      const mark = cur.querySelector(".sw-mark");
+      const lum = acryl ? acrylLum(current) : hexLum(current);
+      if (mark) mark.setAttribute("stroke", lum > 0.62 ? "#151B2B" : "#FFFFFF");
       cur.classList.add("is-on");
     }
     const out = row.querySelector(".sw-hex");
@@ -744,7 +751,8 @@ function renderPicker(target, hex) {
       ${state.recents.length ? `<div class="pick-recent">
         <span class="l">最近使った色</span>
         <span class="r">${state.recents.map((c) => `<button type="button" class="${cls("sw sw-sm", normHex(c) === normHex(hex) && "is-on")}"
-          style="background:${c}" title="${esc(c)}" ${act("pick-recent", c)}></button>`).join("")}</span>
+          style="background:${c}${swatchEdge(c) ? `;box-shadow:${swatchEdge(c)}` : ""}" title="${esc(c)}"
+          ${act("pick-recent", c)}>${swatchMark(hexLum(c), 12)}</button>`).join("")}</span>
       </div>` : ""}
       <div class="pick-foot">
         <span class="pick-chip" style="background:${hex}"></span>
@@ -1798,7 +1806,9 @@ function renderThemePanel() {
       <div class="pop-section">
         <div class="pop-label">テーマカラー</div>
         <div class="swatches">
-          ${SWATCHES.map((hex) => `<button type="button" class="${cls(hex === state.accent && "is-on")}" style="background:${hex}" title="${hex}" ${act("set-accent", hex)}></button>`).join("")}
+          ${SWATCHES.map((hex) => `<button type="button" class="${cls(hex === state.accent && "is-on")}"
+            style="background:${hex}${swatchEdge(hex) ? `;box-shadow:${swatchEdge(hex)}` : ""}" title="${hex}"
+            ${act("set-accent", hex)}>${swatchMark(hexLum(hex), 13)}</button>`).join("")}
         </div>
         <div class="hex-row">
           <button type="button" class="hex-swatch" style="background:${state.accent}" title="色を選ぶ" ${act("pick-open", "accent")}></button>
@@ -2648,6 +2658,41 @@ function renderBluetooth() {
 
 // --- Render: keyboard colours -----------------------------------------------
 
+// A white PCB, which is what sits behind every acrylic swatch.
+const BOARD_LUM = 0.9;
+
+/** How light an acrylic swatch really looks: the tint over the board, at the
+ *  strength the swatch draws it. The tint's own brightness is no guide -- it
+ *  would call クリア black. */
+function acrylLum(tint) {
+  if (tint === "NONE") return BOARD_LUM;
+  const lum = hexLum(tint);
+  const a = lum < 0.25 ? 0.5 : 0.38;
+  return lum * a + BOARD_LUM * (1 - a);
+}
+
+/** The line around a swatch. Only colours that would otherwise dissolve into
+ *  the panel get one -- near-white against the light theme, near-black against
+ *  the dark one -- and every acrylic swatch, which is a picture and so has no
+ *  edge of its own. */
+function swatchEdge(hex, acryl) {
+  const PALE = "inset 0 0 0 1px rgba(21,27,43,.10)";
+  if (acryl) return PALE;
+  const lum = hexLum(hex);
+  if (lum > 0.86) return PALE;
+  if (lum < 0.06) return "inset 0 0 0 1px rgba(255,255,255,.10)";
+  return "";
+}
+
+/** The tick marking the chosen swatch.
+ *  Drawn into every swatch and revealed by .is-on, so moving the mark stays a
+ *  class toggle -- which is what the live picker drag needs it to be. */
+function swatchMark(lum, size) {
+  const ink = lum > 0.62 ? "#151B2B" : "#FFFFFF";
+  return `<svg class="sw-mark" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="${ink}"
+      stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12.5l4.2 4.2L18.5 8"/></svg>`;
+}
+
 /** One row of colour choices: the twelve, the current colour when it is not
  *  one of them, the picker button, and the readout.
  *
@@ -2657,8 +2702,12 @@ function renderBluetooth() {
 function swatchRow(list, current, action, pickAction, { acryl = false, label = current } = {}) {
   const norm = (v) => (v || "").toUpperCase();
   const paint = acryl ? (v) => acrylSwatch(v) : (v) => v;
-  const swatch = (name, c, extra) => `<button type="button" class="${cls("sw", extra, norm(c) === norm(current) && "is-on")}"
-      style="background:${paint(c)}" title="${esc(name)}" ${act(action, c)}></button>`;
+  const swatch = (name, c, extra) => {
+    const edge = swatchEdge(c, acryl);
+    return `<button type="button" class="${cls("sw", extra, norm(c) === norm(current) && "is-on")}"
+      style="background:${paint(c)}${edge ? `;box-shadow:${edge}` : ""}" title="${esc(name)}"
+      ${act(action, c)}>${swatchMark(acryl ? acrylLum(c) : hexLum(c), 14)}</button>`;
+  };
   return `<div class="sw-row" data-row="${pickAction}"${acryl ? ' data-acryl=""' : ""}>
       ${list.map(([name, c]) => swatch(name, c)).join("")}
       ${list.some(([, c]) => norm(c) === norm(current)) ? "" : swatch("いま選んでいる色", current, "sw-cur")}
@@ -2746,11 +2795,11 @@ function renderColor() {
       </div>
       ${colorRow({
         title: "モデル", first: true,
-        desc: "本体の色。選ぶとバンパーとキーキャップも、そのモデルの標準の色になります",
+        desc: "選ぶと、各パーツがそのモデルの標準色になります",
         control: `<div class="model-grid">${models}</div>`,
       })}
       ${colorRow({
-        title: "トッププレート", desc: "キーのまわりの天板。アクリルは中の基板が透けて見えます",
+        title: "トッププレート", desc: "キーのまわりの天板。アクリルは基板が透けて見えます",
         control: plateControl,
       })}
       ${colorRow({
@@ -2762,12 +2811,12 @@ function renderColor() {
         control: swatchRow(BALLS, L.ball, "look-ball", "look-ball"),
       })}
       ${colorRow({
-        title: "キーキャップ（全体）", desc: "すべてのキーキャップの基本の色",
+        title: "キーキャップ（全体）", desc: "すべてのキーの基本の色",
         control: swatchRow(CAPS, L.cap, "look-cap", "look-cap"),
       })}
       ${colorRow({
         title: "キーキャップ（個別）",
-        desc: "色を選んでから、上のキーボードのキーをクリックすると、そのキーだけ塗れます。同じ色でもう一度クリックすると基本の色に戻ります",
+        desc: "色を選んで、上のキーをクリックすると塗れます。もう一度クリックで元に戻ります",
         control: swatchRow(BRUSHES, L.brush, "look-brush", "look-brush") + `
           <div class="paint-row">
             <span class="n">塗ったキー：<b>${painted}</b> 個</span>
