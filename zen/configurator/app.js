@@ -2359,8 +2359,7 @@ function renderPointer() {
         })}
         ${settingRow({
           title: "慣性スクロール", dirty: dirty("inertia") || dirty("glide"), disabled: !FEATURES.inertia,
-          desc: "はじくように転がすと、指を離したあともしばらく滑ります（トラックパッドのような動き）"
-            + (FEATURES.inertia ? "" : '<br><span style="color:var(--accent-ink)">※ トラックパッド搭載版のための設定です。トラックボールはボール自体が惰性で回るので使いません</span>'),
+          desc: FEATURES.inertia ? "" : '<span style="color:var(--accent-ink)">※ トラックパッド搭載版のための設定です。トラックボールはボール自体が惰性で回るので使いません</span>',
           control: switchHtml(d.inertia, "toggle-inertia")
             + `<div class="${cls("sub-ctl", !d.inertia && "is-off")}">${sliderHtml("glide", d.glide)}</div>`,
         })}
