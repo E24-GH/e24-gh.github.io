@@ -318,6 +318,30 @@ function capLook(hex, style) {
 const validHex = (h) => /^#?[0-9A-Fa-f]{6}$/.test((h || "").trim());
 const normHex = (h) => "#" + h.trim().replace(/^#/, "").toUpperCase();
 
+/** #RRGGBB -> [hue 0-360, saturation 0-1, value 0-1]. */
+function hexToHsv(hex) {
+  const n = parseInt(normHex(hex).slice(1), 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  return [h, max ? d / max : 0, max];
+}
+
+function hsvToHex(h, s, v) {
+  const channel = (n) => {
+    const k = (n + h / 60) % 6;
+    const x = v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
+    return Math.round(x * 255).toString(16).padStart(2, "0");
+  };
+  return ("#" + channel(5) + channel(3) + channel(1)).toUpperCase();
+}
+
 /** Black or white text on the accent, by relative luminance (WCAG formula). */
 function onAccentFor(hex) {
   const n = parseInt(hex.slice(1), 16);
@@ -444,6 +468,10 @@ const state = {
   accent: validHex(theme0.accent) ? normHex(theme0.accent) : DEFAULT_ACCENT,
   hexDraft: (validHex(theme0.accent) ? normHex(theme0.accent) : DEFAULT_ACCENT).slice(1),
   hexInvalid: false,
+  // Which colour the picker is open for ("accent" or a look-* row), and the
+  // hue it is on. The hue is kept separately: a grey has none to read back.
+  pick: null,
+  pickHue: 0,
 
   // What the user's own keyboard looks like. Cosmetic, this computer only.
   look: { ...DEFAULT_LOOK, ...lsGet(LS.look, {}) },
@@ -462,11 +490,11 @@ function setLook(patch) {
   render();
 }
 
-// A colour picked from the native colour panel cannot go through render().
-// The panel belongs to the <input type="color"> that opened it, and render()
-// replaces #app wholesale, so the first step of the drag destroyed that input
-// and macOS closed the panel again -- the colour was impossible to choose.
-// These two patch, in place, the few things a colour actually changes.
+// Picking a colour cannot go through render(), which replaces #app wholesale:
+// the picker panel the pointer is holding would be destroyed on the first step
+// of the drag. These two patch, in place, the few things a colour changes --
+// the keyboard preview, each row's selected swatch and hex readout, and for the
+// theme accent the CSS variables applyTheme() writes on :root.
 const LOOK_PICK_KEY = {
   "look-bumper": "bumper",
   "look-ball": "ball",
@@ -474,7 +502,7 @@ const LOOK_PICK_KEY = {
   "look-brush": "brush",
 };
 
-function setLookLive(action, hex, source) {
+function setLookLive(action, hex) {
   const key = LOOK_PICK_KEY[action];
   if (!key || !validHex(hex)) return;
   state.look = { ...state.look, [key]: normHex(hex) };
@@ -483,9 +511,8 @@ function setLookLive(action, hex, source) {
   const boards = document.querySelector("[data-boards]");
   if (boards) boards.outerHTML = renderBoards();
 
-  for (const row of document.querySelectorAll(".sw-row")) {
-    const pick = row.querySelector("input[data-pick]");
-    const rowKey = pick && LOOK_PICK_KEY[pick.dataset.pick];
+  for (const row of document.querySelectorAll(".sw-row[data-row]")) {
+    const rowKey = LOOK_PICK_KEY[row.dataset.row];
     if (!rowKey) continue;
     const current = normHex(state.look[rowKey]);
     for (const sw of row.querySelectorAll(".sw")) {
@@ -493,11 +520,58 @@ function setLookLive(action, hex, source) {
     }
     const out = row.querySelector(".sw-hex");
     if (out) out.textContent = current;
-    // Never write back to the picker this came from: its panel is a window of
-    // its own, so the input is not necessarily focused, and touching the value
-    // under an open panel is not worth the risk. It already holds this colour.
-    if (pick !== source) pick.value = current;
   }
+}
+
+/** Which colour the open picker is editing, and its current value. */
+function pickTargetHex() {
+  if (state.pick === "accent") return state.accent;
+  const key = LOOK_PICK_KEY[state.pick];
+  return key ? state.look[key] : "";
+}
+
+function renderPicker(target, hex) {
+  const [, sat, val] = hexToHsv(hex);
+  const hue = state.pickHue;
+  return `<div class="pick" data-pick-panel="${target}">
+      <div class="pick-sv" data-pick-sv style="--hue:${hsvToHex(hue, 1, 1)}">
+        <span class="pick-dot" style="left:${sat * 100}%;top:${(1 - val) * 100}%;background:${hex}"></span>
+      </div>
+      <input class="pick-hue" type="range" min="0" max="360" step="1" value="${Math.round(hue)}" data-pick-hue />
+      <div class="pick-foot">
+        <span class="pick-chip" style="background:${hex}"></span>
+        <span class="pick-val">${esc(hex)}</span>
+        <button type="button" class="btn-sm" style="margin-left:auto" ${act("pick-close")}>完了</button>
+      </div>
+    </div>`;
+}
+
+/** Apply a colour from the picker, and move the picker's own marks to match.
+    Like the slider drag, this never re-renders: the panel the pointer is
+    holding has to survive the drag. */
+function applyPick(hex) {
+  if (!state.pick) return;
+  if (state.pick === "accent") setAccentLive(hex);
+  else setLookLive(state.pick, hex);
+
+  const panel = document.querySelector("[data-pick-panel]");
+  if (!panel) return;
+  const [, sat, val] = hexToHsv(hex);
+  const dot = panel.querySelector(".pick-dot");
+  dot.style.left = `${sat * 100}%`;
+  dot.style.top = `${(1 - val) * 100}%`;
+  dot.style.background = hex;
+  panel.querySelector(".pick-chip").style.background = hex;
+  panel.querySelector(".pick-val").textContent = hex;
+}
+
+const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+
+function svHex(sv, event) {
+  const rect = sv.getBoundingClientRect();
+  const sat = clamp((event.clientX - rect.left) / rect.width, 0, 1);
+  const val = 1 - clamp((event.clientY - rect.top) / rect.height, 0, 1);
+  return hsvToHex(state.pickHue, sat, val);
 }
 
 function setAccentLive(hex) {
@@ -1493,9 +1567,7 @@ function renderThemePanel() {
           ${SWATCHES.map((hex) => `<button type="button" class="${cls(hex === state.accent && "is-on")}" style="background:${hex}" title="${hex}" ${act("set-accent", hex)}></button>`).join("")}
         </div>
         <div class="hex-row">
-          <label class="hex-swatch" style="background:${state.accent}" title="色を選ぶ">
-            <input type="color" value="${state.accent}" data-pick-color />
-          </label>
+          <button type="button" class="hex-swatch" style="background:${state.accent}" title="色を選ぶ" ${act("pick-open", "accent")}></button>
           <div class="hex-field">
             <span>#</span>
             <input type="text" value="${esc(state.hexDraft)}" maxlength="7" spellcheck="false" placeholder="F0512B"
@@ -1504,6 +1576,7 @@ function renderThemePanel() {
           <button type="button" class="btn-sm" ${act("reset-accent")} title="はじめの色に戻す">初期値</button>
         </div>
         ${state.hexInvalid ? '<div class="hex-error">6けたのカラーコード（例：F0512B）を入力してください</div>' : ""}
+        ${state.pick === "accent" ? renderPicker("accent", state.accent) : ""}
         <div class="theme-preview">
           <span class="lead">見え方</span>
           <span class="a">A</span>
@@ -2281,13 +2354,12 @@ function renderBluetooth() {
 
 function swatchRow(list, current, action, hex, pickAction) {
   const norm = (v) => (v || "").toUpperCase();
-  return `<div class="sw-row">
+  return `<div class="sw-row" data-row="${pickAction}">
       ${list.map(([name, c]) => `<button type="button" class="${cls("sw", norm(c) === norm(current) && "is-on")}"
         style="background:${c}" title="${esc(name)}" ${act(action, c)}></button>`).join("")}
-      <label class="sw-pick" title="ほかの色を選ぶ">
-        <input type="color" value="${hex}" data-pick="${pickAction}" />
-      </label>
+      <button type="button" class="sw-pick" title="ほかの色を選ぶ" ${act("pick-open", pickAction)}></button>
       <span class="sw-hex">${esc(hex)}</span>
+      ${state.pick === pickAction ? renderPicker(pickAction, hex) : ""}
     </div>`;
 }
 
@@ -2659,6 +2731,13 @@ const CLICK = {
   "theme-toggle": () => { state.themeOpen = !state.themeOpen; state.presetsOpen = false; render(); },
   "presets-toggle": () => { state.presetsOpen = !state.presetsOpen; state.themeOpen = false; render(); },
   "set-dark": (a) => { state.dark = a === "1"; render(); },
+  "pick-open": (a) => {
+    state.pick = state.pick === a ? null : a;
+    if (state.pick) state.pickHue = hexToHsv(pickTargetHex())[0];
+    render();
+  },
+  "pick-close": () => { state.pick = null; render(); },
+
   "set-accent": (a) => { state.accent = a; state.hexDraft = a.slice(1); state.hexInvalid = false; render(); },
   "reset-accent": () => { state.accent = DEFAULT_ACCENT; state.hexDraft = DEFAULT_ACCENT.slice(1); state.hexInvalid = false; render(); },
 
@@ -2798,12 +2877,40 @@ function init() {
     if (handler) handler(el.dataset.a, el.dataset.b);
   });
 
+  // Dragging in the picker's colour square. Pointer capture keeps the events
+  // coming to the square even when the pointer leaves it mid-drag.
+  app.addEventListener("pointerdown", (event) => {
+    const sv = event.target.closest && event.target.closest("[data-pick-sv]");
+    if (!sv) return;
+    event.preventDefault();
+    sv.setPointerCapture(event.pointerId);
+    const move = (e) => applyPick(svHex(sv, e));
+    const up = () => {
+      sv.removeEventListener("pointermove", move);
+      sv.removeEventListener("pointerup", up);
+      sv.removeEventListener("pointercancel", up);
+    };
+    sv.addEventListener("pointermove", move);
+    sv.addEventListener("pointerup", up);
+    sv.addEventListener("pointercancel", up);
+    applyPick(svHex(sv, event));
+  });
+
   // Live readout while dragging a slider — state only, no re-render, so the
   // drag is not interrupted.
   app.addEventListener("input", (event) => {
     const t = event.target;
-    if (t.dataset.pick) return setLookLive(t.dataset.pick, t.value, t);
-    if (t.hasAttribute("data-pick-color")) return setAccentLive(t.value);
+    if (t.hasAttribute("data-pick-hue")) {
+      state.pickHue = Number(t.value);
+      const sv = document.querySelector("[data-pick-sv]");
+      if (sv) sv.style.setProperty("--hue", hsvToHex(state.pickHue, 1, 1));
+      const [, sat, val] = hexToHsv(pickTargetHex());
+      // A grey has no hue to keep, so dragging the strip would do nothing
+      // visible. Give it full saturation instead, which is what the user is
+      // reaching for when they drag a colour strip.
+      applyPick(hsvToHex(state.pickHue, sat || 1, val || 1));
+      return;
+    }
     if (t.dataset.slider) {
       const key = t.dataset.slider;
       const value = Number(t.value);
@@ -2854,8 +2961,6 @@ function init() {
       state.pointer[key] = Number(t.value);
       return render();
     }
-    if (t.dataset.pick) return setLookLive(t.dataset.pick, t.value, t);
-    if (t.hasAttribute("data-pick-color")) return setAccentLive(t.value);
     if (t.hasAttribute("data-raw")) return writeBinding(t.value);
   });
 
@@ -2864,15 +2969,26 @@ function init() {
   // bubbles back up, the handler above has already re-rendered and the clicked
   // node is detached, so closest() would always say "outside".
   let insidePop = false;
+  let insidePick = false;
   document.addEventListener("click", (event) => {
-    insidePop = !!(event.target.closest && event.target.closest(".pop-wrap"));
+    const near = event.target.closest;
+    insidePop = !!(near && event.target.closest(".pop-wrap"));
+    // The swatch row and the hex row count as "inside": picking a preset while
+    // the picker is open should not shut it.
+    insidePick = !!(near && event.target.closest(".pick, .sw-row, .hex-row"));
   }, true);
   document.addEventListener("click", () => {
-    if (!state.themeOpen && !state.presetsOpen) return;
-    if (insidePop) return;
-    state.themeOpen = false;
-    state.presetsOpen = false;
-    render();
+    let changed = false;
+    if ((state.themeOpen || state.presetsOpen) && !insidePop) {
+      state.themeOpen = false;
+      state.presetsOpen = false;
+      changed = true;
+    }
+    if (state.pick && !insidePick) {
+      state.pick = null;
+      changed = true;
+    }
+    if (changed) render();
   });
 
   state.ed = parseInto(state.keymap[state.layer].bindings[state.sel]);
