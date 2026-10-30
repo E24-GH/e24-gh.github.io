@@ -281,10 +281,28 @@ const MODELS = {
   white: { label: "ホワイト", sub: "白い筐体＋グレーのバンパー", body: "#F4F4F2", bumper: "#9CA3AE", cap: "#F4F4F2", ball: "#F4F4F2" },
   black: { label: "ブラック", sub: "バンパーまですべて黒", body: "#1C1D20", bumper: "#1E1F22", cap: "#2A2B2E", ball: "#2A2B2E" },
 };
-const BUMPERS = [["グレー", "#9CA3AE"], ["ブラック", "#1E1F22"], ["ホワイト", "#F1F1EE"], ["ブルー", "#3D7BD9"], ["スカイ", "#7EC3E8"], ["ミント", "#7CCBAA"], ["イエロー", "#E9C53A"], ["オレンジ", "#E8833A"], ["レッド", "#D9483B"], ["ピンク", "#E58BB0"], ["パープル", "#8C6FD1"]];
-const CAPS = [["ホワイト", "#F4F4F2"], ["ライトグレー", "#D9DBDF"], ["チャコール", "#55585F"], ["ブラック", "#2A2B2E"], ["ネイビー", "#27324A"], ["ベージュ", "#E9DFCC"], ["ミント", "#BFE3D2"], ["スカイ", "#C6DDF2"], ["ラベンダー", "#D7CCF0"], ["ピーチ", "#F6C9B4"]];
-const BALLS = [["パール", "#F4F4F2"], ["グレー", "#A8ADB5"], ["ブラック", "#2A2B2E"], ["レッド", "#D9483B"], ["オレンジ", "#E8833A"], ["イエロー", "#E9C53A"], ["グリーン", "#4FA36B"], ["ブルー", "#3D7BD9"], ["パープル", "#8C6FD1"], ["ピンク", "#E58BB0"]];
-const BRUSHES = [["テラコッタ", "#D49A80"], ["オレンジ", "#E8833A"], ["レッド", "#D9483B"], ["イエロー", "#E9C53A"], ["グリーン", "#4FA36B"], ["ブルー", "#3D7BD9"], ["パープル", "#8C6FD1"], ["ピンク", "#E58BB0"], ["ホワイト", "#F4F4F2"], ["ブラック", "#2A2B2E"]];
+// Twelve colours, the same twelve in the same order on every row, so the rows
+// line up and a colour means the same thing wherever you meet it. The values
+// differ per material: bumpers are saturated, balls glossy, keycaps the muted
+// shades moulded resin actually comes in. Anything outside these twelve is
+// what the colour picker and 最近使った色 are for.
+const BUMPERS = [
+  ["ホワイト", "#F1F1EE"], ["グレー", "#9CA3AE"], ["チャコール", "#5A5F68"], ["ブラック", "#1E1F22"],
+  ["レッド", "#D9483B"], ["オレンジ", "#E8833A"], ["イエロー", "#E9C53A"], ["グリーン", "#7CCBAA"],
+  ["スカイ", "#7EC3E8"], ["ブルー", "#3D7BD9"], ["パープル", "#8C6FD1"], ["ピンク", "#E58BB0"],
+];
+const BALLS = [
+  ["ホワイト", "#F4F4F2"], ["グレー", "#A8ADB5"], ["チャコール", "#5E626A"], ["ブラック", "#2A2B2E"],
+  ["レッド", "#D9483B"], ["オレンジ", "#E8833A"], ["イエロー", "#E9C53A"], ["グリーン", "#4FA36B"],
+  ["スカイ", "#7EC3E8"], ["ブルー", "#3D7BD9"], ["パープル", "#8C6FD1"], ["ピンク", "#E58BB0"],
+];
+const CAPS = [
+  ["ホワイト", "#F4F4F2"], ["グレー", "#D9DBDF"], ["チャコール", "#55585F"], ["ブラック", "#2A2B2E"],
+  ["レッド", "#D9483B"], ["オレンジ", "#F6C9B4"], ["イエロー", "#EFE3B0"], ["グリーン", "#BFE3D2"],
+  ["スカイ", "#C6DDF2"], ["ブルー", "#27324A"], ["パープル", "#D7CCF0"], ["ピンク", "#F2C4D5"],
+];
+// Painting one key is still choosing a keycap, so it is the same twelve.
+const BRUSHES = CAPS;
 
 // The four arrow keys ship with red caps, so they start painted.
 const ARROW_KEYS = [36, 47, 48, 49];
@@ -361,6 +379,7 @@ const LS = {
   profiles: "zen-configurator-profiles",
   keymapPath: "zen-configurator-keymap-path",
   look: "zen-configurator-look",
+  recents: "zen-configurator-recent-colours",
 };
 
 function lsGet(key, fallback) {
@@ -472,6 +491,7 @@ const state = {
   // hue it is on. The hue is kept separately: a grey has none to read back.
   pick: null,
   pickHue: 0,
+  recents: (lsGet(LS.recents, []) || []).filter(validHex).map(normHex).slice(0, 8),
 
   // What the user's own keyboard looks like. Cosmetic, this computer only.
   look: { ...DEFAULT_LOOK, ...lsGet(LS.look, {}) },
@@ -553,6 +573,37 @@ function setLookLive(action, hex) {
   }
 }
 
+// Colours outside the twelve presets would otherwise be unreachable once you
+// moved off them -- the hex readout told you what you had, but nothing let you
+// get back to it. Keep the last few, and bound the list so the strip cannot
+// grow without end.
+const RECENTS_MAX = 8;
+const PICK_PRESETS = {
+  "look-bumper": BUMPERS, "look-ball": BALLS, "look-cap": CAPS, "look-brush": BRUSHES,
+};
+
+function isPreset(target, hex) {
+  const v = normHex(hex);
+  const list = PICK_PRESETS[target];
+  if (list) return list.some(([, c]) => normHex(c) === v);
+  return SWATCHES.some((c) => normHex(c) === v);
+}
+
+function rememberColour(hex) {
+  const v = normHex(hex);
+  state.recents = [v, ...state.recents.filter((c) => c !== v)].slice(0, RECENTS_MAX);
+  lsSet(LS.recents, state.recents);
+}
+
+/** Close the picker, keeping the colour if it was not one of the presets.
+    Called from every path that closes it, so a colour is never lost. */
+function closePick() {
+  if (!state.pick) return;
+  const hex = pickTargetHex();
+  if (validHex(hex) && !isPreset(state.pick, hex)) rememberColour(hex);
+  state.pick = null;
+}
+
 /** Which colour the open picker is editing, and its current value. */
 function pickTargetHex() {
   if (state.pick === "accent") return state.accent;
@@ -568,6 +619,11 @@ function renderPicker(target, hex) {
         <span class="pick-dot" style="left:${sat * 100}%;top:${(1 - val) * 100}%;background:${hex}"></span>
       </div>
       <input class="pick-hue" type="range" min="0" max="360" step="1" value="${Math.round(hue)}" data-pick-hue />
+      ${state.recents.length ? `<div class="pick-recent">
+        <span class="l">最近使った色</span>
+        <span class="r">${state.recents.map((c) => `<button type="button" class="${cls("sw sw-sm", normHex(c) === normHex(hex) && "is-on")}"
+          style="background:${c}" title="${esc(c)}" ${act("pick-recent", c)}></button>`).join("")}</span>
+      </div>` : ""}
       <div class="pick-foot">
         <span class="pick-chip" style="background:${hex}"></span>
         <span class="pick-val">${esc(hex)}</span>
@@ -2413,6 +2469,8 @@ function swatchRow(list, current, action, hex, pickAction) {
   return `<div class="sw-row" data-row="${pickAction}">
       ${list.map(([name, c]) => `<button type="button" class="${cls("sw", norm(c) === norm(current) && "is-on")}"
         style="background:${c}" title="${esc(name)}" ${act(action, c)}></button>`).join("")}
+      ${list.some(([, c]) => norm(c) === norm(current)) ? "" : `<button type="button" class="sw is-on"
+        style="background:${current}" title="いま選んでいる色" ${act(action, current)}></button>`}
       <button type="button" class="sw-pick" title="ほかの色を選ぶ" ${act("pick-open", pickAction)}></button>
       <span class="sw-hex">${esc(hex)}</span>
       ${state.pick === pickAction ? renderPicker(pickAction, hex) : ""}
@@ -2773,11 +2831,19 @@ const CLICK = {
   "presets-toggle": () => { state.presetsOpen = !state.presetsOpen; state.themeOpen = false; render(); },
   "set-dark": (a) => { state.dark = a === "1"; render(); },
   "pick-open": (a) => {
-    state.pick = state.pick === a ? null : a;
+    const next = state.pick === a ? null : a;
+    closePick();
+    state.pick = next;
     if (state.pick) state.pickHue = hexToHsv(pickTargetHex())[0];
     render();
   },
-  "pick-close": () => { state.pick = null; render(); },
+  "pick-close": () => { closePick(); render(); },
+  "pick-recent": (a) => {
+    if (state.pick === "accent") setAccentLive(a);
+    else setLookLive(state.pick, a);
+    state.pickHue = hexToHsv(a)[0];
+    render();
+  },
 
   "set-accent": (a) => { state.accent = a; state.hexDraft = a.slice(1); state.hexInvalid = false; render(); },
   "reset-accent": () => { state.accent = DEFAULT_ACCENT; state.hexDraft = DEFAULT_ACCENT.slice(1); state.hexInvalid = false; render(); },
@@ -3026,7 +3092,7 @@ function init() {
       changed = true;
     }
     if (state.pick && !insidePick) {
-      state.pick = null;
+      closePick();
       changed = true;
     }
     if (changed) render();
