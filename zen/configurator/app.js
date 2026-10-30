@@ -185,6 +185,7 @@ const ICON = {
   auto: "M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M6 18l2-2M16 8l2-2",
   combo: "M4 6h6v6H4zM14 6h6v6h-6zM10 9h4M12 12v4M8 20h8",
   mousetab: "M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM8.5 9.5a4 4 0 0 1 4-2.5",
+  shuffle: "M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5",
   search: "",
 };
 
@@ -278,8 +279,8 @@ const PALETTE = {
 // desk. None of it is ever sent to the keyboard.
 
 const MODELS = {
-  white: { label: "ホワイト", sub: "白い筐体＋グレーのバンパー", body: "#F4F4F2", bumper: "#9CA3AE", cap: "#F4F4F2", ball: "#F4F4F2" },
-  black: { label: "ブラック", sub: "バンパーまですべて黒", body: "#1C1D20", bumper: "#1E1F22", cap: "#2A2B2E", ball: "#2A2B2E" },
+  white: { label: "ホワイト", body: "#F4F4F2", plate: "#F4F4F2", bumper: "#9CA3AE", cap: "#F4F4F2", ball: "#F4F4F2" },
+  black: { label: "ブラック", body: "#1C1D20", plate: "#1C1D20", bumper: "#1E1F22", cap: "#2A2B2E", ball: "#2A2B2E" },
 };
 // Twelve colours, the same twelve in the same order on every row, so the rows
 // line up and a colour means the same thing wherever you meet it. The values
@@ -303,15 +304,96 @@ const CAPS = [
 ];
 // Painting one key is still choosing a keycap, so it is the same twelve.
 const BRUSHES = CAPS;
+// The top plate, when it is painted rather than acrylic. Lighter than the
+// bumper of the same name: a wide flat surface reads darker than a thin edge.
+const PLATES = [
+  ["ホワイト", "#F4F4F2"], ["グレー", "#B9BEC6"], ["チャコール", "#3A3C42"], ["ブラック", "#1C1D20"],
+  ["レッド", "#C8473C"], ["オレンジ", "#E8915A"], ["イエロー", "#EBD38A"], ["グリーン", "#9ED6BE"],
+  ["スカイ", "#A9D2EE"], ["ブルー", "#3D7BD9"], ["パープル", "#B3A2E0"], ["ピンク", "#F2C4D3"],
+];
+// Acrylic is tinted, not painted, so the first four are the smoke shades the
+// sheet comes in rather than white/grey/charcoal/black, and "クリア" is the
+// absence of a tint. Both acrylics use the same twelve.
+const ACRYLS = [
+  ["クリア", "NONE"], ["ライトスモーク", "#9AA1AC"], ["スモーク", "#3A3F48"], ["ブラックスモーク", "#15171B"],
+  ["レッド", "#D9483B"], ["オレンジ", "#F0512B"], ["イエロー", "#E9C53A"], ["グリーン", "#4FA36B"],
+  ["アクア", "#3FB7C9"], ["ブルー", "#3D7BD9"], ["パープル", "#8C6FD1"], ["ピンク", "#E58BB0"],
+];
 
 // The four arrow keys ship with red caps, so they start painted.
 const ARROW_KEYS = [36, 47, 48, 49];
 const ARROW_CAP = "#D9483B";
 const DEFAULT_LOOK = {
   model: "white", bumper: "#9CA3AE", cap: "#F4F4F2", ball: "#F4F4F2",
+  // The top plate is either painted (`plate`) or acrylic (`tint`, "NONE" for
+  // untinted); `mat` says which of the two is on show.
+  mat: "solid", plate: "#F4F4F2", tint: "NONE",
   paint: Object.fromEntries(ARROW_KEYS.map((i) => [i, ARROW_CAP])),
   brush: ARROW_CAP, reflect: true,
 };
+
+// --- おすすめ配色 -----------------------------------------------------------
+//
+// A configuration is proposed entirely here, offline: nothing is asked of a
+// server, and nothing is invented. Recipes are written as *indices into the
+// twelve families*, so whatever comes out can be bought -- look the index up
+// in CAPS/BUMPERS/BALLS and you have a part that exists.
+//
+//   base = キーキャップ（全体） / sub = バンパー / accent = 矢印キー
+//   ball = トラックボール      / plate = 天板の素材
+//
+// A family repeated in a list is simply more likely to come up; that is the
+// only weighting there is.
+const MOODS = {
+  spring: { label: "春", base: [0, 11, 0, 7], sub: [11, 0, 7, 1], accent: [11, 7, 6, 10], ball: [0, 11, 7], plate: ["solid", "solid", "frost"] },
+  summer: { label: "夏", base: [0, 8, 0], sub: [8, 9, 0], accent: [5, 6, 8, 9], ball: [0, 8, 9, 6], plate: ["clear", "clear", "solid"] },
+  autumn: { label: "秋", base: [5, 6, 2, 0], sub: [5, 2, 3, 4], accent: [4, 5, 6], ball: [5, 4, 2], plate: ["solid", "solid", "frost"] },
+  winter: { label: "冬", base: [0, 2, 3, 1], sub: [1, 3, 0, 9], accent: [8, 9, 4, 0], ball: [0, 8, 1], plate: ["frost", "solid", "solid"] },
+  trend: { label: "トレンド", base: [0, 1, 0, 10, 7], sub: [2, 1, 0, 10], accent: [10, 7, 5, 11, 4, 9], ball: [0, 1, 10, 7], plate: ["solid", "frost", "clear"] },
+  calm: { label: "落ち着き", base: [0, 1, 2, 3], sub: [1, 2, 3, 0], accent: [2, 3, 0, 9], ball: [0, 1, 2, 3], plate: ["solid", "solid", "frost"] },
+};
+// The painted plate that goes with each keycap family, and the acrylic tint
+// that goes with each bumper family. Both are indexed by family, like MOODS.
+const PLATE_FOR = ["#F4F4F2", "#B9BEC6", "#3A3C42", "#1C1D20", "#F4F4F2", "#F4F4F2", "#EBD38A", "#9ED6BE", "#A9D2EE", "#3A3C42", "#F4F4F2", "#F2C4D3"];
+const TINT_FOR = ACRYLS.map(([, hex]) => hex);
+
+function seasonNow() {
+  const m = new Date().getMonth() + 1;
+  return m >= 3 && m <= 5 ? "spring" : m >= 6 && m <= 8 ? "summer" : m >= 9 && m <= 11 ? "autumn" : "winter";
+}
+
+/** How far apart two keycap colours are, as a plain RGB distance. Good enough
+ *  to answer the only question asked of it: would the arrow keys disappear
+ *  into the rest of the board? */
+function capDist(a, b) {
+  const x = parseInt(a.slice(1), 16);
+  const y = parseInt(b.slice(1), 16);
+  const d = (shift) => ((x >> shift) & 255) - ((y >> shift) & 255);
+  return Math.sqrt(d(16) ** 2 + d(8) ** 2 + d(0) ** 2);
+}
+
+/** Draw one configuration from @p moodKey ("any" picks a mood at random).
+ *  Rerolls a result identical to @p prevSig, or one whose arrow keys would
+ *  vanish into the other caps -- but gives up rather than loop, because a
+ *  narrow mood may have nothing else to offer. */
+function recipeFor(moodKey, prevSig) {
+  const pick = (list) => list[Math.floor(Math.random() * list.length)];
+  for (let tries = 0; tries < 24; tries++) {
+    const key = moodKey === "any" ? pick(Object.keys(MOODS)) : moodKey;
+    const mood = MOODS[key];
+    const base = pick(mood.base);
+    const sub = pick(mood.sub);
+    const apart = mood.accent.filter((a) => a !== base && a !== sub);
+    const accent = pick(apart.length ? apart : mood.accent);
+    const ball = Math.random() < 0.4 ? accent : pick(mood.ball);
+    const mat = pick(mood.plate);
+    const sig = [key, base, sub, accent, ball, mat].join("-");
+    const last = tries === 23;
+    if (!last && sig === prevSig) continue;
+    if (!last && capDist(CAPS[base][1], CAPS[accent][1]) < 50) continue;
+    return { key, base, sub, accent, ball, mat, sig };
+  }
+}
 
 /** Plain (non-gamma) brightness, which is what "does black text read on this
  *  keycap?" actually wants -- the WCAG curve pushes mid greys the wrong way. */
@@ -493,6 +575,13 @@ const state = {
   pickHue: 0,
   recents: (lsGet(LS.recents, []) || []).filter(validHex).map(normHex).slice(0, 8),
 
+  // おすすめ配色. The mood and the undo stack are for this sitting only -- the
+  // colours they produce are saved like any others, but which button was lit
+  // when you left is not worth remembering.
+  recMood: "any",
+  recLast: null,
+  recUndo: [],
+
   // What the user's own keyboard looks like. Cosmetic, this computer only.
   look: { ...DEFAULT_LOOK, ...lsGet(LS.look, {}) },
 
@@ -521,6 +610,20 @@ const LOOK_PICK_KEY = {
   "look-cap": "cap",
   "look-brush": "brush",
 };
+
+/** Which field of `look` a row edits. The top plate is one row but two
+ *  fields: the paint colour, or the acrylic tint. */
+function lookKeyFor(row) {
+  if (row === "look-plate") return plateOf(state.look).acryl ? "tint" : "plate";
+  return LOOK_PICK_KEY[row];
+}
+
+/** The name of an acrylic tint, for the readout. A tint the user mixed
+ *  themselves has none, so it falls back to the code. */
+function tintName(tint) {
+  const found = ACRYLS.find(([, v]) => v === tint);
+  return found ? found[0] : tint;
+}
 
 /** Recolour the keyboard preview without rebuilding it.
  *
@@ -554,7 +657,7 @@ function repaintBoardColours() {
 }
 
 function setLookLive(action, hex) {
-  const key = LOOK_PICK_KEY[action];
+  const key = lookKeyFor(action);
   if (!key || !validHex(hex)) return;
   state.look = { ...state.look, [key]: normHex(hex) };
   saveLook();
@@ -562,14 +665,24 @@ function setLookLive(action, hex) {
   repaintBoardColours();
 
   for (const row of document.querySelectorAll(".sw-row[data-row]")) {
-    const rowKey = LOOK_PICK_KEY[row.dataset.row];
+    const rowKey = lookKeyFor(row.dataset.row);
     if (!rowKey) continue;
+    const acryl = row.hasAttribute("data-acryl");
     const current = normHex(state.look[rowKey]);
     for (const sw of row.querySelectorAll(".sw")) {
       sw.classList.toggle("is-on", normHex(sw.dataset.a || "") === current);
     }
+    // The swatch standing in for a colour outside the twelve is the one the
+    // drag is moving, so it has to follow rather than keep the colour it was
+    // rendered with.
+    const cur = row.querySelector(".sw-cur");
+    if (cur) {
+      cur.dataset.a = current;
+      cur.style.background = acryl ? acrylSwatch(current) : current;
+      cur.classList.add("is-on");
+    }
     const out = row.querySelector(".sw-hex");
-    if (out) out.textContent = current;
+    if (out) out.textContent = acryl ? tintName(current) : current;
   }
 }
 
@@ -582,9 +695,14 @@ const PICK_PRESETS = {
   "look-bumper": BUMPERS, "look-ball": BALLS, "look-cap": CAPS, "look-brush": BRUSHES,
 };
 
+function presetsFor(target) {
+  if (target === "look-plate") return plateOf(state.look).acryl ? ACRYLS : PLATES;
+  return PICK_PRESETS[target];
+}
+
 function isPreset(target, hex) {
   const v = normHex(hex);
-  const list = PICK_PRESETS[target];
+  const list = presetsFor(target);
   if (list) return list.some(([, c]) => normHex(c) === v);
   return SWATCHES.some((c) => normHex(c) === v);
 }
@@ -607,8 +725,12 @@ function closePick() {
 /** Which colour the open picker is editing, and its current value. */
 function pickTargetHex() {
   if (state.pick === "accent") return state.accent;
-  const key = LOOK_PICK_KEY[state.pick];
-  return key ? state.look[key] : "";
+  const key = lookKeyFor(state.pick);
+  if (!key) return "";
+  const value = state.look[key];
+  // Untinted acrylic has no colour of its own; open the picker on white, which
+  // is where dragging away from "clear" naturally starts.
+  return value === "NONE" ? "#FFFFFF" : value;
 }
 
 function renderPicker(target, hex) {
@@ -1787,6 +1909,40 @@ function keyFontSize(main) {
   return "2.2cqw";
 }
 
+/** The tint, laid over whatever is beneath it, as one flat CSS layer.
+ *  @p strong is used instead of @p normal for a dark tint, which needs more of
+ *  itself to read as that colour at all. "NONE" is clear acrylic: no tint, just
+ *  the glass. */
+function tintLayer(tint, normal, strong) {
+  if (tint === "NONE") return "linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0))";
+  const pct = hexLum(tint) < 0.25 ? strong : normal;
+  const a = `color-mix(in srgb, ${tint} ${pct}%, transparent)`;
+  return `linear-gradient(${a}, ${a})`;
+}
+
+const FROST_GLASS = "linear-gradient(rgba(246,248,250,.56), rgba(246,248,250,.56))";
+const CLEAR_GLASS = "linear-gradient(rgba(240,243,247,.20), rgba(240,243,247,.20))";
+
+/** What the board under an acrylic plate is seen through: the tint, then the
+ *  glass itself. Frosted glass is milkier, so its tint is laid on lighter. */
+function acrylVeil(mat, tint) {
+  return mat === "frost"
+    ? `${tintLayer(tint, 30, 46)}, ${FROST_GLASS}`
+    : `${tintLayer(tint, 34, 50)}, ${CLEAR_GLASS}`;
+}
+
+/** The top plate as currently chosen, whichever of the two it is. */
+function plateOf(L) {
+  const mat = L.mat || "solid";
+  return {
+    mat,
+    acryl: mat !== "solid",
+    frost: mat === "frost",
+    plate: L.plate || MODELS[L.model].plate,
+    tint: L.tint || "NONE",
+  };
+}
+
 /** The case, bumper, plate, socket and ball, as CSS variables for .board.
  *
  * The colour tab always shows the real colours (you are picking them); every
@@ -1795,26 +1951,47 @@ function keyFontSize(main) {
 function boardLook() {
   const L = state.look;
   const use = state.tab === "color" || L.reflect;
-  const black = L.model === "black";
+  const { mat, acryl, frost, plate, tint } = plateOf(L);
+  // An acrylic plate shows the board underneath -- but only when the preview
+  // is showing the user's own keyboard at all.
+  const pcb = use && acryl;
+  // A dark plate needs its inner highlight darkened too, or the white rim of
+  // the light theme draws a bright outline around it.
+  const dark = !acryl && hexLum(plate) < 0.3;
+  // The BMP BOOST cover is an opaque part: it stays the model's colour even
+  // when everything around it has gone transparent.
+  const cover = MODELS[L.model].plate;
+
   const vars = {
-    "case-bg": !use ? "var(--acrylic)" : black
-      ? "linear-gradient(150deg, rgba(42,44,50,.94) 0%, rgba(22,23,27,.92) 60%, rgba(34,36,41,.94) 100%)"
-      : "linear-gradient(150deg, rgba(255,255,255,.82) 0%, rgba(245,245,242,.62) 55%, rgba(255,255,255,.74) 100%)",
+    // Under acrylic this is what shows through the cut-outs in the board.
+    "case-bg": pcb ? "#E9EAEC" : !use ? "var(--acrylic)"
+      : `linear-gradient(150deg, color-mix(in srgb, ${plate} 88%, #FFFFFF) 0%, ${plate} 55%, color-mix(in srgb, ${plate} 92%, #FFFFFF) 100%)`,
     bumper: use ? L.bumper : "var(--case-frame)",
-    // A black case needs its inner highlight darkened or the white rim of the
-    // light theme draws a bright outline around it.
-    "case-shadow": use && black
+    "case-shadow": use && dark
       ? "inset 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 .8cqw rgba(0,0,0,.18), 0 3cqw 6cqw -3.5cqw rgba(0,0,0,.55)"
       : "inset 0 0 0 1px var(--case-rim), inset 0 1px 0 var(--glass-hi), inset 0 0 0 .8cqw var(--acrylic-edge), 0 3cqw 6cqw -3.5cqw var(--glass-shadow)",
-    "plate-bg": !use ? "var(--fill)" : black ? "#26272B" : "#FBFBF9",
-    "plate-bd": !use ? "var(--line)" : black ? "rgba(255,255,255,.06)" : "rgba(21,27,43,.08)",
-    "housing-bg": !use ? "var(--fill)" : black ? "#202125" : "#FAFAF8",
+    "plate-bg": pcb ? cover : !use ? "var(--fill)" : `color-mix(in srgb, ${plate} 84%, #FFFFFF)`,
+    "plate-bd": pcb ? (L.model === "black" ? "rgba(255,255,255,.08)" : "rgba(21,27,43,.10)")
+      : !use ? "var(--line)" : dark ? "rgba(255,255,255,.07)" : "rgba(21,27,43,.08)",
+    // Over acrylic the cover is lifted off the plate rather than flush with it.
+    "cover-shadow": pcb
+      ? "inset 0 -.4cqw 0 rgba(0,0,0,.06), 0 .4cqw 1cqw -.4cqw rgba(21,27,43,.35)"
+      : "inset 0 -.4cqw 0 rgba(0,0,0,.05)",
+    "housing-bg": pcb ? (frost ? "rgba(236,238,241,.78)" : "rgba(236,238,241,.55)")
+      : !use ? "var(--fill)" : `color-mix(in srgb, ${plate} 90%, #FFFFFF)`,
+    "housing-bd": pcb ? "rgba(255,255,255,.55)"
+      : !use ? "var(--line)" : dark ? "rgba(255,255,255,.07)" : "rgba(21,27,43,.08)",
     "ball-bg": !use
       ? "radial-gradient(circle at 36% 30%,var(--surface) 0%,var(--fill2) 45%,var(--line-strong) 100%)"
       : `radial-gradient(circle at 36% 30%, color-mix(in srgb, ${L.ball} 30%, #FFFFFF) 0%, ${L.ball} 52%, color-mix(in srgb, ${L.ball} 72%, #000000) 100%)`,
     "ball-bd": !use ? "var(--line-strong)" : `color-mix(in srgb, ${L.ball} 80%, #000000)`,
+    "pcb-veil": acrylVeil(mat, tint),
+    "pcb-filter": frost ? "blur(2.5px) saturate(.85)" : "none",
+    "pcb-sheen": frost
+      ? "linear-gradient(150deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.18) 45%, rgba(255,255,255,.34) 100%)"
+      : "linear-gradient(150deg, rgba(255,255,255,.30) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 70%, rgba(255,255,255,.16) 100%)",
   };
-  return { use, style: Object.entries(vars).map(([k, v]) => `--${k}:${v}`).join(";") };
+  return { use, pcb, style: Object.entries(vars).map(([k, v]) => `--${k}:${v}`).join(";") };
 }
 
 /** Background, legend and shadow for one key, in the order they win:
@@ -1881,9 +2058,16 @@ function renderBoards() {
 
   const lcd = (side, value) => `<div class="lcd lcd-${side}"><span class="cap">BATTERY</span><span class="val">${value == null ? "--" : value + "%"}</span></div>`;
 
+  // The board seen through an acrylic plate. Two layers rather than one: the
+  // sheen must not pick up the frost blur applied to the board itself.
+  const pcb = (side) => (board.pcb
+    ? `<div class="pcb pcb-${side}" aria-hidden="true"></div><div class="pcb pcb-sheen" aria-hidden="true"></div>`
+    : "");
+
   return `<div class="boards">
       <div class="board-wrap">
         <div class="board" style="${board.style}">
+          ${pcb("l")}
           <div class="plate plate-l"></div>
           ${keys.filter((k) => k.left).map((k) => k.html).join("")}
           ${lcd("l", bat.left)}
@@ -1892,6 +2076,7 @@ function renderBoards() {
       </div>
       <div class="board-wrap">
         <div class="board" style="${board.style}">
+          ${pcb("r")}
           <div class="plate plate-r"></div>
           ${keys.filter((k) => !k.left).map((k) => k.html).join("")}
           <button type="button" class="tb" ${act("tab", "pointer")} title="マウス操作の設定へ">
@@ -2463,17 +2648,39 @@ function renderBluetooth() {
 
 // --- Render: keyboard colours -----------------------------------------------
 
-function swatchRow(list, current, action, hex, pickAction) {
+/** One row of colour choices: the twelve, the current colour when it is not
+ *  one of them, the picker button, and the readout.
+ *
+ *  @p acryl draws each swatch as the board seen through that tint instead of
+ *  as a flat colour, and @p label is what the readout says -- a tint has a
+ *  name worth more than its hex ("クリア" has no hex at all). */
+function swatchRow(list, current, action, pickAction, { acryl = false, label = current } = {}) {
   const norm = (v) => (v || "").toUpperCase();
-  return `<div class="sw-row" data-row="${pickAction}">
-      ${list.map(([name, c]) => `<button type="button" class="${cls("sw", norm(c) === norm(current) && "is-on")}"
-        style="background:${c}" title="${esc(name)}" ${act(action, c)}></button>`).join("")}
-      ${list.some(([, c]) => norm(c) === norm(current)) ? "" : `<button type="button" class="sw is-on"
-        style="background:${current}" title="いま選んでいる色" ${act(action, current)}></button>`}
+  const paint = acryl ? (v) => acrylSwatch(v) : (v) => v;
+  const swatch = (name, c, extra) => `<button type="button" class="${cls("sw", extra, norm(c) === norm(current) && "is-on")}"
+      style="background:${paint(c)}" title="${esc(name)}" ${act(action, c)}></button>`;
+  return `<div class="sw-row" data-row="${pickAction}"${acryl ? ' data-acryl=""' : ""}>
+      ${list.map(([name, c]) => swatch(name, c)).join("")}
+      ${list.some(([, c]) => norm(c) === norm(current)) ? "" : swatch("いま選んでいる色", current, "sw-cur")}
       <button type="button" class="sw-pick" title="ほかの色を選ぶ" ${act("pick-open", pickAction)}></button>
-      <span class="sw-hex">${esc(hex)}</span>
-      ${state.pick === pickAction ? renderPicker(pickAction, hex) : ""}
+      <span class="sw-hex">${esc(label)}</span>
+      ${state.pick === pickAction ? renderPicker(pickAction, pickTargetHex()) : ""}
     </div>`;
+}
+
+/** An acrylic swatch: a scrap of the board, the glass, the tint, and a
+ *  highlight across the top so it reads as a piece of sheet rather than a
+ *  circle of colour. */
+function acrylSwatch(tint) {
+  const { mat } = plateOf(state.look);
+  const strong = tint !== "NONE" && hexLum(tint) < 0.25;
+  const a = tint === "NONE" ? "rgba(255,255,255,0)" : `color-mix(in srgb, ${tint} ${strong ? 50 : 38}%, transparent)`;
+  return [
+    "linear-gradient(135deg, rgba(255,255,255,.32), rgba(255,255,255,0) 60%)",
+    `linear-gradient(${a}, ${a})`,
+    mat === "frost" ? FROST_GLASS : CLEAR_GLASS,
+    "url(assets/pcb-right.png) 30% 40% / 260% auto",
+  ].join(", ");
 }
 
 function colorRow({ title, desc, first, control }) {
@@ -2483,22 +2690,52 @@ function colorRow({ title, desc, first, control }) {
     </div>`;
 }
 
+/** The 配色を提案 card: a mood, a button, and one step of undo. */
+function renderRecommend() {
+  const season = seasonNow();
+  const moods = [
+    ["any", "おまかせ"],
+    ["season", `季節（${MOODS[season].label}）`],
+    ["trend", MOODS.trend.label],
+    ["calm", MOODS.calm.label],
+  ];
+  return `<section class="card glass rec-card">
+      <span class="rec-title">おすすめ配色</span>
+      <div class="seg-pill">
+        ${moods.map(([id, label]) => `<button type="button" class="${cls(state.recMood === id && "is-on")}"
+          ${act("rec-mood", id)}>${esc(label)}</button>`).join("")}
+      </div>
+      <div class="rec-acts">
+        <button type="button" class="btn-sm" ${act("rec-undo")} ${state.recUndo.length ? "" : "disabled"}>ひとつ戻す</button>
+        <button type="button" class="btn btn-accent rec-go" ${act("rec-suggest")}>${svg(ICON.shuffle, 15)}配色を提案</button>
+      </div>
+    </section>`;
+}
+
 function renderColor() {
   const L = state.look;
   const painted = Object.keys(L.paint).length;
+  const { acryl, plate, tint } = plateOf(L);
 
   const models = Object.entries(MODELS).map(([id, m]) => `
     <button type="button" class="${cls("model-card", L.model === id && "is-on")}" ${act("look-model", id)}>
       <span class="model-art" style="background:${m.body};border-color:${m.bumper}">
         ${Array.from({ length: 8 }, (_, i) => `<span style="background:${i === 6 ? ARROW_CAP : m.cap}"></span>`).join("")}
       </span>
-      <span>
-        <span class="l">${m.label}</span>
-        <span class="s">${m.sub}</span>
-      </span>
+      <span class="l">${m.label}</span>
     </button>`).join("");
 
-  return `<section class="card glass" style="padding:16px 20px 6px">
+  const mats = [["solid", "カラー"], ["clear", "透明アクリル"], ["frost", "半透明アクリル"]];
+  const plateControl = `<div class="seg-pill" style="margin-bottom:12px">
+      ${mats.map(([id, label]) => `<button type="button" class="${cls(L.mat === id && "is-on")}"
+        ${act("look-mat", id)}>${esc(label)}</button>`).join("")}
+    </div>
+    ${acryl
+      ? swatchRow(ACRYLS, tint, "look-tint", "look-plate", { acryl: true, label: tintName(tint) })
+      : swatchRow(PLATES, plate, "look-plate", "look-plate")}`;
+
+  return `${renderRecommend()}
+    <section class="card glass" style="padding:16px 20px 6px">
       <div class="card-head" style="padding-bottom:10px;margin-bottom:0">
         <span class="card-title" style="font-size:15px">あなたの ZEN に合わせる</span>
         <span class="pop-tag">このパソコンに保存</span>
@@ -2513,21 +2750,25 @@ function renderColor() {
         control: `<div class="model-grid">${models}</div>`,
       })}
       ${colorRow({
+        title: "トッププレート", desc: "キーのまわりの天板。アクリルは中の基板が透けて見えます",
+        control: plateControl,
+      })}
+      ${colorRow({
         title: "バンパー", desc: "外周のバンパーの色",
-        control: swatchRow(BUMPERS, L.bumper, "look-bumper", L.bumper, "look-bumper"),
+        control: swatchRow(BUMPERS, L.bumper, "look-bumper", "look-bumper"),
       })}
       ${colorRow({
         title: "トラックボール", desc: "交換したボールの色に合わせられます",
-        control: swatchRow(BALLS, L.ball, "look-ball", L.ball, "look-ball"),
+        control: swatchRow(BALLS, L.ball, "look-ball", "look-ball"),
       })}
       ${colorRow({
         title: "キーキャップ（全体）", desc: "すべてのキーキャップの基本の色",
-        control: swatchRow(CAPS, L.cap, "look-cap", L.cap, "look-cap"),
+        control: swatchRow(CAPS, L.cap, "look-cap", "look-cap"),
       })}
       ${colorRow({
-        title: "キーキャップ（1つずつ）",
+        title: "キーキャップ（個別）",
         desc: "色を選んでから、上のキーボードのキーをクリックすると、そのキーだけ塗れます。同じ色でもう一度クリックすると基本の色に戻ります",
-        control: swatchRow(BRUSHES, L.brush, "look-brush", L.brush, "look-brush") + `
+        control: swatchRow(BRUSHES, L.brush, "look-brush", "look-brush") + `
           <div class="paint-row">
             <span class="n">塗ったキー：<b>${painted}</b> 個</span>
             <button type="button" style="margin-left:8px" ${act("look-arrows")}>矢印キーを初期色に</button>
@@ -2819,6 +3060,31 @@ function setRole(id) {
   writeBinding(composeBinding());
 }
 
+/** Apply one proposal from the current mood, remembering what it replaced.
+ *
+ * Everything it sets is an ordinary colour choice, saved like any other, so
+ * "ひとつ戻す" is the only thing that knows a proposal happened. */
+function suggestLook() {
+  const L = state.look;
+  const mood = state.recMood === "season" ? seasonNow() : state.recMood;
+  const r = recipeFor(mood, state.recLast && state.recLast.sig);
+
+  const paint = { ...L.paint };
+  for (const i of ARROW_KEYS) paint[i] = CAPS[r.accent][1];
+
+  state.recUndo = [L, ...state.recUndo].slice(0, 10);
+  state.recLast = r;
+  setLook({
+    // Only the two dark families come with a black case.
+    model: r.base === 2 || r.base === 3 ? "black" : "white",
+    cap: CAPS[r.base][1], bumper: BUMPERS[r.sub][1], ball: BALLS[r.ball][1], paint,
+    mat: r.mat, plate: PLATE_FOR[r.base],
+    // A white or grey bumper gives the acrylic nothing to take its tint from,
+    // so it borrows the accent instead.
+    tint: r.mat === "solid" ? (L.tint || "NONE") : TINT_FOR[r.sub === 0 || r.sub === 1 ? r.accent : r.sub],
+  });
+}
+
 const CLICK = {
   connect: () => connect(),
   disconnect: () => disconnect(),
@@ -2948,12 +3214,30 @@ const CLICK = {
 
   "look-model": (a) => {
     const m = MODELS[a];
-    setLook({ model: a, bumper: m.bumper, cap: m.cap, ball: m.ball });
+    // The model is the standard build, so it puts the plate back to paint --
+    // acrylic is something you choose afterwards.
+    setLook({ model: a, plate: m.plate, mat: "solid", bumper: m.bumper, cap: m.cap, ball: m.ball });
   },
   "look-bumper": (a) => setLook({ bumper: a }),
   "look-cap": (a) => setLook({ cap: a }),
   "look-ball": (a) => setLook({ ball: a }),
   "look-brush": (a) => setLook({ brush: a }),
+  "look-mat": (a) => setLook({ mat: a }),
+  "look-plate": (a) => setLook({ plate: a, mat: "solid" }),
+  "look-tint": (a) => setLook({ tint: a }),
+
+  "rec-mood": (a) => { state.recMood = a; render(); },
+  "rec-suggest": () => suggestLook(),
+  "rec-undo": () => {
+    if (!state.recUndo.length) return;
+    const [previous, ...rest] = state.recUndo;
+    state.recUndo = rest;
+    // Nothing left to step back from means nothing left to reroll away from.
+    if (!rest.length) state.recLast = null;
+    state.look = previous;
+    saveLook();
+    render();
+  },
   "look-arrows": () => setLook({ paint: { ...state.look.paint, ...Object.fromEntries(ARROW_KEYS.map((i) => [i, ARROW_CAP])) } }),
   "look-clear": () => setLook({ paint: {} }),
 
