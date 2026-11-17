@@ -9,7 +9,7 @@
        this line and link it from the ZEN page once the bridge ships. -->
   <meta name="robots" content="noindex, nofollow" />
   <title>ZEN Configurator</title>
-  <link rel="stylesheet" href="app.css?v=2cbd224f" />
+  <link rel="stylesheet" href="app.css?v=0ca00b00" />
 </head>
 <body>
   <div id="app"></div>
@@ -17,10 +17,13 @@
        on every state change, which would restart it. -->
   <div id="splash"></div>
   <input id="import-file" type="file" accept="application/json" hidden />
+  <!-- Combos live in config/keymap.keymap, which a browser tab can only be
+       handed; the desktop build opens it by path instead. -->
+  <input id="keymap-file" type="file" accept=".keymap" hidden />
 
   <script src="keycodes.js?v=dee86bbc"></script>
-  <script src="protocol.js?v=4d138a3c"></script>
+  <script src="protocol.js?v=49d81a00"></script>
   <script src="keymap-combos.js?v=7dd19ba8"></script>
-  <script src="app.js?v=505bfe26"></script>
+  <script src="app.js?v=26a25b64"></script>
 </body>
 </html>

@@ -21,9 +21,10 @@
 //   trackball angle   angleSupported()      (pointer settings version)
 //   auto-mouse        autoMouseSupported()  (does GET_AUTO_MOUSE answer?)
 //   Bluetooth         state.bleProfiles     (does GET_BLE_PROFILES answer?)
-//   combos            canEditCombos()       (not a keyboard feature at all --
-//                                            they are compiled into the
-//                                            firmware from keymap.keymap)
+//   combos            -- not a keyboard feature at all. They are compiled into
+//                        the firmware from keymap.keymap, so the tab edits that
+//                        file; canWriteKeymapInPlace() only picks how it is
+//                        read and written, not whether it can be.
 const FEATURES = {
   // Deliberately not offered for the trackball: the ball already coasts on its
   // own, so software inertia would stack on top of real sensor motion. It is a
@@ -536,6 +537,10 @@ const state = {
   // them into a const table at compile time. null means no file is loaded.
   combos: null,
   savedCombos: null,
+  // The keymap file the combos came out of: its name, for the UI, and its
+  // text, which the browser build writes the edited combos block back into.
+  comboFile: "",
+  comboSource: "",
   comboSel: null,
   comboError: "",
   comboBusy: false,
@@ -564,6 +569,7 @@ const state = {
   toastError: false,
   toastOut: false,
   btConfirm: false,
+  resetConfirm: false,
   busy: false,
   dark: !!theme0.dark,
   accent: validHex(theme0.accent) ? normHex(theme0.accent) : DEFAULT_ACCENT,
@@ -1347,6 +1353,56 @@ async function discardChanges() {
   render();
 }
 
+/** Throw away everything the keyboard has stored, so it comes back on the
+ *  keymap and pointer settings built into its firmware.
+ *
+ *  This is the way *out* of the Configurator. The settings-reset UF2 does the
+ *  same job, but it takes the Bluetooth pairings with it and means flashing
+ *  twice -- a heavy price for "I want my old keymap back". Pairings are left
+ *  alone here; the stock keymap has a combo for clearing those.
+ */
+async function resetKeyboard() {
+  state.resetConfirm = false;
+  if (!state.client) {
+    render();
+    return;
+  }
+  state.busy = true;
+  render();
+  try {
+    try {
+      await state.client.resetKeymap();
+    } catch (error) {
+      // Firmware older than this command answers "unknown command". Say what
+      // to do about it, rather than showing the wire-level complaint.
+      if (/unknown command|not supported/.test(error.message)) {
+        toast("このキーボードのファームウェアは、この操作に対応していません。新しいファームウェアを書き込んでください", true);
+        state.busy = false;
+        render();
+        return;
+      }
+      throw error;
+    }
+    // readKeymap() puts state.saved back as well, so the "unsaved changes"
+    // counts settle on their own.
+    if (state.liveKeymap) await readKeymap();
+
+    const fresh = await state.client.resetPointerSettings();
+    state.pointer = { ...state.pointer, ...fromDeviceSettings(fresh) };
+    if (state.autoMouseSupported) {
+      Object.assign(state.pointer, fromAutoMouseSettings(await state.client.getAutoMouse()));
+    }
+    state.savedPointer = { ...state.pointer };
+
+    state.active = false;
+    toast("キーボードを出荷時の設定に戻しました");
+  } catch (error) {
+    toast(error.message, true);
+  }
+  state.busy = false;
+  render();
+}
+
 async function resetPointer() {
   if (state.client) {
     state.busy = true;
@@ -1378,12 +1434,47 @@ async function resetPointer() {
 // save bar does not apply, and the one place the app writes to a file someone
 // also edits by hand.
 
-/** The desktop shell can reach the filesystem; a browser tab cannot. */
-function canEditCombos() {
+/** The desktop shell can write config/keymap.keymap back where it found it.
+ *  A browser tab cannot, so there the file arrives through a file input and
+ *  leaves again as a download, for the user to commit themselves.
+ *
+ *  Everything either side of that -- parsing, the editor, writing the combos
+ *  block back into the text -- is the same code. keymap-combos.js was written
+ *  without DOM or Tauri so that it could be. */
+function canWriteKeymapInPlace() {
   return typeof window !== "undefined" && typeof window.__TAURI__?.core?.invoke === "function";
 }
 
 const keymapPath = () => lsGet(LS.keymapPath, null);
+
+/** The keymap file as text, however this build gets hold of one.
+ *  Resolves to null when the user cancels. */
+function readKeymapFile({ pick = false } = {}) {
+  if (canWriteKeymapInPlace()) {
+    return (async () => {
+      const path = pick ? await pickKeymapFile() : keymapPath();
+      if (!path) return null;
+      return { text: await window.__TAURI__.core.invoke("read_keymap", { path }), label: path };
+    })();
+  }
+
+  // A browser only ever gets a file by being handed one, so `pick` has no
+  // meaning here: there is nothing remembered to go back to.
+  return new Promise((resolve, reject) => {
+    const input = document.getElementById("keymap-file");
+    input.onchange = async () => {
+      const file = input.files[0];
+      input.value = "";
+      if (!file) return resolve(null);
+      try {
+        resolve({ text: await file.text(), label: file.name });
+      } catch (error) {
+        reject(error);
+      }
+    };
+    input.click();
+  });
+}
 
 async function pickKeymapFile() {
   const { open } = window.__TAURI__.dialog;
@@ -1408,22 +1499,24 @@ function withUids(combos) {
 const copyCombos = (combos) => combos.map((c) => ({ ...c, keyPositions: c.keyPositions.slice() }));
 
 async function loadCombos({ pick = false } = {}) {
-  if (!canEditCombos()) return;
   state.comboBusy = true;
   state.comboError = "";
   render();
   try {
-    const path = pick ? await pickKeymapFile() : keymapPath();
-    if (!path) {
+    const file = await readKeymapFile({ pick });
+    if (!file) {
       state.comboBusy = false;
       render();
       return;
     }
-    const text = await window.__TAURI__.core.invoke("read_keymap", { path });
-    const parsed = parseCombos(text);
+    const parsed = parseCombos(file.text);
     state.combos = withUids(parsed.combos);
     state.savedCombos = copyCombos(state.combos);
     state.comboSel = null;
+    state.comboFile = file.label;
+    // Kept so the browser build has something to write the combos block back
+    // into. The desktop build re-reads instead, and overwrites this.
+    state.comboSource = file.text;
   } catch (error) {
     state.comboError = String(error.message ?? error);
     state.combos = null;
@@ -1433,24 +1526,43 @@ async function loadCombos({ pick = false } = {}) {
 }
 
 async function saveCombos() {
-  if (!canEditCombos() || !state.combos) return;
-  const path = keymapPath();
-  if (!path) return;
+  if (!state.combos) return;
   state.comboBusy = true;
   render();
   try {
-    const { invoke } = window.__TAURI__.core;
-    // Re-read rather than keeping the file in memory: it may well have been
-    // edited by hand since it was loaded, and only the combos block is ours.
-    const text = await invoke("read_keymap", { path });
-    await invoke("write_keymap", { path, contents: writeCombos(text, state.combos) });
+    let source = state.comboSource;
+    if (canWriteKeymapInPlace()) {
+      // Re-read rather than trusting what we loaded: the file may well have
+      // been edited by hand since, and only the combos block is ours.
+      source = await window.__TAURI__.core.invoke("read_keymap", { path: keymapPath() });
+    }
+    const contents = writeCombos(source, state.combos);
+
+    if (canWriteKeymapInPlace()) {
+      await window.__TAURI__.core.invoke("write_keymap", { path: keymapPath(), contents });
+      toast("keymap.keymap に書き出しました。ビルドして書き込むと反映されます");
+    } else {
+      downloadText(contents, "keymap.keymap");
+      toast("keymap.keymap をダウンロードしました。GitHub の config/ に置き換えてください");
+    }
+    state.comboSource = contents;
     state.savedCombos = copyCombos(state.combos);
-    toast("keymap.keymap に書き出しました。ビルドして書き込むと反映されます");
   } catch (error) {
     toast(String(error.message ?? error), true);
   }
   state.comboBusy = false;
   render();
+}
+
+function downloadText(text, filename) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 /** Combos shown on a layer. No `layers` property means every layer, which is
@@ -1873,6 +1985,14 @@ function renderPresetPanel() {
         <div class="lead">ファイルでバックアップ</div>
         <button type="button" ${act("export")}>${svg(ICON.download, 15, 1.9)}ファイルに書き出す</button>
         <button type="button" ${act("import")}>${svg(ICON.upload, 15, 1.9)}ファイルから読み込む</button>
+      </div>
+      <div class="preset-reset">
+        <div class="lead">キーボードを出荷時に戻す</div>
+        <p>この画面で変更したキー配置とマウス操作を、キーボードから消します。ファームウェアに入っている元の設定に戻ります。無線の登録は消えません。</p>
+        <button type="button" class="btn-danger-plain" ${act("keyboard-reset")} ${state.client ? "" : "disabled"}>
+          ${svg(ICON.reset, 15, 1.9)}出荷時の設定に戻す
+        </button>
+        ${state.client ? "" : '<span class="preset-reset-note">キーボードをつなぐと押せます</span>'}
       </div>
     </div>`;
 }
@@ -2353,18 +2473,6 @@ function renderEditorDetail() {
 // --- Render: combo ----------------------------------------------------------
 
 function renderComboPanel() {
-  // A browser tab cannot reach config/keymap.keymap, and there is nothing to
-  // send to the keyboard instead -- combos are compiled in.
-  if (!canEditCombos()) {
-    return `<section class="card card-pad glass">
-        <div class="notice">${svg(ICON.warn, 15, 2)}<span>
-          <b>コンボの編集はデスクトップアプリでのみできます。</b>
-          コンボはキーボードに送るのではなく、<code>config/keymap.keymap</code> を書き換えて
-          ファームウェアを作り直す必要があるためです。
-        </span></div>
-      </section>`;
-  }
-
   if (!state.combos) {
     return `<section class="card card-pad glass">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -2374,14 +2482,16 @@ function renderComboPanel() {
         </div>
         <div class="notice">${svg(ICON.warn, 15, 2)}<span>
           コンボは<b>キーボードではなく <code>config/keymap.keymap</code></b> に入っています。
-          そのファイルを選ぶと、いま入っているコンボを読み込んで編集できます。
+          キーボードに送ることはできないので、このファイルを書き換えてファームウェアを作り直します。
+          ${canWriteKeymapInPlace() ? "" : `<br>GitHub のご自分のリポジトリから
+          <code>config/keymap.keymap</code> をダウンロードして、ここで読み込んでください。`}
         </span></div>
         ${state.comboError ? `<div class="notice" style="margin-top:10px;border-color:var(--danger)"><span style="color:var(--danger)">${esc(state.comboError)}</span></div>` : ""}
         <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
           <button type="button" class="btn btn-accent" ${act("combo-pick")} ${state.comboBusy ? "disabled" : ""}>
-            ${svg(ICON.cards, 15, 1.9)}keymap.keymap を選ぶ
+            ${svg(ICON.cards, 15, 1.9)}keymap.keymap を読み込む
           </button>
-          ${keymapPath() ? `<span class="card-note" style="word-break:break-all">前回: ${esc(keymapPath())}</span>` : ""}
+          ${canWriteKeymapInPlace() && keymapPath() ? `<span class="card-note" style="word-break:break-all">前回: ${esc(keymapPath())}</span>` : ""}
         </div>
       </section>`;
   }
@@ -2477,15 +2587,22 @@ function renderComboPanel() {
         </div>
       </div>` : ""}
 
+      ${canWriteKeymapInPlace() ? "" : `<div class="combo-hint" style="margin-top:14px">
+        読み込んだ時点の内容をもとに書き出します。読み込んだあとに GitHub 側で
+        <code>config/keymap.keymap</code> を編集した場合は、読み込み直してください。
+      </div>`}
+
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
         <div style="flex:1;min-width:200px">
-          <div style="font-size:13px;font-weight:650">${dirty ? `${dirty} 件の変更が未書き出しです` : "ファイルと同じ内容です"}</div>
-          <div class="card-note" style="word-break:break-all">${esc(keymapPath() ?? "")}</div>
+          <div style="font-size:13px;font-weight:650">${dirty ? `${dirty} 件の変更が未書き出しです` : "読み込んだ内容と同じです"}</div>
+          <div class="card-note" style="word-break:break-all">${esc(state.comboFile || "")}</div>
         </div>
-        <button type="button" class="btn" ${act("combo-reload")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.reset, 13)}読み直す</button>
+        ${canWriteKeymapInPlace()
+          ? `<button type="button" class="btn" ${act("combo-reload")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.reset, 13)}読み直す</button>`
+          : ""}
         <button type="button" class="btn" ${act("combo-pick")} ${state.comboBusy ? "disabled" : ""}>別のファイル</button>
         <button type="button" class="${cls("btn", dirty && "btn-accent")}" ${act("combo-save")} ${state.comboBusy || !dirty ? "disabled" : ""}>
-          ${svg(ICON.download, 15, 1.9)}keymap.keymap に書き出す
+          ${svg(ICON.download, 15, 1.9)}${canWriteKeymapInPlace() ? "keymap.keymap に書き出す" : "keymap.keymap をダウンロード"}
         </button>
       </div>
     </section>`;
@@ -2961,6 +3078,7 @@ function render() {
         <div class="grow"></div>
         ${renderSaveBar(counts)}
       </div>
+      ${state.resetConfirm ? renderResetConfirm() : ""}
     </div>`;
 
   keepScroll(() => {
@@ -2982,6 +3100,21 @@ function render() {
       }
     }
   }
+}
+
+function renderResetConfirm() {
+  return `<div class="modal-back" ${act("keyboard-reset-cancel")}>
+      <div class="modal" role="alertdialog" aria-modal="true" data-act="noop" data-stop>
+        <div class="modal-icon">${svg(ICON.warn, 20)}</div>
+        <h2>出荷時の設定に戻しますか？</h2>
+        <p>この画面で変更したキー配置とマウス操作が、キーボードから消えます。ファームウェアに入っている元の設定に戻ります。この操作は取り消せません。</p>
+        <p>無線の登録（ペアリング）は消えません。</p>
+        <div class="modal-actions">
+          <button type="button" class="modal-cancel" ${act("keyboard-reset-cancel")}>キャンセル</button>
+          <button type="button" class="modal-confirm" ${act("keyboard-reset-confirm")}>戻す</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderBtConfirm(bonded) {
@@ -3179,7 +3312,7 @@ const CLICK = {
     render();
     // First visit to the combo tab with a remembered file: load it rather than
     // making the user press a button for something they already chose.
-    if (a === "combo" && !state.combos && !state.comboBusy && canEditCombos() && keymapPath()) {
+    if (a === "combo" && !state.combos && !state.comboBusy && canWriteKeymapInPlace() && keymapPath()) {
       loadCombos();
     }
   },
@@ -3254,6 +3387,10 @@ const CLICK = {
   "bt-select": (a) => bleAction(BLE_ACTION.SELECT, Number(a)),
   "bt-disconnect": (a) => bleAction(BLE_ACTION.DISCONNECT, Number(a)),
   "bt-clear": (a) => bleAction(BLE_ACTION.CLEAR, Number(a)),
+  "keyboard-reset": () => { state.resetConfirm = true; state.presetsOpen = false; render(); },
+  "keyboard-reset-cancel": () => { state.resetConfirm = false; render(); },
+  "keyboard-reset-confirm": () => resetKeyboard(),
+
   "bt-clear-all": () => { state.btConfirm = true; render(); },
   "bt-cancel": () => { state.btConfirm = false; render(); },
   "bt-clear-all-confirm": () => {

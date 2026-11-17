@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Draft. Remove this line when it becomes firmware.html. -->
+<meta name="robots" content="noindex, nofollow">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2649HNYM9E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2649HNYM9E');
+</script>
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="theme-color" content="#F0512B">
+<title>ZEN — ファームウェア セットアップガイド</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=Saira+SemiCondensed:wght@500;600;700&family=DotGothic16&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
+<link rel="stylesheet" href="../e24.css">
+<link rel="stylesheet" href="../zen.css">
+<link rel="stylesheet" href="../zen-firmware.css">
+</head>
+<body>
+
+<!-- GLOBAL NAV -->
+<nav class="gnav">
+  <div class="gnav-inner solo">
+    <span class="brand" aria-label="e24"><span class="e">e</span><span class="num">24</span><span class="dot">.</span></span>
+  </div>
+</nav>
+
+<!-- PRODUCT SUBNAV -->
+<div class="subnav">
+  <div class="subnav-inner">
+    <div class="name"><span class="zen-logo">ZEN</span><small>ゼン</small><span class="tagline">ファームウェア・設定</span></div>
+    <div class="subnav-end">
+      <nav class="links" id="subnavLinks">
+        <a href="index.html" class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>製品ページ</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">GitHub</a>
+        <div class="owner-group">
+          <span class="og-label">購入者向け</span>
+          <a href="firmware.html">ファームウェア</a>
+          <a href="assembly.html">組み立て方</a>
+        </div>
+      </nav>
+      <div class="subnav-owner">
+        <button class="subnav-owner-btn" type="button" aria-haspopup="true" aria-expanded="false">
+          <svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          購入者向け
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="subnav-owner-menu">
+          <div class="oh">購入者向けメニュー</div>
+          <a href="firmware.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>ファームウェア</a>
+          <a href="assembly.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.7-.7-2.5z"/></svg>組み立て方</a>
+        </div>
+      </div>
+      <a href="https://e24key.booth.pm/items/8457837" target="_blank" rel="noopener" class="buy-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        購入
+      </a>
+      <button class="subnav-burger" type="button" aria-label="メニューを開閉" aria-expanded="false" aria-controls="subnavLinks">
+        <span class="bz"><i></i><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main class="fw-page" data-screen-label="ファームウェアガイド">
+
+  <!-- HERO -->
+  <header class="fw-hero">
+    <div class="wrap">
+      <span class="eyebrow-mono">FIRMWARE &amp; SETUP GUIDE</span>
+      <h1>ZEN の設定</h1>
+      <p class="lead">ファームウェアを書き込んで、ブラウザからキー配置とトラックボールを設定するまでの手順です。GitHub の操作は必要ありません。</p>
+
+      <nav class="fw-toc" aria-label="目次">
+        <a href="#req"><span class="n">0</span><span class="t">必要なもの</span></a>
+        <a href="#flash"><span class="n">1</span><span class="t">ファームウェアを書き込む</span></a>
+        <a href="#configure"><span class="n">2</span><span class="t">Configurator で設定する</span></a>
+        <a href="#combo"><span class="n">3</span><span class="t">コンボを使いたいとき</span></a>
+        <a href="#migrate"><span class="n">4</span><span class="t">すでにお使いの方へ</span></a>
+        <a href="#trouble"><span class="n">?</span><span class="t">困ったとき</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 0. requirements -->
+  <section class="fw-sec" id="req">
+    <div class="wrap">
+      <div class="sec-num">00 — REQUIREMENTS</div>
+      <h2>必要なもの</h2>
+      <ul class="fw-list">
+        <li>ZEN 本体</li>
+        <li>対応コントローラ（左右）</li>
+        <li>データ通信対応の USB Type-C ケーブル</li>
+        <li>Mac / PC と、Chrome または Edge</li>
+      </ul>
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>ブラウザについて</div>
+        設定画面はキーボードと USB で直接やりとりします。<strong>Chrome または Edge</strong> をおすすめします。<br>
+        Safari では動きません。<strong>iPhone / iPad は、どのブラウザアプリを使っても対応していません。</strong>Android は Chrome 148 以降で動作します。
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 1. flash -->
+  <section class="fw-sec" id="flash">
+    <div class="wrap">
+      <div class="sec-num">01 — FLASH</div>
+      <h2>ファームウェアを書き込む</h2>
+      <p>左右それぞれに、お使いの構成に合うファームウェアを書き込みます。まず zip をダウンロードしてください。</p>
+
+      <a class="dl-link" href="../assets/fw/zen-firmware.zip" download="zen-firmware.zip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        <span>ファームウェアをダウンロード</span>
+      </a>
+
+      <p class="fw-files-label">右手側（トラックボールのある方）— センサーに合うものを1つ</p>
+      <ul class="fw-files">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_right_trackball_pmw3610_central-bmp_boost-zmk.uf2</code><span class="fw-file-desc">PMW3610（標準）</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_right_trackball_paw3222_central-bmp_boost-zmk.uf2</code><span class="fw-file-desc">PAW3222</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_right_trackpad_central-bmp_boost-zmk.uf2</code><span class="fw-file-desc">トラックパッド</span></span></li>
+      </ul>
+
+      <p class="fw-files-label">左手側 — 構成に合うものを1つ</p>
+      <ul class="fw-files">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_left_peripheral-bmp_boost-zmk.uf2</code><span class="fw-file-desc">トラックパッドなし（標準）</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fw-file-text"><code>zen_left_trackpad_peripheral-bmp_boost-zmk.uf2</code><span class="fw-file-desc">トラックパッドあり</span></span></li>
+      </ul>
+      <p>標準構成なら、右手は PMW3610 用、左手はトラックパッドなし用の2つです。</p>
+
+      <h3>書き込み手順</h3>
+      <ol class="fw-steps">
+        <li>右手側の対応コントローラを、電源スイッチを OFF にした状態で、USB ケーブルで Mac / PC と接続します。これでブートローダーモードになります。<span class="s-note">電源スイッチは、向かって奥側が OFF の状態です。</span></li>
+        <li><code>BLEMICROPRO</code> というフォルダが表示されるので、これを開きます。<span class="s-note">表示されない場合は、USB ケーブルがデータ通信に対応しているか確認してください。</span></li>
+        <li>解凍した zip の中から、右手側の UF2 ファイルを <code>BLEMICROPRO</code> フォルダにコピーして書き込みます。<span class="s-note">書き込み後、ドライブの取り外しに関する通知が表示される場合がありますが、書き込みは正常に完了しています。</span></li>
+        <li>続いて左手側の対応コントローラを、同じ手順でブートローダーモードにします。</li>
+        <li>左手側の UF2 ファイルを <code>BLEMICROPRO</code> フォルダにコピーして書き込みます。</li>
+      </ol>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 2. configurator -->
+  <section class="fw-sec" id="configure">
+    <div class="wrap">
+      <div class="sec-num">02 — CONFIGURE</div>
+      <h2>Configurator で設定する</h2>
+      <p>キー配置、トラックボールの速さ、無線の接続先、キーボードの色を、ブラウザから設定できます。</p>
+
+      <a class="dl-link" href="configurator/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+        <span>ZEN Configurator を開く</span>
+      </a>
+
+      <ol class="fw-steps">
+        <li>右手側（トラックボールのある方）を USB ケーブルで Mac / PC につなぎます。<span class="s-note">左手側はつなぐ必要はありません。</span></li>
+        <li>Configurator を開き、右上の <code>キーボードをつなぐ</code> を押します。</li>
+        <li>ポートを選ぶ画面が出たら <code>ZEN</code> を選んで接続します。<span class="s-note">2回目以降は、この画面は出ずにそのままつながります。</span></li>
+        <li>つながると、いまキーボードに入っている設定が読み込まれます。</li>
+      </ol>
+
+      <h3>できること</h3>
+      <ul class="fw-list">
+        <li><strong>キー</strong> — キー配置の変更。レイヤーごとに編集できます</li>
+        <li><strong>マウス</strong> — トラックボールの速さ、スクロール、向き、オートマウス</li>
+        <li><strong>BT</strong> — 無線の接続先の切り替えと削除</li>
+        <li><strong>カラー</strong> — 画面上のキーボードの見た目を、お手元の実機に合わせます</li>
+      </ul>
+
+      <div class="fw-panel warn">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>変更は「キーボードに保存」を押すまで残りません</div>
+        画面下に、<code>この画面</code> → <code>キーボードで試す</code> → <code>キーボードに保存</code> の3段階が表示されます。<strong>保存を押さずに電源を切ると、変更は元に戻ります。</strong>
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 3. combos -->
+  <section class="fw-sec" id="combo">
+    <div class="wrap">
+      <div class="sec-num">03 — COMBOS</div>
+      <h2>コンボを使いたいとき</h2>
+      <p>コンボ（2つのキーの同時押しを別のキーとして使う機能）は、キー配置と違ってキーボードに直接送ることができません。ファームウェアに焼き込まれているためです。使いたい場合は、設定ファイルを書き換えてファームウェアを作り直します。</p>
+      <p><strong>ここからは GitHub を使います。</strong>コンボを使わない場合は、このセクションは読み飛ばしてください。</p>
+
+      <ol class="fw-steps">
+        <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を開き、右上の <code>Fork</code> から自分のアカウントにコピーを作ります。</li>
+        <li>fork した自分のリポジトリで <code>config/keymap.keymap</code> を開き、<code>Raw</code> からファイルをダウンロードします。</li>
+        <li>Configurator の <code>コンボ</code> タブで、そのファイルを読み込みます。</li>
+        <li>コンボを追加・編集します。同時押しするキーは、画面上のキーボードをクリックして選べます。</li>
+        <li><code>keymap.keymap をダウンロード</code> を押します。</li>
+        <li>GitHub に戻り、<code>config/keymap.keymap</code> の内容をダウンロードしたファイルの内容で置き換えて commit します。</li>
+        <li><code>Actions</code> タブで build の完了を待ち、<code>firmware</code> の zip をダウンロードします。</li>
+        <li>「<a href="#flash">ファームウェアを書き込む</a>」と同じ手順で書き込みます。</li>
+      </ol>
+
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>キー配置は Configurator、コンボは設定ファイル</div>
+        この2つは別々に保存されます。<strong>同じキーを両方で変更すると、Configurator で設定した内容が優先されます。</strong>設定ファイル側の変更を反映させたいときは、先に Configurator の <code>プリセット</code> →「出荷時の設定に戻す」を実行してください。
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- 4. migration -->
+  <section class="fw-sec" id="migrate">
+    <div class="wrap">
+      <div class="sec-num">04 — ALREADY USING ZEN</div>
+      <h2>すでに ZEN をお使いの方へ</h2>
+      <p>以前のファームウェアは Configurator に対応していません。切り替えるとブラウザから設定できるようになります。</p>
+
+      <h3>キー配置をカスタマイズしていない場合</h3>
+      <p>「<a href="#flash">ファームウェアを書き込む</a>」の手順でそのまま書き込んでください。無線の接続先はそのまま残ります。</p>
+
+      <h3>キー配置やコンボをカスタマイズしている場合</h3>
+      <p>以前の fork で編集した <code>config/keymap.keymap</code> を、新しいリポジトリに移します。コンボも同じファイルに入っているので、ファイルごと移せばそのまま引き継がれます。</p>
+      <ol class="fw-steps">
+        <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を fork します。</li>
+        <li>以前の fork（<code>zen-firmware</code>）で <code>config/keymap.keymap</code> を開き、<code>Raw</code> の内容をすべてコピーします。</li>
+        <li>新しい fork の <code>config/keymap.keymap</code> を編集し、すべて貼り替えて commit します。</li>
+        <li><code>Actions</code> タブで build を待ち、<code>firmware</code> の zip をダウンロードして書き込みます。</li>
+      </ol>
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><code>keymap.keymap</code> 以外も変更している場合</div>
+        スリープ時間など <code>boards/shields/zen/</code> 以下の設定も変更している場合は、その差分もあわせてご確認ください。
+      </div>
+      <div class="fw-divider"></div>
+    </div>
+  </section>
+
+  <!-- trouble -->
+  <section class="fw-sec" id="trouble">
+    <div class="wrap">
+      <div class="sec-num">05 — TROUBLESHOOTING</div>
+      <h2>困ったとき</h2>
+      <div class="fw-trouble">
+        <div class="fw-tcard">
+          <h3>設定を元に戻したい</h3>
+          <p>Configurator の <code>プリセット</code> →「出荷時の設定に戻す」で、この画面から変更したキー配置とマウス操作をキーボードから消せます。ファームウェアに入っている元の設定に戻ります。<strong>無線の登録は消えません。</strong></p>
+        </div>
+        <div class="fw-tcard">
+          <h3>Configurator がキーボードを見つけられない</h3>
+          <p>右手側（トラックボールのある方）を USB でつないでいるか確認してください。左手側では設定できません。ブラウザは Chrome または Edge が必要です。</p>
+          <p>別のタブで Configurator を開いたままだと、そちらが接続を掴んだままになります。使っていないタブは閉じてください。</p>
+        </div>
+        <div class="fw-tcard">
+          <h3>トラックボールが動かない</h3>
+          <p>キー入力はできるのにトラックボールが動かない場合は、右手側に書き込んだ UF2 がお使いのセンサーに合っているか確認してください。PMW3610 と PAW3222 で別のファイルです。</p>
+        </div>
+        <div class="fw-tcard">
+          <h3>接続が不安定 / 無線の登録をやり直したい</h3>
+          <p>zip に同梱の <code>settings_reset-bmp_boost-zmk.uf2</code> を書き込むと、無線の登録を含めてすべて初期化されます。</p>
+          <ol class="fw-steps">
+            <li>Mac / PC の接続設定から <code>ZEN</code> を削除します。</li>
+            <li><code>settings_reset-bmp_boost-zmk.uf2</code> を書き込みます。</li>
+            <li>USB を外します。</li>
+            <li>ZEN の電源を入れます。</li>
+            <li>もう一度、通常のファームウェアを書き込みます。</li>
+            <li>接続設定から <code>ZEN</code> を再接続します。</li>
+          </ol>
+          <p><span class="s-note">Configurator で設定した内容もすべて消えます。先に「出荷時の設定に戻す」で足りないか確認してください。</span></p>
+        </div>
+        <div class="fw-tcard">
+          <h3>Actions が動かない</h3>
+          <p>fork したリポジトリの <code>Actions</code> タブを開き、GitHub Actions を有効化してください。</p>
+        </div>
+        <div class="fw-tcard">
+          <h3>以前の手順を見たい</h3>
+          <p>Keymap Editor を使う以前の手順は <a href="firmware-keymap-editor.html">こちら</a> に残しています。<span class="s-note">この手順で使う Keymap Editor は、提供元が GitHub 連携の終了を予告しています。いずれ使えなくなります。</span></p>
+        </div>
+      </div>
+
+      <a class="dl-link" href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener" style="margin-top:28px;">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.42 7.86 10.95.58.1.79-.25.79-.56 0-.27-.01-1.16-.02-2.1-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.04 11.04 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12.02C23.5 5.74 18.27.5 12 .5Z"/></svg>
+        <span>zen-keyboard リポジトリ・Issues</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+
+<!-- GLOBAL FOOTER -->
+<footer class="gfoot">
+  <div class="wrap">
+    <div class="top">
+      <div class="brandcol">
+        <div class="bm">e<span class="num">24</span><span class="dot">.</span></div>
+        <p>毎日ふれる道具に、ちょっと嬉しいを。<br>キーボードと、その周辺をつくっています。</p>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h4>ZEN</h4>
+          <a href="index.html#feature">特徴</a>
+          <a href="index.html#layout">キー配列</a>
+          <a href="index.html#kit">必要なもの</a>
+          <a href="index.html#spec">スペック</a>
+        </div>
+        <div class="col">
+          <h4>ファームウェア</h4>
+          <a href="firmware.html">セットアップガイド</a>
+          <a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">GitHub リポジトリ</a>
+          <a href="configurator/">ZEN Configurator</a>
+        </div>
+        <div class="col">
+          <h4>e24</h4>
+          <a href="index.html">製品ページ</a>
+          <a href="https://e24key.booth.pm/" target="_blank" rel="noopener">BOOTH</a>
+          <a href="https://x.com/e24keyboard" target="_blank" rel="noopener">X / @e24keyboard</a>
+        </div>
+      </div>
+    </div>
+    <p class="foot-cg-note">※一部の掲載画像は3DCGによる完成イメージです。実際の製品とは、色味・質感・表面処理および細部の形状が異なる場合があります。</p>
+    <div class="bottom">
+      <span class="legal">© 2026 e24. All rights reserved.<a href="notice.html">注意事項・免責事項</a></span>
+      <span class="mono">// EVERY KEYSTROKE A NEW IDEA.</span>
+    </div>
+  </div>
+</footer>
+
+<button id="toTop" class="to-top" aria-label="ページ上部へ戻る">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+  <span class="lbl">上へ戻る</span>
+</button>
+
+<script src="../e24-scroll.js"></script>
+<script src="../zen-lightbox.js"></script>
+</body>
+</html>

@@ -25,6 +25,7 @@ const CMD = {
   SET_BINDING: 0x12,
   SAVE_KEYMAP: 0x13,
   DISCARD_KEYMAP: 0x14,
+  RESET_KEYMAP: 0x15,
   GET_STATUS: 0x20,
   GET_BLE_PROFILES: 0x21,
   BLE_ACTION: 0x22,
@@ -376,7 +377,27 @@ class WebSerialTransport {
     return typeof navigator !== "undefined" && !!navigator.serial;
   }
 
+  /** The keyboard, asking the browser's permission only when it has to.
+   *
+   * Chrome remembers the ports a site has been given and hands them back from
+   * getPorts(), and opening one of those needs no gesture and no dialog. Going
+   * straight to requestPort() meant the picker appeared on every single
+   * connect, which for someone who plugs in daily is a dialog they dismiss
+   * hundreds of times to pick the only entry in the list.
+   *
+   * A remembered port that will not open is the ordinary case, not an error:
+   * the keyboard is unplugged, or another tab still holds it. Fall through to
+   * the picker and let the browser say so. */
   static async request() {
+    for (const known of await navigator.serial.getPorts()) {
+      try {
+        await known.open({ baudRate: BAUD_RATE });
+        return new WebSerialTransport(known);
+      } catch (error) {
+        console.warn("remembered port would not open, asking instead:", error);
+      }
+    }
+
     const port = await navigator.serial.requestPort();
     await port.open({ baudRate: BAUD_RATE });
     return new WebSerialTransport(port);
@@ -694,5 +715,13 @@ class ZenConfigClient {
   async discardKeymap() {
     const { status } = await this.request(CMD.DISCARD_KEYMAP);
     if (status !== 0) throw new Error(`DISCARD_KEYMAP failed: ${STATUS[status]}`);
+  }
+
+  /** Throw the saved keymap away, so the keyboard comes back on the one built
+   *  into the firmware. Unlike discardKeymap(), which only drops edits that
+   *  were never saved. Older firmware answers ERR_NOT_SUPPORTED. */
+  async resetKeymap() {
+    const { status } = await this.request(CMD.RESET_KEYMAP);
+    if (status !== 0) throw new Error(`RESET_KEYMAP failed: ${STATUS[status]}`);
   }
 }
