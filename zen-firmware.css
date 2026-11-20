@@ -256,3 +256,17 @@
 .fw-measured .fw-list .s-note {
   display: block; margin-top: 5px; font-size: 14px; line-height: 1.7; color: var(--ink-3);
 }
+
+/* The A / B cards are the choice a reader makes; the index below them is just
+   an index. Both used a solid accent chip, so seven of them stacked up under
+   two more and the whole block read as one orange field. Quiet chips here,
+   and the accent returns on hover. */
+.fw-measured .fw-toc .n {
+  /* --ink-3 on --paper-3 is only 2.5:1; --ink-2 is 6.3:1. */
+  background: var(--paper-3); color: var(--ink-2);
+  border: 1px solid var(--line);
+  transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.fw-measured .fw-toc a:hover .n {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
