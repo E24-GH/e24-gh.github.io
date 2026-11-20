@@ -86,16 +86,16 @@
       <div class="fw-routes">
         <a class="fw-route" href="#req">
           <span class="rk">A</span>
-          <span class="rt">コンボ／マクロを使わない方</span>
-          <span class="rd">はじめて設定する方もこちらです。GitHub の操作は必要ありません。<br><strong>0 → 1 → 2</strong> の順に進めてください。</span>
+          <span class="rt">はじめて設定する方</span>
+          <span class="rd">GitHub の操作は必要ありません。<br><strong>0 → 1 → 2</strong> の順に進めてください。</span>
         </a>
-        <a class="fw-route" href="#combo">
+        <a class="fw-route" href="#migrate">
           <span class="rk">B</span>
-          <span class="rt">コンボ／マクロを設定している方、またはこれから設定する方</span>
-          <span class="rd">コンボとマクロは設定ファイルを編集するため、GitHub を使います。<br><strong>0 → 3</strong> に進んでください。</span>
+          <span class="rt">すでに ZEN をお使いの方</span>
+          <span class="rd">いま使っているキー配置の扱いが変わります。<br><strong>先に 4</strong> をお読みください。</span>
         </a>
       </div>
-      <p class="fw-routes-note">すでに ZEN をお使いの方は、<strong>先に</strong> <a href="#migrate">4 すでにお使いの方へ</a> をご覧ください。いまのキー配置の扱いが変わります。</p>
+      <p class="fw-routes-note">コンボやマクロを使いたい方は、どちらの場合も <a href="#combo">3 コンボ／マクロを使う</a> もあわせてご覧ください。あとからでも設定できます。</p>
 
       <nav class="fw-toc" aria-label="目次">
         <a href="#req"><span class="n">0</span><span class="t">必要なもの</span></a>
@@ -206,10 +206,9 @@
   <section class="fw-sec" id="combo">
     <div class="wrap">
       <div class="sec-num">03 — COMBOS &amp; MACROS</div>
-      <span class="route-tag">ROUTE B</span>
       <h2>コンボ／マクロを使う</h2>
       <p>コンボ（2つのキーの同時押しを別のキーとして使う機能）とマクロは、キー配置と違ってキーボードに直接送ることができません。ファームウェアに焼き込まれているためです。使いたい場合は、設定ファイルを書き換えてファームウェアを作り直します。</p>
-      <p><strong>ここからは GitHub を使います。</strong>コンボもマクロも使わない場合は、このセクションは読み飛ばしてください。</p>
+      <p><strong>ここからは GitHub を使います。</strong>コンボもマクロも使わない場合は、このセクションは読み飛ばしてください。あとから必要になったときに戻ってくれば大丈夫です。</p>
 
       <ol class="fw-steps">
         <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を開き、右上の <code>Fork</code> から自分のアカウントにコピーを作ります。</li>
@@ -250,13 +249,13 @@
       </div>
 
       <h3>キー配置をカスタマイズしている方</h3>
-      <p><strong>下の「ルート B」の手順をおすすめします。</strong><code>config/keymap.keymap</code> を新しい fork に貼り替えるだけで、キー配置もコンボもマクロも、いまのまま引き継げます。コンボやマクロを使っていない方でも同じです。</p>
+      <p><strong>下の「キーマップを移す」の手順をおすすめします。</strong><code>config/keymap.keymap</code> を新しい fork に貼り替えるだけで、キー配置もコンボもマクロも、いまのまま引き継げます。コンボやマクロを使っていない方でも同じです。</p>
       <p>Configurator で付け直すこともできますが、レイヤーを作り込んでいる場合はそれなりの手間になります。</p>
 
       <h3>キー配置を標準のまま使っている方</h3>
       <p>「<a href="#flash">ファームウェアを書き込む</a>」の手順でそのまま書き込んでください。無線の接続先とトラックボールの設定はそのまま残ります。GitHub の操作は必要ありません。</p>
 
-      <h3>ルート B — <code>config/keymap.keymap</code> を移す</h3>
+      <h3>キーマップを移す</h3>
       <p>以前の fork で編集した <code>config/keymap.keymap</code> を、新しいリポジトリに移します。キー配置もコンボもマクロも同じファイルに入っているので、ファイルごと移せばそのまま引き継がれます。</p>
       <ol class="fw-steps">
         <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を fork します。</li>
