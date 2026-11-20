@@ -229,7 +229,7 @@
    archived guide keep the widths they were reviewed at. The class rides along
    with the file that carries it.
    --------------------------------------------------------------------------- */
-.fw-measured { --fw-measure: 760px; }
+.fw-measured { --fw-measure: 960px; }
 
 .fw-measured .fw-hero .lead,
 .fw-measured .fw-sec > .wrap > p,
