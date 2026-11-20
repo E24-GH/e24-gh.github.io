@@ -95,7 +95,7 @@
           <span class="rd">コンボとマクロは設定ファイルを編集するため、GitHub を使います。<br><strong>0 → 3</strong> に進んでください。</span>
         </a>
       </div>
-      <p class="fw-routes-note">すでに ZEN をお使いの方は、<a href="#migrate">4 すでにお使いの方へ</a> もあわせてご覧ください。</p>
+      <p class="fw-routes-note">すでに ZEN をお使いの方は、<strong>先に</strong> <a href="#migrate">4 すでにお使いの方へ</a> をご覧ください。いまのキー配置の扱いが変わります。</p>
 
       <nav class="fw-toc" aria-label="目次">
         <a href="#req"><span class="n">0</span><span class="t">必要なもの</span></a>
@@ -243,15 +243,20 @@
       <h2>すでに ZEN をお使いの方へ</h2>
       <p>以前のファームウェアは Configurator に対応していません。切り替えるとブラウザから設定できるようになります。</p>
 
-      <h3>ルート A の方（コンボ／マクロを使わない）</h3>
-      <p>「<a href="#flash">ファームウェアを書き込む</a>」の手順でそのまま書き込んでください。無線の接続先とトラックボールの設定はそのまま残ります。</p>
       <div class="fw-panel warn">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>キー配置をカスタマイズしている場合</div>
-        <strong>いま設定されているキー配置は、いったん標準に戻ります。</strong>「<a href="#configure">Configurator で設定する</a>」で付け直す形になります。画面でキーを選ぶだけなので、たいていは数分で終わります。<br>
-        作り込んでいて、そのまま移したい場合は、下の<strong>ルート B の手順</strong>でも移行できます。
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>はじめにお読みください</div>
+        新しいファームウェアを書き込むと、<strong>いま使っているキー配置は標準のものに置き換わります。</strong>これまでのキー配置は、ご自身の fork でビルドしたファームウェアの中にあったためです。<br>
+        ただし <code>config/keymap.keymap</code> は fork にそのまま残っています。<strong>ファイルは失われません。</strong>
       </div>
 
-      <h3>ルート B の方（コンボ／マクロを使う）</h3>
+      <h3>キー配置をカスタマイズしている方</h3>
+      <p><strong>下の「ルート B」の手順をおすすめします。</strong><code>config/keymap.keymap</code> を新しい fork に貼り替えるだけで、キー配置もコンボもマクロも、いまのまま引き継げます。コンボやマクロを使っていない方でも同じです。</p>
+      <p>Configurator で付け直すこともできますが、レイヤーを作り込んでいる場合はそれなりの手間になります。</p>
+
+      <h3>キー配置を標準のまま使っている方</h3>
+      <p>「<a href="#flash">ファームウェアを書き込む</a>」の手順でそのまま書き込んでください。無線の接続先とトラックボールの設定はそのまま残ります。GitHub の操作は必要ありません。</p>
+
+      <h3>ルート B — <code>config/keymap.keymap</code> を移す</h3>
       <p>以前の fork で編集した <code>config/keymap.keymap</code> を、新しいリポジトリに移します。キー配置もコンボもマクロも同じファイルに入っているので、ファイルごと移せばそのまま引き継がれます。</p>
       <ol class="fw-steps">
         <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を fork します。</li>
@@ -279,8 +284,8 @@
         </div>
         <div class="fw-tcard">
           <h3>いまの設定は消えますか</h3>
-          <p>無線の登録（ペアリング）とトラックボールの設定は残ります。キー配置とコンボ／マクロは、新しいファームウェアに入っているものに置き換わります。</p>
-          <p>カスタマイズしている方は、「<a href="#migrate">すでに ZEN をお使いの方へ</a>」の手順をご覧ください。</p>
+          <p>無線の登録（ペアリング）とトラックボールの設定は残ります。<strong>キー配置とコンボ／マクロは、新しいファームウェアに入っているものに置き換わります。</strong></p>
+          <p>ただし、ご自身の fork の <code>config/keymap.keymap</code> はそのまま残っています。ファイルごと移せば引き継げますので、カスタマイズしている方は「<a href="#migrate">すでに ZEN をお使いの方へ</a>」をご覧ください。</p>
         </div>
         <div class="fw-tcard">
           <h3>元のファームウェアに戻せますか</h3>
