@@ -243,20 +243,13 @@
       <p>以前のファームウェアは Configurator に対応していません。切り替えるとブラウザから設定できるようになります。</p>
 
       <div class="fw-panel warn">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>はじめにお読みください</div>
-        新しいファームウェアを書き込むと、<strong>いま使っているキー配置は標準のものに置き換わります。</strong>これまでのキー配置は、ご自身の fork でビルドしたファームウェアの中にあったためです。<br>
-        ただし <code>config/keymap.keymap</code> は fork にそのまま残っています。<strong>ファイルは失われません。</strong>
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>初回だけ、キーマップの引っ越しをしてください</div>
+        新しいファームウェアを書き込むと、<strong>いま使っているキー配置は標準のものに置き換わります。</strong>いままで使っていた fork の <code>config/keymap.keymap</code> を、新しいリポジトリの fork に上書きしてください。<strong>キー配置もコンボもマクロも、そのまま引き継げます。</strong><br>
+        2回目以降は不要です。これ以降は新しい fork だけを使います。
       </div>
 
-      <h3>キー配置をカスタマイズしている方</h3>
-      <p><strong>下の「キーマップを移す」の手順をおすすめします。</strong><code>config/keymap.keymap</code> を新しい fork に貼り替えるだけで、キー配置もコンボもマクロも、いまのまま引き継げます。コンボやマクロを使っていない方でも同じです。</p>
-      <p>Configurator で付け直すこともできますが、レイヤーを作り込んでいる場合はそれなりの手間になります。</p>
-
-      <h3>キー配置を標準のまま使っている方</h3>
-      <p>「<a href="#flash">ファームウェアを書き込む</a>」の手順でそのまま書き込んでください。無線の接続先とトラックボールの設定はそのまま残ります。GitHub の操作は必要ありません。</p>
-
       <h3>キーマップを移す</h3>
-      <p>以前の fork で編集した <code>config/keymap.keymap</code> を、新しいリポジトリに移します。キー配置もコンボもマクロも同じファイルに入っているので、ファイルごと移せばそのまま引き継がれます。</p>
+      <p>いままで使っていた fork（<code>E24-GH/zen-firmware</code> の fork）の <code>config/keymap.keymap</code> を、新しいリポジトリの fork に上書きします。キー配置もコンボもマクロも同じファイルに入っているので、ファイルごと移せばそのまま引き継がれます。</p>
       <ol class="fw-steps">
         <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を fork します。</li>
         <li>以前の fork（<code>zen-firmware</code>）で <code>config/keymap.keymap</code> を開き、<code>Raw</code> の内容をすべてコピーします。</li>
@@ -267,6 +260,9 @@
         <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><code>keymap.keymap</code> 以外も変更している場合</div>
         スリープ時間など <code>boards/shields/zen/</code> 以下の設定も変更している場合は、その差分もあわせてご確認ください。
       </div>
+
+      <h3>キー配置を標準のまま使っていた方</h3>
+      <p>引っ越しは不要です。「<a href="#flash">ファームウェアを書き込む</a>」の手順でそのまま書き込んでください。無線の接続先とトラックボールの設定はそのまま残ります。GitHub の操作も必要ありません。</p>
       <div class="fw-divider"></div>
     </div>
   </section>
