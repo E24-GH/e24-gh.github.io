@@ -259,14 +259,20 @@
 
 /* The A / B cards are the choice a reader makes; the index below them is just
    an index. Both used a solid accent chip, so seven of them stacked up under
-   two more and the whole block read as one orange field. Quiet chips here,
-   and the accent returns on hover. */
+   two more and the whole block read as one orange field.
+
+   No chip here, just the number. That also narrows each entry enough to fit
+   five across instead of four. The number still has to be readable -- the A/B
+   cards send people to it by number -- so it takes --ink-2 (7.2:1 on the card)
+   rather than the lighter --ink-3, which would be 2.8:1. */
+.fw-measured .fw-toc {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.fw-measured .fw-toc a { gap: 11px; padding: 15px 17px; }
 .fw-measured .fw-toc .n {
-  /* --ink-3 on --paper-3 is only 2.5:1; --ink-2 is 6.3:1. */
-  background: var(--paper-3); color: var(--ink-2);
-  border: 1px solid var(--line);
-  transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+  background: none; border: none; border-radius: 0;
+  width: auto; min-width: 11px; height: auto;
+  color: var(--ink-2); font-size: 13px;
+  transition: color .2s var(--ease);
 }
-.fw-measured .fw-toc a:hover .n {
-  background: var(--accent); color: #fff; border-color: var(--accent);
-}
+.fw-measured .fw-toc a:hover .n { color: var(--accent); }
