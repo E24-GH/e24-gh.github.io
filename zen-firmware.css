@@ -216,3 +216,43 @@
   color: var(--accent-d); background: var(--accent-soft);
   border-radius: 999px; padding: 5px 12px; margin: 0 0 14px;
 }
+
+/* ---------------------------------------------------------------------------
+   fw-measured: one width for every block of running text.
+
+   Without it each kind of block sets its own: the lead 700px, a paragraph
+   70ch, a bullet list 70ch at a smaller font (so a different 70ch), the steps
+   72ch, a panel none at all. Five different right edges down one column, which
+   reads as text breaking early in some places and not others.
+
+   Opt-in via a class on .fw-page, so the published firmware.html and the
+   archived guide keep the widths they were reviewed at. The class rides along
+   with the file that carries it.
+   --------------------------------------------------------------------------- */
+.fw-measured { --fw-measure: 760px; }
+
+.fw-measured .fw-hero .lead,
+.fw-measured .fw-sec > .wrap > p,
+.fw-measured .fw-list,
+.fw-measured .fw-files,
+.fw-measured .fw-steps,
+.fw-measured .fw-panel,
+.fw-measured .fw-trouble,
+.fw-measured .fw-routes-note { max-width: var(--fw-measure); }
+
+/* Break the lead at phrase boundaries too, like the body text below it;
+   otherwise it is the one paragraph that can end on a stray trailing kana. */
+.fw-measured .fw-hero .lead { word-break: auto-phrase; }
+
+/* A bullet row is not a flex container here: every child of the li, bare text
+   nodes included, would become its own flex item in its own column. An li
+   holding <strong>, some text and a trailing note rendered as three columns. */
+.fw-measured .fw-list li {
+  display: block; position: relative; padding-left: 20px;
+}
+.fw-measured .fw-list li::before {
+  position: absolute; left: 0; top: 11px; margin-top: 0;
+}
+.fw-measured .fw-list .s-note {
+  display: block; margin-top: 5px; font-size: 14px; line-height: 1.7; color: var(--ink-3);
+}
