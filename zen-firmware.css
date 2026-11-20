@@ -174,3 +174,45 @@
   position: absolute; left: 0; right: 0; bottom: clamp(14px,3vw,24px); text-align: center;
   color: rgba(255,255,255,.82); font-size: 13px; padding: 0 20px; pointer-events: none;
 }
+
+/* route chooser (A / B) */
+.fw-routes {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;
+  margin: 36px 0 0;
+}
+.fw-route {
+  display: block; text-decoration: none;
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 22px 24px; transition: border-color .2s var(--ease), transform .2s var(--ease);
+}
+.fw-route:hover { border-color: var(--accent); transform: translateY(-2px); }
+.fw-route .rk {
+  font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: #fff;
+  background: var(--accent); width: 32px; height: 32px; border-radius: 9px;
+  display: grid; place-items: center; margin-bottom: 12px;
+}
+.fw-route .rt {
+  display: block; font-weight: 700; font-size: 17px; color: var(--ink);
+  line-height: 1.45; word-break: auto-phrase;
+}
+.fw-route .rd {
+  display: block; margin-top: 8px; color: var(--ink-2); font-size: 15px;
+  line-height: 1.8; word-break: auto-phrase;
+}
+.fw-route .rd strong { color: var(--accent-d); }
+.fw-routes-note {
+  margin: 14px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.8;
+}
+.fw-routes-note a {
+  color: var(--accent); font-weight: 700; text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+}
+.fw-routes-note a:hover { border-bottom-color: var(--accent); }
+
+/* route badge inside a section heading block */
+.route-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  color: var(--accent-d); background: var(--accent-soft);
+  border-radius: 999px; padding: 5px 12px; margin: 0 0 14px;
+}
