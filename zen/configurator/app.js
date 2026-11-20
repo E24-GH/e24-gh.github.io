@@ -1872,7 +1872,7 @@ function renderHeader() {
         </svg>
         <div style="min-width:0">
           <div class="disconn-title">キーボードがつながっていません</div>
-          <div class="disconn-sub">右手側（トラックボールのある方）をUSBケーブルでパソコンにつないでください</div>
+          <div class="disconn-sub">右手側をUSBケーブルでパソコンにつないでください</div>
         </div>
       </div>`;
 
@@ -2710,7 +2710,7 @@ function renderBluetooth() {
     const why = !state.client
       ? "キーボードをつなぐと、登録されている機器が表示されます。"
       : state.status && state.status.role === "peripheral"
-        ? "左手側には接続先の登録がありません。右手側（トラックボールのある方）をつないでください。"
+        ? "左手側には接続先の登録がありません。右手側をつないでください。"
         : "このキーボードのファームウェアは、接続先の読み取りに対応していません。ファームウェアを更新してください。";
     return `<div class="stack">
         <section class="card bt-main glass">
