@@ -225,33 +225,22 @@
     <div class="section-head reveal">
       <span class="tdeco"></span>
       <h2 class="h2"><span class="accent">自分専用</span>キーマップ</h2>
-      <p class="lead">ZEN は ZMK ファームウェアを採用。購入後はブラウザの ZEN Configurator から、すべてのキーとレイヤーを自由に書き換えられます。GitHub の操作は必要ありません。下の配置は、キットに最初から書き込まれているデフォルトの一例です。</p>
-      <a class="fw-link" href="firmware.html" target="_blank" rel="noopener" style="margin-top:18px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span>キー配置の変え方・セットアップガイド</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+      <p class="lead">ZEN は ZMK ファームウェアを採用。キー配置は <strong>ZEN Configurator</strong> から、ブラウザでいつでも調整できます。右手側を USB でつないで、変えたいキーをクリックするだけ。GitHub の操作は必要ありません。</p>
+      <a class="fw-link" href="configurator/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg><span>ZEN Configurator を開く</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
     </div>
 
-    <div class="keymap-wrap reveal d1">
-      <div class="keymap-controls">
-        <span class="label">LAYER</span>
-        <button class="cat-btn active" data-layer="0">ベース</button>
-        <button class="cat-btn" data-layer="1">マウス</button>
-        <button class="cat-btn" data-layer="2">数字・記号</button>
-        <button class="cat-btn" data-layer="3">Fn・テンキー</button>
-        <span class="km-editor-note">＋ ZEN Configurator で自由に編集</span>
-      </div>
+    <figure class="conf-shot reveal d1">
+      <img src="../assets/zen-configurator.webp" width="2000" height="1114" loading="lazy" decoding="async"
+           alt="ZEN Configurator の画面。左右のキーボードが並び、レイヤーを選んでキーを押すと役割を変えられる">
+      <figcaption>
+        <span class="cs-point">レイヤーごとに編集</span>
+        <span class="cs-point">トラックボールの速さも調整</span>
+        <span class="cs-point">無線の接続先を切り替え</span>
+      </figcaption>
+    </figure>
 
-      <div class="board">
-        <div class="half" id="half-left"></div>
-        <div class="half" id="half-right"></div>
-      </div>
-
-      <div class="keymap-legend">
-        <div class="it"><span class="sw" style="background:transparent;border-color:rgba(20,20,25,.22);"></span>キー</div>
-        <div class="it"><span class="sw" style="background:rgba(20,20,25,.045);border-style:dashed;border-color:rgba(20,20,25,.32);"></span>レイヤー切替キー</div>
-        <div class="it"><span class="sw" style="background:transparent;border-color:rgba(20,20,25,.22);opacity:.26;"></span>薄い＝このレイヤーでは変化なし</div>
-        <div class="it"><span class="sw" style="background:radial-gradient(circle at 38% 32%,#fff,#DCDCE1);border-color:var(--key-sh);"></span>トラックボール</div>
-      </div>
-      <p class="keymap-hint" id="km-info">→ レイヤーを切り替えると、同じキーの役割が変わります。ZMK ならこの割り当ても、すべて自由に。</p>
-    </div>
+    <p class="keymap-hint">→ 変更は「キーボードに保存」を押すまでキーボードに残りません。気軽に試せます。</p>
+    <a class="fw-link" href="firmware.html" target="_blank" rel="noopener" style="margin-top:18px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span>セットアップガイドを見る</span><svg class="ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
   </div>
 </section>
 
@@ -615,7 +604,6 @@
   <span class="lbl">上へ戻る</span>
 </button>
 
-<script src="../zen-keymap.js?v=20260612"></script>
 <script src="../zen-sound.js"></script>
 <script src="../zen-hero-color.js"></script>
 <script src="../zen-carousel.js"></script>
