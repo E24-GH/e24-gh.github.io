@@ -156,6 +156,7 @@ const HOLD_NAME = { LSHFT: "Shift", RSHFT: "Shift", LCTRL: "Ctrl", RCTRL: "Ctrl"
 
 const ICON = {
   kp: "M5 19l7-14 7 14M8 14h8",
+  zen_macro: "M13 3L5 14h6l-1 7 8-11h-6z",
   mt: "M12 4l7 8h-4v7H9v-7H5z",
   layer: "M12 3l9 5-9 5-9-5zM3 13l9 5 9-5",
   mkp: "M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5",
@@ -204,9 +205,13 @@ const ROLES = [
   { id: "mkp", label: "マウスのボタン", sub: "クリック・戻る・進む" },
   { id: "bt", label: "Bluetoothの接続先", sub: "つなぐ機器を選ぶ" },
   { id: "out", label: "USB / Bluetooth 切替", sub: "キー入力の送り先" },
+  // Only offered when the keyboard has macro slots; see rolesForKeyboard().
+  { id: "zen_macro", label: "マクロを実行", sub: "決めておいたキーを順に送る", needsMacro: true },
   { id: "trans", label: "下のレイヤーと同じ", sub: "このレイヤーでは何も決めない" },
   { id: "none", label: "何もしない", sub: "キーを無効にする" },
 ];
+
+const rolesForKeyboard = () => ROLES.filter((r) => !r.needsMacro || state.macroRuntime);
 
 const MOUSE_BODY = "M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10";
 const MOUSE_OPTS = [
@@ -536,6 +541,25 @@ const state = {
   // Combos live in config/keymap.keymap, not on the keyboard -- ZMK builds
   // them into a const table at compile time. null means no file is loaded.
   combos: null,
+  // Set when the connected firmware has editable combo slots, which shipping
+  // builds do not. { slots, maxKeys }.
+  comboRuntime: null,
+  // { slots, maxSteps } when the firmware has editable macros, else null.
+  macroRuntime: null,
+  macros: null,
+  savedMacros: null,
+  macroSel: 0,
+  macroBusy: false,
+  // "Clear everything" writes straight through to flash, so it asks first --
+  // in place, rather than as a dialog, since the list behind it is the thing
+  // being described.
+  wipeConfirm: null,
+  // Set while asking what to do about edits that would otherwise be left
+  // behind: { from, to }. Combos and macros each save on their own page, so
+  // walking away from one is the moment they can be lost.
+  leaveConfirm: null,
+  // True while state.combos is the keyboard's own slots rather than a file.
+  comboLive: false,
   savedCombos: null,
   // The keymap file the combos came out of: its name, for the UI, and its
   // text, which the browser build writes the edited combos block back into.
@@ -899,6 +923,9 @@ function describe(binding) {
     const u = unwrap(rest.join(" "));
     return { tag: u.mods.map((c) => MOD_SYM[c]).join("+"), main: pretty(u.name), style: "key" };
   }
+  if (beh === "zen_macro") {
+    return { tag: "マクロ", main: String(Number(rest[0]) + 1), style: "special" };
+  }
   if (beh === "mt") return { tag: "長押し" + (HOLD_NAME[rest[0]] || pretty(rest[0])), main: pretty(rest[1]), style: "special" };
   if (LAYER_MODE[beh]) return { tag: LAYER_MODE[beh].tag, main: "L" + rest[0], style: "special" };
   if (beh === "mkp") return { tag: "マウス", main: MOUSE_SHORT[rest[0]] || rest[0], style: "special" };
@@ -939,6 +966,9 @@ function sentence(binding) {
       BT_DISC: "今のBluetooth接続を切ります",
     }[rest[0]] || rest.join(" ");
   }
+  if (beh === "zen_macro") {
+    return `マクロ ${Number(rest[0]) + 1} を実行します`;
+  }
   if (beh === "out") {
     return {
       OUT_USB: "キー入力の送り先をUSBにします", OUT_BLE: "キー入力の送り先をBluetoothにします",
@@ -953,7 +983,7 @@ function parseInto(binding) {
   const parts = (binding || "&trans").replace(/^&/, "").split(/\s+/);
   const beh = parts[0];
   const ed = {
-    kind: beh, keyName: "A", hold: "LSHFT", layerArg: 0, opt: "LCLK",
+    kind: beh, keyName: "A", hold: "LSHFT", layerArg: 0, opt: "LCLK", macroSlot: 0,
     mods: { ctrl: false, shift: false, alt: false, gui: false },
   };
   if (beh === "kp") {
@@ -965,6 +995,8 @@ function parseInto(binding) {
     ed.keyName = parts[2] || "A";
   } else if (LAYER_MODE[beh]) {
     ed.layerArg = Number(parts[1]) || 0;
+  } else if (beh === "zen_macro") {
+    ed.macroSlot = Number(parts[1]) || 0;
   } else if (["mkp", "bt", "out"].includes(beh)) {
     ed.opt = parts.slice(1).join(" ");
   }
@@ -980,6 +1012,7 @@ function composeBinding() {
   if (e.kind === "mkp") return `&mkp ${e.opt}`;
   if (e.kind === "bt") return `&bt ${e.opt}`;
   if (e.kind === "out") return `&out ${e.opt}`;
+  if (e.kind === "zen_macro") return `&zen_macro ${e.macroSlot ?? 0}`;
   if (e.kind === "mt") return `&mt ${e.hold} ${e.keyName}`;
   let name = e.keyName;
   [["ctrl", "LC"], ["shift", "LS"], ["alt", "LA"], ["gui", "LG"]].forEach(([id, w]) => {
@@ -1054,6 +1087,26 @@ async function connect() {
     } catch (_error) {
       state.status = null; // older firmware without GET_STATUS — non-fatal
     }
+    // Shipping firmware has no editable combos and answers "unknown command",
+    // which leaves comboRuntime null and the combo tab on the keymap file.
+    try {
+      state.comboRuntime = await state.client.getComboMeta();
+    } catch (_error) {
+      state.comboRuntime = null;
+    }
+    if (state.comboRuntime) {
+      await loadCombosFromDevice();
+    }
+
+    try {
+      state.macroRuntime = await state.client.getMacroMeta();
+    } catch (_error) {
+      state.macroRuntime = null;
+    }
+    if (state.macroRuntime) {
+      await loadMacrosFromDevice();
+    }
+
     await refreshBleProfiles();
     startStatusPolling();
 
@@ -1174,6 +1227,20 @@ async function disconnect() {
   state.savedPointer = { ...POINTER_DEFAULTS };
   state.pointerVersion = POINTER_VERSION_WITH_ROTATION;
   state.autoMouseSupported = null;
+  if (state.comboLive) {
+    // These were the keyboard's, not a file's. Leaving them on screen after
+    // the cable is out would invite editing something nothing can receive.
+    state.combos = null;
+    state.savedCombos = null;
+    state.comboSel = null;
+    state.comboFile = "";
+    state.comboLive = false;
+  }
+  state.comboRuntime = null;
+  state.macroRuntime = null;
+  state.macros = null;
+  state.savedMacros = null;
+  if (state.tab === "macro") state.tab = "combo";
   state.layer = 0;
   state.active = false;
   toast("キーボードとの接続を切りました");
@@ -1527,6 +1594,7 @@ async function loadCombos({ pick = false } = {}) {
 
 async function saveCombos() {
   if (!state.combos) return;
+  if (state.comboLive) return saveCombosToDevice();
   state.comboBusy = true;
   render();
   try {
@@ -1551,6 +1619,250 @@ async function saveCombos() {
     toast(String(error.message ?? error), true);
   }
   state.comboBusy = false;
+  render();
+}
+
+
+// --- Combos: the keyboard's own slots ---------------------------------------
+//
+// Firmware built with CONFIG_ZEN_RUNTIME_COMBO keeps a handful of combo slots
+// it can rewrite while running, so a combo no longer needs a rebuild. The
+// editor above does not care where a combo came from: everything here only
+// swaps what loads and what saves.
+//
+// The combos compiled into the keymap stay read-only and are not in these
+// slots, so they do not appear in this mode. That is deliberate -- the one
+// ZEN ships is the Bluetooth-clear combo, and offering to edit something the
+// keyboard would ignore is worse than leaving it out.
+
+async function loadCombosFromDevice() {
+  const meta = state.comboRuntime;
+  if (!state.client || !meta) return;
+
+  state.comboBusy = true;
+  state.comboError = "";
+  render();
+  try {
+    const combos = [];
+    for (let slot = 0; slot < meta.slots; slot++) {
+      const read = await state.client.getCombo(slot);
+      if (read.keyPositions.length === 0) continue;
+      combos.push({
+        uid: ++comboUid,
+        name: null,
+        keyPositions: read.keyPositions,
+        bindings: read.binding ?? "&none",
+        layers: read.layers,
+        timeoutMs: read.timeoutMs,
+        extra: [],
+      });
+    }
+    state.combos = combos;
+    state.savedCombos = copyCombos(combos);
+    state.comboSel = null;
+    state.comboLive = true;
+    state.comboFile = "";
+    state.comboSource = "";
+  } catch (error) {
+    state.comboError = String(error.message ?? error);
+    state.combos = null;
+    state.comboLive = false;
+  }
+  state.comboBusy = false;
+  render();
+}
+
+/** Writes every slot, then asks the keyboard to keep them.
+ *
+ *  Slots are assigned by position in the list, and the ones past the end are
+ *  emptied -- so a deleted combo actually leaves the keyboard rather than
+ *  lingering in a slot nothing on screen refers to. */
+async function saveCombosToDevice() {
+  const meta = state.comboRuntime;
+  if (!state.client || !meta || !state.combos) return;
+
+  const tooShort = state.combos.find((c) => c.keyPositions.length < 2);
+  if (tooShort) {
+    toast("キーが2つ未満のコンボがあります。キーを選ぶか、削除してください", true);
+    return;
+  }
+  const tooLong = state.combos.find((c) => c.keyPositions.length > meta.maxKeys);
+  if (tooLong) {
+    toast(`このファームウェアで作れるのは ${meta.maxKeys} キーまでです`, true);
+    return;
+  }
+  if (state.combos.length > meta.slots) {
+    toast(`このファームウェアのコンボは ${meta.slots} 件までです`, true);
+    return;
+  }
+
+  state.comboBusy = true;
+  render();
+  try {
+    for (let slot = 0; slot < meta.slots; slot++) {
+      const combo = state.combos[slot] ?? null;
+      await state.client.setCombo(slot, combo && {
+        keyPositions: combo.keyPositions,
+        layers: combo.layers,
+        timeoutMs: combo.timeoutMs ?? COMBO_DEFAULT_TIMEOUT_MS,
+        binding: combo.bindings,
+      });
+    }
+    await state.client.saveCombos();
+    state.savedCombos = copyCombos(state.combos);
+    toast("キーボードに書き込みました");
+  } catch (error) {
+    // The firmware refuses a rewrite while a combo is still held, because the
+    // table renumbers itself and an in-flight press holds an index into it.
+    const message = String(error.message ?? error);
+    toast(message.includes("keys are down")
+      ? "キーを押したままでは書き込めません。すべて離してから、もう一度お試しください"
+      : message, true);
+    // What reached the keyboard before the failure is unknown, so re-read
+    // rather than leave the screen claiming something it cannot vouch for.
+    await loadCombosFromDevice();
+  }
+  state.comboBusy = false;
+  render();
+}
+
+/** Empties every slot on the keyboard and drops the saved copy, so it comes
+ *  back on the combos built into its firmware. */
+async function resetCombosOnDevice() {
+  state.wipeConfirm = null;
+  if (!state.client || !state.comboRuntime) return;
+  state.comboBusy = true;
+  render();
+  try {
+    await state.client.resetCombos();
+    toast("キーボードのコンボをすべて消しました");
+  } catch (error) {
+    toast(String(error.message ?? error), true);
+  }
+  state.comboBusy = false;
+  await loadCombosFromDevice();
+}
+
+
+// --- Macros: the keyboard's own slots ---------------------------------------
+//
+// A macro is a short list of steps the keyboard plays back: tap a key, hold
+// one down, let it go, or wait. Firmware built with CONFIG_ZEN_RUNTIME_MACRO
+// keeps a few slots it can rewrite while running; nothing that ships does, so
+// the tab is hidden until a keyboard says otherwise.
+//
+// A macro has no trigger of its own. It is reached from a combo, whose output
+// can be "macro n" -- which is why this tab and the combo tab belong together.
+
+// MACRO_OP itself comes from protocol.js, which has to know the wire values.
+const MACRO_OP_LABEL = { 0: "押して離す", 1: "押したまま", 2: "離す", 3: "待つ" };
+
+/** What a step reads as in the list. */
+function macroStepLabel(step) {
+  if (step.op === MACRO_OP.WAIT) return `${step.value} ms`;
+  const binding = decodeBinding("key_press", step.value, 0);
+  return describe(binding).main;
+}
+
+function macroChangeCount() {
+  if (!state.macros || !state.savedMacros) return 0;
+  return state.macros.filter(
+    (m, i) => JSON.stringify(m.steps) !== JSON.stringify(state.savedMacros[i]?.steps ?? []),
+  ).length;
+}
+
+/** How many keys a macro would still be holding when it ends. The firmware
+ *  refuses anything but zero, so the editor refuses it too rather than
+ *  letting someone press save and read an error. */
+function macroHeld(steps) {
+  return steps.reduce(
+    (n, step) => n + (step.op === MACRO_OP.PRESS ? 1 : step.op === MACRO_OP.RELEASE ? -1 : 0), 0);
+}
+
+const macrosSendable = () => (state.macros ?? []).every((m) => macroHeld(m.steps) === 0);
+
+const copyMacros = (macros) => macros.map((m) => ({ steps: m.steps.map((x) => ({ ...x })) }));
+
+async function loadMacrosFromDevice() {
+  const meta = state.macroRuntime;
+  if (!state.client || !meta) return;
+
+  state.macroBusy = true;
+  render();
+  try {
+    const macros = [];
+    for (let slot = 0; slot < meta.slots; slot++) {
+      macros.push({ steps: (await state.client.getMacro(slot)).steps });
+    }
+    state.macros = macros;
+    state.savedMacros = copyMacros(macros);
+    if (state.macroSel >= meta.slots) state.macroSel = 0;
+  } catch (error) {
+    toast(String(error.message ?? error), true);
+    state.macros = null;
+  }
+  state.macroBusy = false;
+  render();
+}
+
+async function saveMacrosToDevice() {
+  const meta = state.macroRuntime;
+  if (!state.client || !meta || !state.macros) return;
+
+  const tooLong = state.macros.findIndex((m) => m.steps.length > meta.maxSteps);
+  if (tooLong >= 0) {
+    toast(`マクロ ${tooLong + 1} が長すぎます（${meta.maxSteps} ステップまで）`, true);
+    return;
+  }
+
+  state.macroBusy = true;
+  render();
+  try {
+    for (let slot = 0; slot < meta.slots; slot++) {
+      await state.client.setMacro(slot, state.macros[slot]?.steps ?? []);
+    }
+    await state.client.saveMacros();
+    state.savedMacros = copyMacros(state.macros);
+    toast("キーボードに書き込みました");
+  } catch (error) {
+    // The firmware refuses a macro that would leave a key held down, since
+    // nothing would ever release it. That arrives as "invalid payload".
+    const message = String(error.message ?? error);
+    toast(message.includes("invalid payload")
+      ? "押したままのキーが離されていないマクロがあります。「離す」を登録してください"
+      : message, true);
+    await loadMacrosFromDevice();
+  }
+  state.macroBusy = false;
+  render();
+}
+
+async function resetMacrosOnDevice() {
+  state.wipeConfirm = null;
+  if (!state.client || !state.macroRuntime) return;
+  state.macroBusy = true;
+  render();
+  try {
+    await state.client.resetMacros();
+    toast("キーボードのマクロをすべて消しました");
+  } catch (error) {
+    toast(String(error.message ?? error), true);
+  }
+  state.macroBusy = false;
+  await loadMacrosFromDevice();
+}
+
+/** Appends one step to the slot on screen. Nothing reaches the keyboard until
+ *  the save button, the same as every other editor here. */
+function macroAdd(step) {
+  const meta = state.macroRuntime;
+  const macro = state.macros?.[state.macroSel];
+  if (!macro || !meta) return;
+  if (macro.steps.length >= meta.maxSteps) {
+    toast(`1つのマクロは ${meta.maxSteps} ステップまでです`, true);
+    return;
+  }
+  macro.steps.push(step);
   render();
 }
 
@@ -1796,12 +2108,31 @@ function switchHtml(on, action) {
 
 // --- Render: header ---------------------------------------------------------
 
+/** The half we are plugged into. Right on every shipping build; left on an
+ *  LCD build, where the display takes the spi0 the trackball would use. */
+function thisSide() {
+  const s = state.status;
+  if (s?.side) return s.side;
+  // Firmware older than the side byte. All of it is right-central, so the role
+  // gives the side exactly -- do not just assume right, or plugging in the
+  // left half of an existing keyboard would label it as the right one.
+  return s?.role === "peripheral" ? "left" : "right";
+}
+
+function sideLabel(side) {
+  return side === "left" ? "左手" : "右手";
+}
+
 function batteries() {
   const s = state.status;
   if (!state.client || !s) return { left: null, right: null };
-  if (s.role === "peripheral") return { left: s.localBattery, right: null };
-  if (s.role === "central") return { left: s.peripheralBattery, right: s.localBattery };
-  return { left: null, right: s.localBattery };
+  // Keyed off which half is plugged in, not off the role: reading the role as
+  // "central means right" put the two batteries the wrong way round on an LCD
+  // build, where the left half is the central.
+  const here = thisSide();
+  const near = s.localBattery;
+  const far = s.role === "central" ? s.peripheralBattery : null;
+  return here === "left" ? { left: near, right: far } : { left: far, right: near };
 }
 
 function batterySvg(pct) {
@@ -2005,20 +2336,27 @@ function logoSvg(which, height, extra = "") {
   return `<svg viewBox="0 0 ${l.w} ${l.h}" height="${height}" ${extra} role="img" aria-label="ZEN"><path d="${l.d}" fill="currentColor"/></svg>`;
 }
 
-const TABS = [
+const ALL_TABS = [
   { id: "keymap", short: "キー", label: "キー配置", icon: "keyboard" },
   { id: "combo", short: "コンボ", label: "コンボ", icon: "combo" },
+  // Only firmware with editable macro slots has anything to show here, and
+  // that is no shipping build, so the tab stays hidden until one answers.
+  { id: "macro", short: "マクロ", label: "マクロ", icon: "bolt", needsMacro: true },
   { id: "pointer", short: "マウス", label: "マウス操作", icon: "mousetab" },
   { id: "bt", short: "BT", label: "Bluetooth", icon: "bt" },
   { id: "color", short: "カラー", label: "キーボードの色", icon: "palette" },
 ];
+
+const TABS_FOR = () => ALL_TABS.filter((t) => !t.needsMacro || state.macroRuntime);
 
 function renderRail(counts) {
   const dirty = {
     keymap: counts.key > 0,
     combo: comboChangeCount() > 0,
     pointer: counts.pointer > 0,
+    macro: macroChangeCount() > 0,
   };
+  const TABS = TABS_FOR();
   return `<nav class="rail glass">
       <div class="rail-mark" title="ZEN Configurator">${logoSvg("z", 20, 'width="20"')}</div>
       ${TABS.map((t) => `<button type="button" class="${cls("rail-btn", state.tab === t.id && "is-on")}" ${act("tab", t.id)} title="${t.label}">
@@ -2214,7 +2552,7 @@ function renderBoards() {
           </button>
           ${lcd("r", bat.right)}
         </div>
-        <div class="board-label">右手<i> · </i>USBでつなぐ側</div>
+        <div class="board-label">${sideLabel(thisSide())}<i> · </i>USBでつなぐ側</div>
       </div>
     </div>`;
 }
@@ -2344,7 +2682,7 @@ function renderEditor() {
 
         <div class="ed-roles">
           <div class="ed-sub">このキーの役割</div>
-          ${ROLES.map((r) => `<button type="button" class="${cls("role", r.id === role && "is-on")}" ${act("role", r.id)}>
+          ${rolesForKeyboard().map((r) => `<button type="button" class="${cls("role", r.id === role && "is-on")}" ${act("role", r.id)}>
             <span class="role-icon">${svg(ICON[r.id], 16)}</span>
             <span style="min-width:0">
               <span class="role-label">${r.label}</span>
@@ -2368,6 +2706,32 @@ function renderEditorDetail() {
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v14M7 13l5 5 5-5"/></svg>
         </div>
         <p>このレイヤーでは何も決めず、<b>下のレイヤー（ふだんはレイヤー 0）と同じ動き</b>をします。<br>レイヤーを切り替えても、よく使うキーをそのまま使いたいときに便利です。</p>
+      </div>`;
+  }
+  if (e.kind === "zen_macro") {
+    const macros = state.macros ?? [];
+    const sel = e.macroSlot ?? 0;
+    const chosen = macros[sel];
+    return `<div class="explain" style="align-items:stretch;gap:14px">
+        <div style="width:100%">
+          <div class="ed-sub">どのマクロを実行しますか</div>
+          <div class="cats" style="margin-top:6px">
+            ${(macros.length ? macros : [{ steps: [] }]).map((m, i) => `<button type="button" class="${cls("cat", i === sel && "is-on")}" ${act("macro-slot", String(i))}>
+              マクロ${i + 1}<span style="opacity:.6;margin-left:6px">${m.steps.length ? `${m.steps.length} ステップ` : "空"}</span>
+            </button>`).join("")}
+          </div>
+          <div class="combo-hint" style="margin-top:10px">
+            ${chosen && chosen.steps.length
+              ? `押すと ${chosen.steps.map((step) => esc(macroStepLabel(step))).join(" → ")} の順に送ります。`
+              : "このマクロはまだ空です。中身を決めないと、押しても何も起きません。"}
+          </div>
+          <button type="button" class="${cls("btn", !(chosen && chosen.steps.length) && "btn-accent")}" ${act("tab", "macro")} style="margin-top:4px">
+            ${svg(ICON.bolt, 14, 1.9)}マクロ${sel + 1}の中身を編集する
+          </button>
+          <div class="combo-hint">
+            中身を変えても、このキーの割り当てはそのままです。マクロ側を編集すれば動きが変わります。
+          </div>
+        </div>
       </div>`;
   }
   if (e.kind === "none") {
@@ -2473,6 +2837,23 @@ function renderEditorDetail() {
 // --- Render: combo ----------------------------------------------------------
 
 function renderComboPanel() {
+  if (!state.combos && state.comboRuntime) {
+    // Connected to firmware that holds its own combos, but nothing read yet
+    // -- only reachable when a read failed, since connect() loads them.
+    return `<section class="card card-pad glass">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span class="group-icon">${svg(ICON.combo, 16, 1.9)}</span>
+          <span class="group-title">コンボ</span>
+          <span class="card-note">同時に押すと別のキーとして働きます</span>
+        </div>
+        ${state.comboError ? `<div class="notice" style="border-color:var(--danger)"><span style="color:var(--danger)">${esc(state.comboError)}</span></div>` : ""}
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+          <button type="button" class="btn btn-accent" ${act("combo-device-reload")} ${state.comboBusy ? "disabled" : ""}>
+            ${svg(ICON.reset, 15, 1.9)}キーボードから読み込む
+          </button>
+        </div>
+      </section>`;
+  }
   if (!state.combos) {
     return `<section class="card card-pad glass">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -2512,21 +2893,28 @@ function renderComboPanel() {
 
   const outLabel = (b) => {
     const d = describe(b);
+    // A macro's number means nothing on its own: "1" in the output column
+    // would read as the key 1.
+    if (d.tag === "マクロ") return d.tag + d.main;
     return (d.tag && d.style === "key" ? d.tag + "+" : "") + d.main;
   };
   const pool = (PICKER_GROUPS.find((g) => g.label === state.cat) || PICKER_GROUPS[0]).keys;
   const curOut = sel ? sel.bindings.replace(/^&kp\s+/, "") : "";
 
   return `<section class="card card-pad glass" style="padding-bottom:18px">
-      <div class="notice">${svg(ICON.bolt, 15, 2)}<span>
+      ${state.comboLive ? `<div class="notice">${svg(ICON.bolt, 15, 2)}<span>
+        このキーボードは<b>コンボをその場で書き換えられます</b>。ビルドは要りません。
+        空きは ${state.comboRuntime.slots} 件、1つのコンボに使えるキーは ${state.comboRuntime.maxKeys} つまでです。
+        <br>ファームウェアに焼き込まれているコンボ（Bluetooth の消去など）はここには出ません。消えることもありません。
+      </span></div>` : `<div class="notice">${svg(ICON.bolt, 15, 2)}<span>
         コンボは<b>キーボードに送れません</b>（ファームウェアに焼き込まれているためです）。
         ここでの変更は <code>keymap.keymap</code> に書き出したあと、
         <b>ビルドして書き込む</b>と反映されます。下の「キーボードに保存」は関係ありません。
-      </span></div>
+      </span></div>`}
 
       <div class="combo-head" style="margin-top:14px">
         <span class="t">レイヤー ${state.layer} のコンボ</span>
-        <span class="card-note">${layerCombos.length} 件 / ファイル全体で ${state.combos.length} 件</span>
+        <span class="card-note">${layerCombos.length} 件 / ${state.comboLive ? `キーボード全体で ${state.combos.length} / ${state.comboRuntime.slots} 件` : `ファイル全体で ${state.combos.length} 件`}</span>
         <button type="button" class="btn btn-dark" ${act("combo-add")}>${svg(ICON.plus, 14, 2.2)}新しいコンボ</button>
       </div>
 
@@ -2568,6 +2956,12 @@ function renderComboPanel() {
             <span class="detail-h" style="margin:0">押したときに入力されるキー</span>
             <span class="card-note" style="color:var(--ink2)">${esc(sentence(sel.bindings))}</span>
           </div>
+          ${state.macroRuntime ? `<div class="cats" style="margin-bottom:6px">
+            <span class="card-note" style="margin-right:4px">マクロを出す:</span>
+            ${state.macros ? state.macros.map((m, i) => `<button type="button" class="${cls("cat", sel.bindings === `&zen_macro ${i}` && "is-on")}" ${act("combo-out-macro", String(i))} ${m.steps.length ? "" : "disabled"} title="${m.steps.length ? `${m.steps.length} ステップ` : "空のマクロです"}">
+              マクロ${i + 1}
+            </button>`).join("") : ""}
+          </div>` : ""}
           <div class="cats">
             ${PICKER_GROUPS.map((g) => `<button type="button" class="${cls("cat", g.label === state.cat && "is-on")}" ${act("cat", g.label)} style="padding:4px 9px;font-size:11.5px">${g.label}</button>`).join("")}
           </div>
@@ -2587,12 +2981,26 @@ function renderComboPanel() {
         </div>
       </div>` : ""}
 
-      ${canWriteKeymapInPlace() ? "" : `<div class="combo-hint" style="margin-top:14px">
+      ${state.comboLive || canWriteKeymapInPlace() ? "" : `<div class="combo-hint" style="margin-top:14px">
         読み込んだ時点の内容をもとに書き出します。読み込んだあとに GitHub 側で
         <code>config/keymap.keymap</code> を編集した場合は、読み込み直してください。
       </div>`}
 
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
+      ${state.comboLive ? `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:13px;font-weight:650">${dirty ? `${dirty} 件の変更が未保存です` : "キーボードの中身と同じです"}</div>
+          <div class="card-note">保存するまで、電源を切ると元に戻ります</div>
+        </div>
+        ${state.wipeConfirm === "combo"
+          ? `<span class="card-note" style="color:var(--danger)">保存した分ごと消えます。元に戻せません</span>
+             <button type="button" class="btn" ${act("wipe-cancel")}>やめる</button>
+             <button type="button" class="btn-danger-plain" ${act("combo-device-reset")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}本当に消す</button>`
+          : `<button type="button" class="btn-danger-plain" ${act("wipe-ask", "combo")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}すべて消す</button>`}
+        <button type="button" class="btn" ${act("combo-device-reload")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.reset, 13)}読み直す</button>
+        <button type="button" class="${cls("btn", dirty && "btn-accent")}" ${act("combo-save")} ${state.comboBusy || !dirty ? "disabled" : ""}>
+          ${svg(ICON.bolt, 15, 1.9)}コンボを保存
+        </button>
+      </div>` : `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
         <div style="flex:1;min-width:200px">
           <div style="font-size:13px;font-weight:650">${dirty ? `${dirty} 件の変更が未書き出しです` : "読み込んだ内容と同じです"}</div>
           <div class="card-note" style="word-break:break-all">${esc(state.comboFile || "")}</div>
@@ -2604,8 +3012,134 @@ function renderComboPanel() {
         <button type="button" class="${cls("btn", dirty && "btn-accent")}" ${act("combo-save")} ${state.comboBusy || !dirty ? "disabled" : ""}>
           ${svg(ICON.download, 15, 1.9)}${canWriteKeymapInPlace() ? "keymap.keymap に書き出す" : "keymap.keymap をダウンロード"}
         </button>
-      </div>
+      </div>`}
     </section>`;
+}
+
+
+// --- Render: macro ----------------------------------------------------------
+
+function renderMacroPanel() {
+  const meta = state.macroRuntime;
+  if (!meta || !state.macros) {
+    return `<section class="card card-pad glass">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="group-icon">${svg(ICON.bolt, 16, 1.9)}</span>
+        <span class="group-title">マクロ</span>
+      </div>
+      <button type="button" class="btn btn-accent" ${act("macro-reload")} ${state.macroBusy ? "disabled" : ""}>
+        ${svg(ICON.reset, 15, 1.9)}キーボードから読み込む
+      </button>
+    </section>`;
+  }
+
+  const macro = state.macros[state.macroSel] ?? { steps: [] };
+  const dirty = macroChangeCount();
+  const pool = (PICKER_GROUPS.find((g) => g.label === state.cat) || PICKER_GROUPS[0]).keys;
+  const held = macroHeld(macro.steps);
+  const sendable = macrosSendable();
+
+  return `<section class="card card-pad glass" style="padding-bottom:18px">
+    <div class="notice">${svg(ICON.bolt, 15, 2)}<span>
+      マクロは<b>キーを順番に送る</b>しくみです。マクロ自体には押すキーがありません。
+      コンボの出力に「マクロ1」などを選ぶと、そのコンボで動きます。
+      <br>1つのマクロに入れられるのは ${meta.maxSteps} ステップまで、マクロは ${meta.slots} 本までです。
+    </span></div>
+
+    <div class="combo-head" style="margin-top:14px">
+      <span class="t">どのマクロを編集しますか</span>
+    </div>
+    <div class="cats" style="margin-bottom:12px">
+      ${state.macros.map((m, i) => `<button type="button" class="${cls("cat", i === state.macroSel && "is-on")}" ${act("macro-sel", String(i))}>
+        マクロ${i + 1}<span style="opacity:.6;margin-left:6px">${m.steps.length ? `${m.steps.length} ステップ` : "空"}</span>
+      </button>`).join("")}
+    </div>
+
+    <div class="combo-table">
+      <div class="combo-grid combo-th" style="grid-template-columns:40px 110px 1fr 90px">
+        <span>No.</span><span>動作</span><span>キー / 時間</span><span></span>
+      </div>
+      ${macro.steps.length === 0
+        ? '<div class="combo-empty">まだ何も入っていません。下から登録してください</div>'
+        : macro.steps.map((step, i) => `<div class="combo-grid combo-row" style="grid-template-columns:40px 110px 1fr 90px">
+            <span class="combo-n">${i + 1}</span>
+            <span>${MACRO_OP_LABEL[step.op] ?? step.op}</span>
+            <span class="combo-keys"><span class="combo-cap">${esc(macroStepLabel(step))}</span></span>
+            <span style="display:flex;gap:4px;justify-content:flex-end">
+              <button type="button" class="btn btn-dark" style="padding:2px 7px" ${act("macro-up", String(i))} ${i === 0 ? "disabled" : ""}>↑</button>
+              <button type="button" class="btn-danger-plain" style="padding:2px 7px" ${act("macro-del", String(i))}>${svg(ICON.trash, 12)}</button>
+            </span>
+          </div>`).join("")}
+    </div>
+
+    ${held > 0 ? `<div class="notice" style="margin-top:12px;border-color:var(--danger)"><span style="color:var(--danger)">
+      押したままのキーが ${held} つ、離されていません。このままでは保存できません。
+      キーボードがそのキーを押しっぱなしにしてしまうためです。
+    </span></div>` : ""}
+
+    <div class="combo-edit" style="margin-top:14px">
+      <div class="combo-panel p1">
+        <div class="detail-h">文字をまとめて入れる</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="macro-text" type="text" placeholder="hello" style="flex:1;min-width:140px"
+                 maxlength="${meta.maxSteps}">
+          <button type="button" class="btn" ${act("macro-text")}>登録</button>
+        </div>
+        <div class="combo-hint">英数字と記号を1文字ずつ「押して離す」に変えます</div>
+
+        <div class="detail-h" style="margin-top:14px">待つ</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${[100, 250, 500, 1000].map((ms) => `<button type="button" class="btn btn-dark" ${act("macro-wait", String(ms))}>${ms} ms</button>`).join("")}
+        </div>
+        <div class="combo-hint">直前のステップのあとに、その時間だけ待ちます</div>
+      </div>
+
+      <div class="combo-panel p2" style="grid-column:span 2">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span class="detail-h" style="margin:0">キーを登録</span>
+          <span class="card-note" style="color:var(--ink2)">${MACRO_OP_LABEL[state.macroOp ?? 0]}</span>
+        </div>
+        <div class="cats">
+          ${[0, 1, 2].map((op) => `<button type="button" class="${cls("cat", (state.macroOp ?? 0) === op && "is-on")}" ${act("macro-op", String(op))}>${MACRO_OP_LABEL[op]}</button>`).join("")}
+        </div>
+        <div class="combo-hint" style="margin-top:6px">
+          ${(state.macroOp ?? 0) === 0
+            ? "ふつうの打鍵です。1文字入ります"
+            : (state.macroOp ?? 0) === 1
+              ? "シフトなどを押したままにします。あとで必ず「離す」を登録してください"
+              : "「押したまま」にしたキーを離します"}
+        </div>
+        <div class="cats" style="margin-top:8px">
+          ${PICKER_GROUPS.map((g) => `<button type="button" class="${cls("cat", g.label === state.cat && "is-on")}" ${act("cat", g.label)} style="padding:4px 9px;font-size:11.5px">${g.label}</button>`).join("")}
+        </div>
+        <div class="combo-pick" data-scroll="macro-pick">
+          ${pool.map((k) => {
+            const label = pretty(k);
+            const size = label.length <= 2 ? "14px" : label.length <= 4 ? "11.5px" : "10px";
+            return `<button type="button" class="keycap" style="font-size:${size}" title="${esc(friendly(k))}" ${act("macro-key", k)}>${esc(label)}</button>`;
+          }).join("")}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;font-weight:650">${!sendable
+          ? "離されていないキーがあるので保存できません"
+          : dirty ? `${dirty} 本のマクロが未保存です` : "キーボードの中身と同じです"}</div>
+        <div class="card-note">保存するまで、電源を切ると元に戻ります</div>
+      </div>
+      ${state.wipeConfirm === "macro"
+        ? `<span class="card-note" style="color:var(--danger)">保存した分ごと消えます。元に戻せません</span>
+           <button type="button" class="btn" ${act("wipe-cancel")}>やめる</button>
+           <button type="button" class="btn-danger-plain" ${act("macro-reset")} ${state.macroBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}本当に消す</button>`
+        : `<button type="button" class="btn-danger-plain" ${act("wipe-ask", "macro")} ${state.macroBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}すべて消す</button>`}
+      <button type="button" class="btn" ${act("macro-reload")} ${state.macroBusy ? "disabled" : ""}>${svg(ICON.reset, 13)}読み直す</button>
+      <button type="button" class="${cls("btn", dirty && sendable && "btn-accent")}" ${act("macro-save")} ${state.macroBusy || !dirty || !sendable ? "disabled" : ""}>
+        ${svg(ICON.bolt, 15, 1.9)}マクロを保存
+      </button>
+    </div>
+  </section>`;
 }
 
 // --- Render: pointer --------------------------------------------------------
@@ -2710,7 +3244,7 @@ function renderBluetooth() {
     const why = !state.client
       ? "キーボードをつなぐと、登録されている機器が表示されます。"
       : state.status && state.status.role === "peripheral"
-        ? "左手側には接続先の登録がありません。右手側をつないでください。"
+        ? `${sideLabel(thisSide())}側には接続先の登録がありません。${sideLabel(thisSide() === "left" ? "right" : "left")}側をつないでください。`
         : "このキーボードのファームウェアは、接続先の読み取りに対応していません。ファームウェアを更新してください。";
     return `<div class="stack">
         <section class="card bt-main glass">
@@ -3073,12 +3607,14 @@ function render() {
         ${renderHeader()}
         <div style="height:16px"></div>
         ${showBoard ? `<div class="stack">${renderBoardCard()}${under}</div>` : ""}
+        ${state.tab === "macro" ? renderMacroPanel() : ""}
         ${state.tab === "pointer" ? renderPointer() : ""}
         ${state.tab === "bt" ? renderBluetooth() : ""}
         <div class="grow"></div>
         ${renderSaveBar(counts)}
       </div>
       ${state.resetConfirm ? renderResetConfirm() : ""}
+      ${state.leaveConfirm ? renderLeaveConfirm() : ""}
     </div>`;
 
   keepScroll(() => {
@@ -3100,6 +3636,30 @@ function render() {
       }
     }
   }
+}
+
+
+/** Combos and macros are saved on their own pages, not by the save bar at the
+ *  bottom -- so leaving the page is where the work goes missing. Assigning an
+ *  unsaved macro to a key and saving the keymap looked like it worked and did
+ *  not, which is the worst version of this. */
+function renderLeaveConfirm() {
+  const { from } = state.leaveConfirm;
+  const what = from === "macro" ? "マクロ" : "コンボ";
+  const count = from === "macro" ? macroChangeCount() : comboChangeCount();
+  return `<div class="modal-back" ${act("leave-cancel")}>
+      <div class="modal" role="alertdialog" aria-modal="true" data-act="noop" data-stop>
+        <div class="modal-icon">${svg(ICON.warn, 20)}</div>
+        <h2>${what}が保存されていません</h2>
+        <p>${count} 件、キーボードに書き込んでいない変更があります。このまま移ると、画面には残りますが<b>キーボードには入りません</b>。</p>
+        ${from === "macro" ? "<p>キー配置でこのマクロを割り当てても、中身が入っていなければ押したときに何も起きません。</p>" : ""}
+        <div class="modal-actions">
+          <button type="button" class="modal-cancel" ${act("leave-cancel")}>この画面に戻る</button>
+          <button type="button" class="modal-cancel" ${act("leave-discard")}>保存せずに移る</button>
+          <button type="button" class="modal-confirm" ${act("leave-save")}>保存して移る</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderResetConfirm() {
@@ -3238,6 +3798,7 @@ function setRole(id) {
   else if (id === "bt") { e.kind = "bt"; e.opt = e.opt && e.opt.startsWith("BT_") ? e.opt : "BT_SEL 0"; }
   else if (id === "out") { e.kind = "out"; e.opt = e.opt && e.opt.startsWith("OUT_") ? e.opt : "OUT_TOG"; }
   else if (id === "mt") { e.kind = "mt"; e.hold = e.hold || "LSHFT"; }
+  else if (id === "zen_macro") { e.kind = "zen_macro"; e.macroSlot = e.macroSlot ?? 0; }
   else e.kind = id;
   writeBinding(composeBinding());
 }
@@ -3308,11 +3869,23 @@ const CLICK = {
   import: () => importFile(),
 
   tab: (a) => {
+    if (a !== state.tab) {
+      const unsaved = state.tab === "macro" ? macroChangeCount()
+        : state.tab === "combo" && state.comboLive ? comboChangeCount()
+        : 0;
+      if (unsaved > 0) {
+        state.leaveConfirm = { from: state.tab, to: a };
+        render();
+        return;
+      }
+    }
     state.tab = a;
+    state.wipeConfirm = null;
     render();
     // First visit to the combo tab with a remembered file: load it rather than
     // making the user press a button for something they already chose.
-    if (a === "combo" && !state.combos && !state.comboBusy && canWriteKeymapInPlace() && keymapPath()) {
+    if (a === "combo" && !state.combos && !state.comboBusy && !state.comboRuntime
+        && canWriteKeymapInPlace() && keymapPath()) {
       loadCombos();
     }
   },
@@ -3337,7 +3910,12 @@ const CLICK = {
     if (state.tab === "combo") {
       const sel = state.combos && state.combos.find((c) => c.uid === state.comboSel);
       if (!sel) return;
-      sel.keyPositions = sel.keyPositions.includes(index)
+      const present = sel.keyPositions.includes(index);
+      if (!present && state.comboRuntime && sel.keyPositions.length >= state.comboRuntime.maxKeys) {
+        toast(`このファームウェアで同時に押せるのは ${state.comboRuntime.maxKeys} キーまでです`, true);
+        return;
+      }
+      sel.keyPositions = present
         ? sel.keyPositions.filter((k) => k !== index)
         : sel.keyPositions.concat([index]).sort((a, b) => a - b);
       render();
@@ -3348,6 +3926,7 @@ const CLICK = {
   deselect: () => { state.active = false; render(); },
   advanced: () => { state.advanced = !state.advanced; render(); },
   role: (a) => setRole(a),
+  "macro-slot": (a) => { state.ed.macroSlot = Number(a); writeBinding(composeBinding()); },
   "layer-mode": (a) => { state.ed.kind = a; writeBinding(composeBinding()); },
   "layer-arg": (a) => { state.ed.layerArg = Number(a); writeBinding(composeBinding()); },
   hold: (a) => { state.ed.hold = a; writeBinding(composeBinding()); },
@@ -3356,10 +3935,88 @@ const CLICK = {
   "pick-key": (a) => { state.ed.keyName = a; writeBinding(composeBinding()); },
   cat: (a) => { state.cat = a; render(); },
 
+  "leave-cancel": () => { state.leaveConfirm = null; render(); },
+  "leave-discard": () => {
+    const { from, to } = state.leaveConfirm;
+    state.leaveConfirm = null;
+    // Put the page back to what the keyboard actually holds, so the screen
+    // never shows a macro the keyboard has not got.
+    if (from === "macro") state.macros = copyMacros(state.savedMacros ?? []);
+    else state.combos = copyCombos(state.savedCombos ?? []);
+    state.tab = to;
+    render();
+  },
+  "leave-save": async () => {
+    const { from, to } = state.leaveConfirm;
+    state.leaveConfirm = null;
+    render();
+    if (from === "macro") await saveMacrosToDevice();
+    else await saveCombos();
+    // A refused save (a macro still holding a key, keys down for a combo)
+    // leaves the edits in place, so staying put is the only honest move.
+    const stillUnsaved = from === "macro" ? macroChangeCount() : comboChangeCount();
+    if (stillUnsaved === 0) state.tab = to;
+    render();
+  },
+  "wipe-ask": (a) => { state.wipeConfirm = a; render(); },
+  "wipe-cancel": () => { state.wipeConfirm = null; render(); },
+  "macro-reload": () => loadMacrosFromDevice(),
+  "macro-save": () => saveMacrosToDevice(),
+  "macro-reset": () => resetMacrosOnDevice(),
+  "macro-sel": (a) => { state.macroSel = Number(a); render(); },
+  "macro-op": (a) => { state.macroOp = Number(a); render(); },
+  "macro-key": (a) => {
+    const value = KEYCODE_VALUES[a];
+    if (value === undefined) {
+      toast(`${a} はまだマクロに入れられません`, true);
+      return;
+    }
+    macroAdd({ op: state.macroOp ?? MACRO_OP.TAP, value });
+  },
+  "macro-wait": (a) => macroAdd({ op: MACRO_OP.WAIT, value: Number(a) }),
+  "macro-text": () => {
+    const input = document.getElementById("macro-text");
+    const text = (input?.value ?? "").trim();
+    if (!text) return;
+    // Letters go in as their own name, digits as ZMK spells them (N1..N0),
+    // and anything else is looked up as-is -- the picker is there for the
+    // ones that need a shift.
+    for (const ch of text) {
+      const name = /[a-zA-Z]/.test(ch) ? ch.toUpperCase()
+        : /[0-9]/.test(ch) ? `N${ch}`
+        : ch === " " ? "SPACE"
+        : null;
+      const value = name === null ? undefined : KEYCODE_VALUES[name];
+      if (value === undefined) {
+        toast(`${ch} は下のキー一覧から登録してください`, true);
+        return;
+      }
+      macroAdd({ op: MACRO_OP.TAP, value });
+    }
+    if (input) input.value = "";
+    render();
+  },
+  "macro-up": (a) => {
+    const i = Number(a);
+    const steps = state.macros[state.macroSel].steps;
+    [steps[i - 1], steps[i]] = [steps[i], steps[i - 1]];
+    render();
+  },
+  "macro-del": (a) => {
+    state.macros[state.macroSel].steps.splice(Number(a), 1);
+    render();
+  },
+
   "combo-pick": () => loadCombos({ pick: true }),
+  "combo-device-reload": () => loadCombosFromDevice(),
+  "combo-device-reset": () => resetCombosOnDevice(),
   "combo-reload": () => loadCombos(),
   "combo-save": () => saveCombos(),
   "combo-add": () => {
+    if (state.comboRuntime && state.combos.length >= state.comboRuntime.slots) {
+      toast(`このファームウェアのコンボは ${state.comboRuntime.slots} 件までです`, true);
+      return;
+    }
     const combo = {
       uid: ++comboUid, name: null, keyPositions: [], bindings: "&kp ESCAPE",
       layers: [state.layer], timeoutMs: COMBO_DEFAULT_TIMEOUT_MS, extra: [],
@@ -3371,6 +4028,11 @@ const CLICK = {
   "combo-sel": (a) => {
     const uid = Number(a);
     state.comboSel = state.comboSel === uid ? null : uid;
+    render();
+  },
+  "combo-out-macro": (a) => {
+    const sel = state.combos.find((c) => c.uid === state.comboSel);
+    if (sel) sel.bindings = `&zen_macro ${Number(a)}`;
     render();
   },
   "combo-out": (a) => {

@@ -29,7 +29,23 @@ const CMD = {
   GET_STATUS: 0x20,
   GET_BLE_PROFILES: 0x21,
   BLE_ACTION: 0x22,
+  // Editable combos. Shipping firmware is built without them and answers
+  // "unknown command", which is how the app decides whether to offer the
+  // keyboard-side combo editor at all.
+  GET_COMBO_META: 0x30,
+  SET_COMBO: 0x31,
+  GET_COMBO: 0x32,
+  SAVE_COMBO: 0x33,
+  RESET_COMBO: 0x34,
+  GET_MACRO_META: 0x40,
+  SET_MACRO: 0x41,
+  GET_MACRO: 0x42,
+  SAVE_MACRO: 0x43,
+  RESET_MACRO: 0x44,
 };
+
+/** A macro step's op. A wait applies after the step before it. */
+const MACRO_OP = { TAP: 0, PRESS: 1, RELEASE: 2, WAIT: 3 };
 
 // CMD_BLE_ACTION's first payload byte. Mirrors enum zen_config_ble_action.
 const BLE_ACTION = {
@@ -48,6 +64,7 @@ const STATUS = {
   5: "unknown behavior",
   6: "not supported (peripheral has no local keymap, or feature disabled)",
   7: "generic error",
+  8: "keys are down -- let go of every key and try again",
 };
 
 const BEHAVIOR_NAME_LEN = 16;
@@ -55,6 +72,11 @@ const BINDING_SIZE = BEHAVIOR_NAME_LEN + 4 + 4;
 const POINTER_PAYLOAD_SIZE = 8;
 const AUTO_MOUSE_PAYLOAD_SIZE = 6;
 const STATUS_PAYLOAD_SIZE = 7;
+const COMBO_MAX_KEYS = 6;
+const COMBO_PAYLOAD_SIZE = 8 + 2 * COMBO_MAX_KEYS + BINDING_SIZE;
+const MACRO_MAX_STEPS = 16;
+const MACRO_STEP_SIZE = 8;
+const MACRO_PAYLOAD_SIZE = 4 + MACRO_MAX_STEPS * MACRO_STEP_SIZE;
 const BLE_PROFILES_MAX = 8;
 const BLE_PROFILES_PAYLOAD_SIZE = 2 + BLE_PROFILES_MAX;
 const TRANSPORT_NAMES = { 0: "USB", 1: "BLE" };
@@ -128,6 +150,9 @@ const BEHAVIOR_DEVICE_NAMES = {
   mkp: "mouse_key_press",
   bt: "bluetooth",
   out: "outputs",
+  // Not a ZMK behavior: ZEN's own, present only in firmware built with
+  // editable macros. Its parameter is the macro slot.
+  zen_macro: "zen_macro",
 };
 const BEHAVIOR_SHORT_NAMES = Object.fromEntries(
   Object.entries(BEHAVIOR_DEVICE_NAMES).map(([short, device]) => [device, short]),
@@ -156,6 +181,7 @@ function encodeBinding(bindingString) {
         if (!parsed) return null;
         return { param1: ((parsed.mods << 24) | parsed.value) >>> 0, param2: 0 };
       }
+      case "zen_macro":
       case "mo":
       case "to":
       case "tog":
@@ -208,6 +234,7 @@ function decodeBinding(name, param1, param2) {
       return "&none";
     case "kp":
       return `&kp ${decodeModifiedKeycode(param1)}`;
+    case "zen_macro":
     case "mo":
     case "to":
     case "tog":
@@ -322,6 +349,8 @@ function decodeBleProfilesPayload(bytes) {
   return { count, activeIndex: bytes[1] === 0xff ? null : bytes[1], profiles };
 }
 
+const SIDE_NAMES = { 1: "left", 2: "right" };
+
 /** Matches include/zen_config_wire.h's ZEN_CONFIG_WIRE_STATUS_PAYLOAD_SIZE layout. */
 function decodeStatusPayload(bytes) {
   return {
@@ -331,6 +360,10 @@ function decodeStatusPayload(bytes) {
     connected: bytes[4] === 1,
     activeProfile: bytes[5] === 0xff ? null : bytes[5],
     transport: TRANSPORT_NAMES[bytes[6]] ?? null,
+    // Added after the LCD build appeared. Firmware without it sends 7 bytes,
+    // and reports null here; the caller infers the side from the role, which
+    // is exact for that firmware because all of it is right-central.
+    side: SIDE_NAMES[bytes[7]] ?? null,
   };
 }
 
@@ -364,6 +397,93 @@ const BAUD_RATE = 115200;
 // Both expose write / startReading / close, and everything below this line --
 // framing, encoding, decoding -- is shared, so there is one implementation of
 // the wire format rather than two that drift apart.
+
+/** One combo slot, as CMD_GET_COMBO returns it and CMD_SET_COMBO takes it.
+ *  The two share a layout so the app can read a slot, change one field and
+ *  send it straight back. An empty slot has no keys and a null binding. */
+function decodeComboPayload(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const slot = bytes[0];
+  const count = bytes[1];
+  const keyPositions = [];
+  for (let i = 0; i < count && i < COMBO_MAX_KEYS; i++) {
+    keyPositions.push(view.getUint16(8 + 2 * i, true));
+  }
+  const entry = decodeBindingEntry(bytes, 8 + 2 * COMBO_MAX_KEYS);
+  return {
+    slot,
+    keyPositions,
+    // 0 means every layer, which the app carries as null the way the keymap
+    // file's parser does.
+    layers: view.getUint32(2, true) === 0 ? null : layersFromMask(view.getUint32(2, true)),
+    timeoutMs: view.getUint16(6, true),
+    binding: count === 0 ? null : decodeBinding(entry.name, entry.param1, entry.param2),
+  };
+}
+
+function layersFromMask(mask) {
+  const layers = [];
+  for (let i = 0; i < 32; i++) {
+    if (mask & (1 << i)) layers.push(i);
+  }
+  return layers;
+}
+
+function maskFromLayers(layers) {
+  if (!layers) return 0;
+  return layers.reduce((mask, layer) => mask | (1 << layer), 0) >>> 0;
+}
+
+function encodeComboPayload(slot, combo) {
+  const payload = new Uint8Array(COMBO_PAYLOAD_SIZE);
+  const view = new DataView(payload.buffer);
+  const keys = combo?.keyPositions ?? [];
+
+  payload[0] = slot;
+  payload[1] = keys.length;
+  view.setUint32(2, maskFromLayers(combo?.layers ?? null), true);
+  view.setUint16(6, combo?.timeoutMs ?? 0, true);
+  for (let i = 0; i < keys.length && i < COMBO_MAX_KEYS; i++) {
+    view.setUint16(8 + 2 * i, keys[i], true);
+  }
+
+  if (keys.length > 0) {
+    const encoded = encodeBinding(combo.binding);
+    if (!encoded) throw new Error(`この動作は送れません: ${combo.binding}`);
+    payload.set(
+      encodeBindingEntry(encoded.name, encoded.param1, encoded.param2),
+      8 + 2 * COMBO_MAX_KEYS,
+    );
+  }
+  return payload;
+}
+
+
+function decodeMacroPayload(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const count = bytes[1];
+  const steps = [];
+  for (let i = 0; i < count && i < MACRO_MAX_STEPS; i++) {
+    const at = 4 + i * MACRO_STEP_SIZE;
+    steps.push({ op: bytes[at], value: view.getUint32(at + 4, true) });
+  }
+  return { slot: bytes[0], steps };
+}
+
+function encodeMacroPayload(slot, steps) {
+  const payload = new Uint8Array(MACRO_PAYLOAD_SIZE);
+  const view = new DataView(payload.buffer);
+  payload[0] = slot;
+  payload[1] = steps.length;
+  steps.forEach((step, i) => {
+    if (i >= MACRO_MAX_STEPS) return;
+    const at = 4 + i * MACRO_STEP_SIZE;
+    payload[at] = step.op;
+    view.setUint32(at + 4, step.value >>> 0, true);
+  });
+  return payload;
+}
+
 
 class WebSerialTransport {
   constructor(port) {
@@ -723,5 +843,70 @@ class ZenConfigClient {
   async resetKeymap() {
     const { status } = await this.request(CMD.RESET_KEYMAP);
     if (status !== 0) throw new Error(`RESET_KEYMAP failed: ${STATUS[status]}`);
+  }
+
+  /** How many editable combo slots this firmware has, or null when it was
+   *  built without them -- which is every shipping build so far. The app uses
+   *  null to mean "edit the keymap file instead". */
+  async getComboMeta() {
+    const { status, data } = await this.request(CMD.GET_COMBO_META);
+    if (status !== 0) return null;
+    return { slots: data[0], maxKeys: data[1], wireMaxKeys: data[2] };
+  }
+
+  async getCombo(slot) {
+    const { status, data } = await this.request(CMD.GET_COMBO, new Uint8Array([slot]));
+    if (status !== 0) throw new Error(`GET_COMBO failed: ${STATUS[status]}`);
+    return decodeComboPayload(data);
+  }
+
+  /** combo === null empties the slot. The change takes effect at once but is
+   *  only in RAM until saveCombos(). */
+  async setCombo(slot, combo) {
+    const { status } = await this.request(CMD.SET_COMBO, encodeComboPayload(slot, combo));
+    if (status !== 0) throw new Error(`SET_COMBO failed: ${STATUS[status]}`);
+  }
+
+  async saveCombos() {
+    const { status } = await this.request(CMD.SAVE_COMBO);
+    if (status !== 0) throw new Error(`SAVE_COMBO failed: ${STATUS[status]}`);
+  }
+
+  /** Empties every slot and drops the saved copy, so the keyboard comes back
+   *  on the combos built into the firmware. */
+  async resetCombos() {
+    const { status } = await this.request(CMD.RESET_COMBO);
+    if (status !== 0) throw new Error(`RESET_COMBO failed: ${STATUS[status]}`);
+  }
+
+  /** How many macro slots this firmware has, or null when it was built
+   *  without them. */
+  async getMacroMeta() {
+    const { status, data } = await this.request(CMD.GET_MACRO_META);
+    if (status !== 0) return null;
+    return { slots: data[0], maxSteps: data[1], wireMaxSteps: data[2] };
+  }
+
+  async getMacro(slot) {
+    const { status, data } = await this.request(CMD.GET_MACRO, new Uint8Array([slot]));
+    if (status !== 0) throw new Error(`GET_MACRO failed: ${STATUS[status]}`);
+    return decodeMacroPayload(data);
+  }
+
+  /** An empty step list clears the slot. The firmware refuses a macro that
+   *  would leave a key held down, which comes back as "invalid payload". */
+  async setMacro(slot, steps) {
+    const { status } = await this.request(CMD.SET_MACRO, encodeMacroPayload(slot, steps));
+    if (status !== 0) throw new Error(`SET_MACRO failed: ${STATUS[status]}`);
+  }
+
+  async saveMacros() {
+    const { status } = await this.request(CMD.SAVE_MACRO);
+    if (status !== 0) throw new Error(`SAVE_MACRO failed: ${STATUS[status]}`);
+  }
+
+  async resetMacros() {
+    const { status } = await this.request(CMD.RESET_MACRO);
+    if (status !== 0) throw new Error(`RESET_MACRO failed: ${STATUS[status]}`);
   }
 }
