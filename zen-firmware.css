@@ -209,6 +209,41 @@
 }
 .fw-routes-note a:hover { border-bottom-color: var(--accent); }
 
+/* The one group that must not start at step 1: people whose keymap lives in
+   their own fork. It sat under the A/B cards as a line of grey text and was
+   read as a footnote, so it is a card of its own now -- tinted, not the same
+   shape as A and B, because it is a detour and not a third route. */
+.fw-alert {
+  display: block; text-decoration: none; margin: 14px 0 0;
+  background: var(--accent-soft); border: 1px solid #E8B7A6;
+  border-left: 4px solid var(--accent);
+  border-radius: var(--r-md); padding: 20px 24px;
+  transition: border-color .2s var(--ease), transform .2s var(--ease);
+}
+.fw-alert:hover { border-color: var(--accent); transform: translateY(-2px); }
+.fw-alert .ra-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  color: #fff; background: var(--accent); border-radius: 999px; padding: 5px 12px;
+}
+.fw-alert .ra-tag svg { width: 14px; height: 14px; flex: none; }
+.fw-alert .ra-t {
+  display: block; margin-top: 12px; font-weight: 700; font-size: 17px;
+  color: var(--ink); line-height: 1.45; word-break: auto-phrase;
+}
+.fw-alert .ra-d {
+  display: block; margin-top: 8px; color: var(--ink-2); font-size: 15px;
+  line-height: 1.8; word-break: auto-phrase;
+}
+.fw-alert .ra-d strong { color: var(--accent-d); }
+.fw-alert .ra-d code { font-family: var(--font-mono); font-size: .92em; }
+.fw-alert .ra-go {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
+  font-weight: 700; font-size: 15px; color: var(--accent-d);
+}
+.fw-alert .ra-go svg { width: 17px; height: 17px; transition: transform .2s var(--ease); }
+.fw-alert:hover .ra-go svg { transform: translateX(3px); }
+
 /* route badge inside a section heading block */
 .route-tag {
   display: inline-flex; align-items: center; gap: 7px;
@@ -238,7 +273,8 @@
 .fw-measured .fw-steps,
 .fw-measured .fw-panel,
 .fw-measured .fw-trouble,
-.fw-measured .fw-routes-note { max-width: var(--fw-measure); }
+.fw-measured .fw-routes-note,
+.fw-measured .fw-alert { max-width: var(--fw-measure); }
 
 /* Break the lead at phrase boundaries too, like the body text below it;
    otherwise it is the one paragraph that can end on a stray trailing kana. */

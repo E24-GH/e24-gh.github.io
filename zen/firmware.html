@@ -95,7 +95,15 @@
           <span class="rd"><strong>1</strong> を書き込むだけで終わります。<br>いまの設定は消えません。</span>
         </a>
       </div>
-      <p class="fw-routes-note">GitHub で <code>config/keymap.keymap</code> を編集してお使いの方だけ、先に <a href="#migrate">4 カスタマイズしている方へ</a> をお読みください。</p>
+      <a class="fw-alert" href="#migrate">
+        <span class="ra-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+          先にお読みください
+        </span>
+        <span class="ra-t">キー配置を自分で書き替えてお使いの方へ</span>
+        <span class="ra-d">GitHub や <strong>Keymap Editor</strong> で <code>config/keymap.keymap</code> を編集している方は、<strong>1 より先に「4 GitHub でカスタマイズしている方へ」</strong>をお読みください。<br>配布の zip をそのまま書き込むと、ご自分のキー配置が標準のものに置き替わります。</span>
+        <span class="ra-go">4 を読む<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></span>
+      </a>
 
       <nav class="fw-toc" aria-label="目次">
         <a href="#req"><span class="n">0</span><span class="t">必要なもの</span></a>
@@ -237,7 +245,7 @@
     <div class="wrap">
       <div class="sec-num">04 — CUSTOMISING VIA GITHUB</div>
       <h2>GitHub でカスタマイズしている方へ</h2>
-      <p><strong>この章が必要なのは、GitHub で <code>config/keymap.keymap</code> を編集してお使いの方だけです。</strong>標準のキー配置のままお使いの方、Configurator でキー配置を変えている方は、「<a href="#flash">ファームウェアを書き込む</a>」だけで終わります。GitHub の操作は必要ありません。</p>
+      <p><strong>この章が必要なのは、GitHub や Keymap Editor で <code>config/keymap.keymap</code> を編集してお使いの方だけです。</strong>標準のキー配置のままお使いの方、Configurator でキー配置を変えている方は、「<a href="#flash">ファームウェアを書き込む</a>」だけで終わります。GitHub の操作は必要ありません。</p>
       <p>これまでの ZEN は、キー配置を変えるのに GitHub の fork が必要でした。新しいファームウェアでは、キー配置もコンボもマクロも Configurator から変えられます。<strong>fork が要るのは、Configurator に無い項目を触るときだけになります。</strong></p>
       <p>いままでの設定を引き継ぐための引っ越しが、<strong>初回だけ</strong>あります。</p>
 
