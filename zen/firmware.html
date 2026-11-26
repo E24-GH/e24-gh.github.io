@@ -263,7 +263,16 @@
       </div>
 
       <h3>さらに細かく調整したい方</h3>
-      <p>スリープ時間など、Configurator に無い項目を変えたいときは、新しく fork したリポジトリを GitHub で編集してビルドしてください。編集する場所は <code>boards/shields/zen/</code> 以下です。</p>
+      <p>スリープ時間など、Configurator に無い項目を変えたいときは、fork したリポジトリを GitHub で編集してビルドしてください。編集する場所は <code>boards/shields/zen/</code> 以下です。</p>
+
+      <p>そのとき、<strong>Configurator で作り込んだ内容は <code>keymap.keymap</code> に書き出せます。</strong>手で写し直す必要はありません。</p>
+      <ol class="fw-steps">
+        <li>fork したご自分のリポジトリで <code>config/keymap.keymap</code> を開き、<code>Raw</code> からダウンロードします。</li>
+        <li>ZEN をつないだ状態で Configurator の <code>プリセット</code> →「keymap.keymap に書き出す」を押し、いまダウンロードしたファイルを選びます。</li>
+        <li>書き出されたファイルで、fork の <code>config/keymap.keymap</code> を置き替えて commit します。</li>
+        <li><code>Actions</code> タブで build を待ち、<code>firmware</code> の zip をダウンロードして書き込みます。</li>
+      </ol>
+      <p>キー配置・コンボ・マクロがまとめてファームウェアに入ります。マクロは ZMK のマクロとして書き出されるので、そのあとは設定ファイル側で自由に編集できます。</p>
 
       <div class="fw-panel tip">
         <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>ビルドし直してもキー配置が変わらないとき</div>

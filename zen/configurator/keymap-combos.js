@@ -57,10 +57,10 @@ function blankComments(text) {
   return out;
 }
 
-/** Locates the combos block. Returns null when the file has none. */
-function findCombosBlock(text) {
+/** Locates a `name { ... };` node. Returns null when the file has none. */
+function findNamedBlock(text, name) {
   const bare = blankComments(text);
-  const m = /(^|\n)([ \t]*)combos\s*\{/.exec(bare);
+  const m = new RegExp(`(^|\\n)([ \\t]*)${name}\\s*\\{`).exec(bare);
   if (!m) return null;
 
   const open = bare.indexOf("{", m.index + m[0].length - 1);
@@ -78,6 +78,11 @@ function findCombosBlock(text) {
     bodyStart: open + 1,
     bodyEnd: close,
   };
+}
+
+/** Locates the combos block. Returns null when the file has none. */
+function findCombosBlock(text) {
+  return findNamedBlock(text, "combos");
 }
 
 function parseIntList(value) {
@@ -103,6 +108,7 @@ function parseChildNodes(body, offset) {
       name: m[1],
       body: body.slice(open + 1, close),
       start: offset + m.index,
+      bodyStart: offset + open + 1,
     });
     re.lastIndex = close;
   }
@@ -240,6 +246,180 @@ function writeCombos(text, combos, options = {}) {
   return text.slice(0, at) + rendered + "\n\n" + text.slice(at);
 }
 
+// --- Writing a keymap back out of a running keyboard -------------------------
+//
+// The reverse of the migration the setup guide describes: someone who has been
+// editing from the Configurator wants to go back to building from source, and
+// needs their layers, combos and macros as devicetree.
+//
+// The keyboard is not the whole file -- a keymap holds includes, behaviour
+// definitions and layer names that never reach it -- so these write into the
+// user's existing keymap.keymap rather than generating one. Same rule as the
+// combos block above: touch nothing we were not asked to.
+
+/** Splits a `bindings = <...>` value into one string per binding. */
+function splitBindings(value) {
+  return unwrapAngle(value).split(/(?=&)/).map((s) => s.trim()).filter(Boolean);
+}
+
+/** How many bindings sat on each source line, so a rewrite keeps the grid. */
+function bindingLineCounts(value) {
+  return unwrapAngle(value)
+    .split("\n")
+    .map((line) => (line.match(/&/g) || []).length)
+    .filter((n) => n > 0);
+}
+
+/** Lays bindings out over the same line lengths they had, when they still fit. */
+function renderBindings(bindings, counts, indent) {
+  const total = counts.reduce((a, b) => a + b, 0);
+  if (total !== bindings.length) return bindings.join(" ");
+  const lines = [];
+  let at = 0;
+  for (const n of counts) {
+    lines.push(bindings.slice(at, at + n).join(" "));
+    at += n;
+  }
+  return `\n${lines.join("\n")}\n${indent}`;
+}
+
+/** Finds `bindings = <...>` inside one node body. Offsets are file-absolute. */
+function findBindingsProp(node) {
+  const bare = blankComments(node.body);
+  const m = /bindings\s*=\s*</.exec(bare);
+  if (!m) return null;
+  const open = m.index + m[0].length - 1;
+  const close = bare.indexOf(">", open);
+  if (close < 0) return null;
+  return {
+    start: node.bodyStart + open + 1,
+    end: node.bodyStart + close,
+    value: node.body.slice(open + 1, close),
+  };
+}
+
+/**
+ * Replaces every layer's bindings with `layers[i]`, in file order.
+ *
+ * Layer names, the order of the nodes and anything else on them are left
+ * alone; only the lists change. Throws when the counts do not line up, rather
+ * than writing half a keymap.
+ *
+ * @param {string} text          the whole keymap file
+ * @param {string[][]} layers    one array of binding strings per layer
+ */
+function writeKeymapLayers(text, layers) {
+  const block = findNamedBlock(text, "keymap");
+  if (!block) throw new Error("keymap ブロックが見つかりません");
+
+  const body = text.slice(block.bodyStart, block.bodyEnd);
+  const nodes = parseChildNodes(body, block.bodyStart);
+  if (nodes.length !== layers.length) {
+    throw new Error(`レイヤーの数が合いません（ファイル ${nodes.length}、キーボード ${layers.length}）`);
+  }
+
+  let out = text;
+  // Back to front, so the offsets taken above stay valid as we splice.
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    const prop = findBindingsProp(nodes[i]);
+    if (!prop) continue;
+    const existing = splitBindings(prop.value);
+    if (existing.length !== layers[i].length) {
+      throw new Error(`レイヤー ${i} のキー数が合いません（ファイル ${existing.length}、キーボード ${layers[i].length}）`);
+    }
+    const indent = block.indent + "            ";
+    out = out.slice(0, prop.start)
+      + renderBindings(layers[i], bindingLineCounts(prop.value), indent)
+      + out.slice(prop.end);
+  }
+  return out;
+}
+
+/** Wire values for a macro step; mirrors MACRO_OP in protocol.js. */
+const STEP = { TAP: 0, PRESS: 1, RELEASE: 2, WAIT: 3 };
+
+/**
+ * Renders the editable macro slots as ZMK macro nodes.
+ *
+ * The slots live in the keyboard's own storage, which a source build has no
+ * access to, so each one becomes a behaviour of its own. Empty slots are
+ * skipped -- a node with no bindings does not build.
+ *
+ * @param {Array<{steps: Array<{op: number, value: number}>}>} macros
+ * @param {{indent?: string, keycode?: (value: number) => string,
+ *          tapMs?: number, waitMs?: number}} options
+ *        `keycode` turns a HID usage into its devicetree name; the default
+ *        prints the number, which compiles but reads badly.
+ */
+function renderMacrosBlock(macros, options = {}) {
+  const indent = options.indent ?? "    ";
+  const keycode = options.keycode ?? String;
+  const tapMs = options.tapMs ?? 15;
+  const waitMs = options.waitMs ?? 15;
+  const inner = indent + "    ";
+
+  const lines = [`${indent}macros {`];
+  macros.forEach((macro, slot) => {
+    const steps = macro?.steps ?? [];
+    if (steps.length === 0) return;
+    const label = macroLabel(slot);
+    lines.push(`${inner}${label}: ${label} {`);
+    lines.push(`${inner}    compatible = "zmk,behavior-macro";`);
+    lines.push(`${inner}    #binding-cells = <0>;`);
+    lines.push(`${inner}    tap-ms = <${tapMs}>;`);
+    lines.push(`${inner}    wait-ms = <${waitMs}>;`);
+    const parts = steps.map((step) => {
+      if (step.op === STEP.WAIT) return `<&macro_wait_time ${step.value}>`;
+      if (step.op === STEP.PRESS) return `<&macro_press &kp ${keycode(step.value)}>`;
+      if (step.op === STEP.RELEASE) return `<&macro_release &kp ${keycode(step.value)}>`;
+      return `<&macro_tap &kp ${keycode(step.value)}>`;
+    });
+    lines.push(`${inner}    bindings = ${parts.join(`\n${inner}        , `)};`);
+    lines.push(`${inner}};`);
+  });
+  lines.push(`${indent}};`);
+  return lines.join("\n");
+}
+
+/** The devicetree label a macro slot is written out under. */
+function macroLabel(slot) {
+  return `zen_macro_${slot}`;
+}
+
+/** Replaces the macros block, or adds one when the file has none. */
+function writeMacros(text, macros, options = {}) {
+  const block = findNamedBlock(text, "macros");
+  const indent = options.indent ?? block?.indent ?? "    ";
+  const rendered = renderMacrosBlock(macros, { ...options, indent });
+
+  if (block) return text.slice(0, block.start) + rendered + text.slice(block.end);
+
+  const root = /(^|\n)\/\s*\{[ \t]*\n/.exec(text);
+  if (!root) throw new Error("macros を足す root ノードがありません");
+  const at = root.index + root[0].length;
+  return text.slice(0, at) + rendered + "\n\n" + text.slice(at);
+}
+
+/**
+ * Points a keymap binding at an exported macro node instead of a slot number.
+ *
+ * On the keyboard a macro key is `&zen_macro 2` -- the behaviour plus a slot.
+ * In a source build the slots do not exist, so it becomes `&zen_macro_2`, the
+ * node renderMacrosBlock wrote. A key aimed at an empty slot has nothing to
+ * point at and becomes `&none`, which is what it already did in practice.
+ */
+function rewriteMacroBinding(binding, macros) {
+  const m = /^&zen_macro\s+(\d+)$/.exec(binding.trim());
+  if (!m) return binding;
+  const slot = Number(m[1]);
+  const steps = macros?.[slot]?.steps ?? [];
+  return steps.length === 0 ? "&none" : `&${macroLabel(slot)}`;
+}
+
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { parseCombos, writeCombos, renderCombosBlock, findCombosBlock };
+  module.exports = {
+    parseCombos, writeCombos, renderCombosBlock, findCombosBlock, findNamedBlock,
+    writeKeymapLayers, renderMacrosBlock, writeMacros, rewriteMacroBinding, macroLabel,
+    splitBindings, bindingLineCounts,
+  };
 }

@@ -1927,11 +1927,19 @@ function presetMeta(preset) {
   return `${d.getMonth() + 1}月${d.getDate()}日に保存`;
 }
 
+/** Everything a backup has to carry to put the keyboard back as it was.
+ *
+ *  Combos and macros were added to the keyboard long after this function was
+ *  written, and leaving them out quietly made "バックアップ" a lie for anyone
+ *  who had made one. A keyboard without the slots stores null for them, which
+ *  reads back as "there was nothing to restore" rather than "clear them". */
 function snapshot() {
   return {
-    formatVersion: 1,
+    formatVersion: 2,
     keymap: state.keymap.map((l) => ({ name: l.name, layerId: l.layerId, bindings: l.bindings.slice() })),
     pointer: pickWire(state.pointer),
+    combos: state.comboLive && state.combos ? copyCombos(state.combos) : null,
+    macros: state.macros ? copyMacros(state.macros) : null,
   };
 }
 
@@ -1991,6 +1999,17 @@ async function applySnapshot(data, label) {
       Object.assign(state.pointer, pickWire(data.pointer));
       await pushAllSettings();
     }
+    // Into the editors rather than onto the keyboard: combos and macros have
+    // their own save button, and a restore that wrote straight through would
+    // be the one place in the app where it does not.
+    if (Array.isArray(data.combos) && state.comboRuntime) {
+      state.combos = withUids(data.combos.map((c) => ({ ...c, keyPositions: c.keyPositions.slice() })));
+      state.comboSel = null;
+    }
+    if (Array.isArray(data.macros) && state.macroRuntime) {
+      state.macros = copyMacros(data.macros);
+    }
+
     state.ed = parseInto(state.keymap[state.layer].bindings[state.sel]);
     toast(`${label}を読み込みました${state.client ? "（まだキーボードには保存していません）" : ""}`);
   } catch (error) {
@@ -2012,6 +2031,58 @@ function exportFile() {
   URL.revokeObjectURL(url);
   state.presetsOpen = false;
   toast("設定をファイルに書き出しました");
+  render();
+}
+
+/**
+ * Writes what the keyboard currently holds into a keymap.keymap.
+ *
+ * The way back from the Configurator to a source build. It writes into the
+ * user's own file rather than generating one, because a keymap holds plenty
+ * the keyboard never sees -- includes, behaviour definitions, layer names --
+ * and regenerating would throw all of it away.
+ *
+ * Macros need translating rather than copying: on the keyboard they are
+ * numbered slots played by `&zen_macro N`, and a source build has no slots,
+ * so each becomes a ZMK macro node and the keys point at those instead.
+ */
+async function exportKeymapFile() {
+  state.presetsOpen = false;
+  if (!state.keymap?.length) {
+    toast("先にキーボードをつないで、キー配置を読み込んでください", true);
+    render();
+    return;
+  }
+  state.busy = true;
+  render();
+  try {
+    const file = await readKeymapFile({ pick: true });
+    if (!file) {
+      state.busy = false;
+      render();
+      return;
+    }
+
+    const macros = state.macros ?? [];
+    const layers = state.keymap.map((l) => l.bindings.map((b) => rewriteMacroBinding(b, macros)));
+
+    let out = writeKeymapLayers(file.text, layers);
+    if (state.comboLive && state.combos) out = writeCombos(out, state.combos);
+    if (macros.some((m) => m?.steps?.length)) {
+      out = writeMacros(out, macros, { keycode: decodeModifiedKeycode });
+    }
+
+    if (canWriteKeymapInPlace()) {
+      await window.__TAURI__.core.invoke("write_keymap", { path: file.label, contents: out });
+      toast("keymap.keymap に書き出しました。ビルドして書き込むと反映されます");
+    } else {
+      downloadText(out, "keymap.keymap");
+      toast("keymap.keymap を書き出しました。fork の config/ に置き換えてください");
+    }
+  } catch (error) {
+    toast(String(error.message ?? error), true);
+  }
+  state.busy = false;
   render();
 }
 
@@ -2305,7 +2376,7 @@ function renderPresetPanel() {
           <span class="pop-tag">このパソコンに保存</span>
           <button type="button" class="pop-close" ${act("presets-toggle")} aria-label="閉じる">${svg(ICON.close, 14, 2.2)}</button>
         </div>
-        <p>キー配置とマウス操作の設定をひとまとめにして、名前を付けて取っておけます。読み込んだ内容は、下の「キーボードに保存」を押すまでキーボードには記録されません。</p>
+        <p>いまの設定をひとまとめにして、名前を付けて取っておけます。読み込んだ内容は、各画面の保存ボタンを押すまでキーボードには記録されません。</p>
       </div>
       <div class="preset-list">
         ${presets.length === 0
@@ -2330,9 +2401,16 @@ function renderPresetPanel() {
         </div>
       </div>
       <div class="preset-files">
-        <div class="lead">ファイルでバックアップ</div>
-        <button type="button" ${act("export")}>${svg(ICON.download, 15, 1.9)}ファイルに書き出す</button>
-        <button type="button" ${act("import")}>${svg(ICON.upload, 15, 1.9)}ファイルから読み込む</button>
+        <div class="lead">バックアップ</div>
+        <p>キー配置・マウス操作・コンボ・マクロを <code>.json</code> にまとめます。<strong>この画面に戻すためのもの</strong>で、ファームウェアのビルドには使えません。</p>
+        <button type="button" ${act("export")}>${svg(ICON.download, 15, 1.9)}バックアップを書き出す</button>
+        <button type="button" ${act("import")}>${svg(ICON.upload, 15, 1.9)}バックアップを読み込む</button>
+      </div>
+      <div class="preset-files">
+        <div class="lead">keymap.keymap に書き出す</div>
+        <p>いまの設定を <strong>GitHub でビルドできる形</strong>に変換します。お手元の <code>config/keymap.keymap</code> を選ぶと、その中身を書き替えたものを返します。Configurator で作ったコンボとマクロも一緒に入ります。</p>
+        <button type="button" ${act("export-keymap")} ${state.client ? "" : "disabled"}>${svg(ICON.download, 15, 1.9)}keymap.keymap に書き出す</button>
+        ${state.client ? "" : '<span class="preset-reset-note">キーボードをつなぐと押せます</span>'}
       </div>
       <div class="preset-reset">
         <div class="lead">キーボードを出荷時に戻す</div>
@@ -4067,6 +4145,8 @@ const CLICK = {
   "bt-select": (a) => bleAction(BLE_ACTION.SELECT, Number(a)),
   "bt-disconnect": (a) => bleAction(BLE_ACTION.DISCONNECT, Number(a)),
   "bt-clear": (a) => bleAction(BLE_ACTION.CLEAR, Number(a)),
+  "export-keymap": () => exportKeymapFile(),
+
   "keyboard-reset": () => { state.resetConfirm = true; state.presetsOpen = false; render(); },
   "keyboard-reset-cancel": () => { state.resetConfirm = false; render(); },
   "keyboard-reset-confirm": () => resetKeyboard(),
