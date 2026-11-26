@@ -207,28 +207,38 @@
     <div class="wrap">
       <div class="sec-num">03 — COMBOS &amp; MACROS</div>
       <h2>コンボ／マクロを使う</h2>
-      <p>コンボ（2つのキーの同時押しを別のキーとして使う機能）とマクロは、キー配置と違ってキーボードに直接送ることができません。ファームウェアに焼き込まれているためです。使いたい場合は、設定ファイルを書き換えてファームウェアを作り直します。</p>
-      <p><strong>ここからは GitHub を使います。</strong>コンボもマクロも使わない場合は、このセクションは読み飛ばしてください。あとから必要になったときに戻ってくれば大丈夫です。</p>
+      <p>コンボ（複数キーの同時押しを別の入力として使う機能）とマクロ（決まった入力を順に再生する機能）は、<strong>Configurator から直接作れます。</strong>キー配置と同じように、USB でつないだまま編集してキーボードに保存できます。GitHub は必要ありません。</p>
 
       <ol class="fw-steps">
-        <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を開き、右上の <code>Fork</code> から自分のアカウントにコピーを作ります。</li>
-        <li>すでに ZEN をお使いで、以前の fork に設定が入っている方は、先に「<a href="#migrate">すでに ZEN をお使いの方へ</a>」の手順で <code>config/keymap.keymap</code> を移してください。<span class="s-note">はじめての方は、この手順は不要です。</span></li>
-        <li>fork した自分のリポジトリで <code>config/keymap.keymap</code> を開き、<code>Raw</code> からファイルをダウンロードします。</li>
-        <li>Configurator の <code>コンボ</code> タブで、そのファイルを読み込みます。</li>
-        <li>コンボを追加・編集します。同時押しするキーは、画面上のキーボードをクリックして選べます。</li>
-        <li><code>keymap.keymap をダウンロード</code> を押します。</li>
-        <li>GitHub に戻り、<code>config/keymap.keymap</code> の内容をダウンロードしたファイルの内容で置き換えて commit します。</li>
-        <li><code>Actions</code> タブで build の完了を待ち、<code>firmware</code> の zip をダウンロードします。</li>
-        <li>「<a href="#flash">ファームウェアを書き込む</a>」と同じ手順で書き込みます。</li>
+        <li>ZEN を USB でつなぎ、<a href="configurator/">Configurator</a> を開きます。</li>
+        <li><code>コンボ</code> タブ、または <code>マクロ</code> タブを開きます。</li>
+        <li><strong>コンボ</strong>は、同時押しするキーを画面上のキーボードから選び、出したい入力を決めます。</li>
+        <li><strong>マクロ</strong>は、再生したい入力を順に登録します。作ったマクロは、キー配置から直接キーに割り当てることも、コンボから呼び出すこともできます。</li>
+        <li><code>コンボを保存</code> ／ <code>マクロを保存</code> を押します。</li>
       </ol>
 
       <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>マクロについて</div>
-        Configurator の <code>コンボ</code> タブが編集できるのはコンボだけです。マクロは <code>config/keymap.keymap</code> を GitHub 上で直接編集してください。書き込むまでの流れ（commit → Actions → 書き込み）は上と同じです。
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>いくつまで作れるか</div>
+        コンボは <strong>8 個</strong>まで、1 つあたり最大 4 キー。マクロは <strong>4 個</strong>まで、1 つあたり最大 16 ステップです。
       </div>
 
       <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>キー配置は Configurator、コンボ／マクロは設定ファイル</div>
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>保存を押すまでは残りません</div>
+        編集した内容はすぐ試せますが、<strong>保存を押さずに電源を切ると消えます。</strong>試しただけのコンボが残らないようにするためです。気に入ったら保存してください。
+      </div>
+
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>タブが出てこないとき</div>
+        <code>マクロ</code> タブは、対応したファームウェアをつないだときだけ出てきます。見あたらない場合は、「<a href="#flash">ファームウェアを書き込む</a>」から新しいものを書き込んでください。
+      </div>
+
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>もっと多くのコンボが必要なとき</div>
+        <code>config/keymap.keymap</code> に書いたコンボは、これまで通りファームウェアに焼き込まれたまま使えます。Configurator で作るコンボは<strong>その上に足される</strong>ので、両方を併用できます。設定ファイルを編集する手順（fork → 編集 → Actions → 書き込み）は従来どおりです。
+      </div>
+
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>キー配置は Configurator、設定ファイルのコンボは設定ファイル</div>
         この2つは別々に保存されます。<strong>同じキーを両方で変更すると、Configurator で設定した内容が優先されます。</strong>設定ファイル側の変更を反映させたいときは、先に Configurator の <code>プリセット</code> →「出荷時の設定に戻す」を実行してください。
       </div>
       <div class="fw-divider"></div>
@@ -281,6 +291,7 @@
           <h3>いまの設定は消えますか</h3>
           <p>無線の登録（ペアリング）とトラックボールの設定は残ります。<strong>キー配置とコンボ／マクロは、新しいファームウェアに入っているものに置き換わります。</strong></p>
           <p>ただし、ご自身の fork の <code>config/keymap.keymap</code> はそのまま残っています。ファイルごと移せば引き継げますので、カスタマイズしている方は「<a href="#migrate">すでに ZEN をお使いの方へ</a>」をご覧ください。</p>
+          <p><strong>すでに Configurator 対応のファームウェアをお使いの方は、何も消えません。</strong>Configurator で設定したキー配置・トラックボールの設定・無線の登録は、ファームウェアとは別の場所に保存されているため、書き込みで置き換わりません。</p>
         </div>
         <div class="fw-tcard">
           <h3>元のファームウェアに戻せますか</h3>

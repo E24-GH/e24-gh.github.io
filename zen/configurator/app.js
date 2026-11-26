@@ -21,10 +21,13 @@
 //   trackball angle   angleSupported()      (pointer settings version)
 //   auto-mouse        autoMouseSupported()  (does GET_AUTO_MOUSE answer?)
 //   Bluetooth         state.bleProfiles     (does GET_BLE_PROFILES answer?)
-//   combos            -- not a keyboard feature at all. They are compiled into
-//                        the firmware from keymap.keymap, so the tab edits that
-//                        file; canWriteKeymapInPlace() only picks how it is
-//                        read and written, not whether it can be.
+//   combos            state.comboRuntime    (does GET_COMBO_META answer?)
+//                        Firmware without editable slots has its combos
+//                        compiled in from keymap.keymap, so the tab falls back
+//                        to editing that file; canWriteKeymapInPlace() only
+//                        picks how the file is read and written.
+//   macros            state.macroRuntime    (does GET_MACRO_META answer?)
+//                        No file fallback -- older firmware cannot play one.
 const FEATURES = {
   // Deliberately not offered for the trackball: the ball already coasts on its
   // own, so software inertia would stack on top of real sensor motion. It is a
@@ -538,11 +541,12 @@ const state = {
   // nothing is connected, so the controls behave like the other offline ones.
   autoMouseSupported: null,
 
-  // Combos live in config/keymap.keymap, not on the keyboard -- ZMK builds
-  // them into a const table at compile time. null means no file is loaded.
+  // Either the keyboard's editable slots (comboLive) or what was read out of
+  // a config/keymap.keymap file. null means neither: no file is loaded.
   combos: null,
-  // Set when the connected firmware has editable combo slots, which shipping
-  // builds do not. { slots, maxKeys }.
+  // Set when the connected firmware has editable combo slots. Firmware older
+  // than 2026-11 does not, and then the tab edits the file instead.
+  // { slots, maxKeys }.
   comboRuntime: null,
   // { slots, maxSteps } when the firmware has editable macros, else null.
   macroRuntime: null,
@@ -2340,7 +2344,8 @@ const ALL_TABS = [
   { id: "keymap", short: "キー", label: "キー配置", icon: "keyboard" },
   { id: "combo", short: "コンボ", label: "コンボ", icon: "combo" },
   // Only firmware with editable macro slots has anything to show here, and
-  // that is no shipping build, so the tab stays hidden until one answers.
+  // there is no file fallback the way combos have one, so the tab stays
+  // hidden until the keyboard answers GET_MACRO_META.
   { id: "macro", short: "マクロ", label: "マクロ", icon: "bolt", needsMacro: true },
   { id: "pointer", short: "マウス", label: "マウス操作", icon: "mousetab" },
   { id: "bt", short: "BT", label: "Bluetooth", icon: "bt" },
