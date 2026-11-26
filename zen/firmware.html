@@ -89,20 +89,20 @@
           <span class="rt">はじめて設定する方</span>
           <span class="rd">GitHub の操作は必要ありません。<br><strong>0 → 1 → 2</strong> の順に進めてください。</span>
         </a>
-        <a class="fw-route" href="#migrate">
+        <a class="fw-route" href="#flash">
           <span class="rk">B</span>
           <span class="rt">すでに ZEN をお使いの方</span>
-          <span class="rd">初回だけ、新しいリポジトリへの引っ越しがあります。<br><strong>先に 4</strong> をお読みください。</span>
+          <span class="rd"><strong>1</strong> を書き込むだけで終わります。<br>いまの設定は消えません。</span>
         </a>
       </div>
-      <p class="fw-routes-note">コンボとマクロは、どちらの場合も <a href="#combo">3 コンボ／マクロを使う</a> から、あとで設定できます。</p>
+      <p class="fw-routes-note">GitHub で <code>config/keymap.keymap</code> を編集してお使いの方だけ、先に <a href="#migrate">4 カスタマイズしている方へ</a> をお読みください。コンボとマクロは、どちらの場合も <a href="#combo">3 コンボ／マクロを使う</a> から、あとで設定できます。</p>
 
       <nav class="fw-toc" aria-label="目次">
         <a href="#req"><span class="n">0</span><span class="t">必要なもの</span></a>
         <a href="#flash"><span class="n">1</span><span class="t">ファームウェアを書き込む</span></a>
         <a href="#configure"><span class="n">2</span><span class="t">Configurator で設定する</span></a>
         <a href="#combo"><span class="n">3</span><span class="t">コンボ／マクロを使う</span></a>
-        <a href="#migrate"><span class="n">4</span><span class="t">すでにお使いの方へ</span></a>
+        <a href="#migrate"><span class="n">4</span><span class="t">カスタマイズしている方へ</span></a>
         <a href="#faq"><span class="n">5</span><span class="t">よくある質問</span></a>
         <a href="#trouble"><span class="n">?</span><span class="t">困ったとき</span></a>
       </nav>
@@ -235,10 +235,11 @@
   <!-- 4. already using ZEN -->
   <section class="fw-sec" id="migrate">
     <div class="wrap">
-      <div class="sec-num">04 — ALREADY USING ZEN</div>
-      <h2>すでに ZEN をお使いの方へ</h2>
+      <div class="sec-num">04 — CUSTOMISING VIA GITHUB</div>
+      <h2>GitHub でカスタマイズしている方へ</h2>
+      <p><strong>この章が必要なのは、GitHub で <code>config/keymap.keymap</code> を編集してお使いの方だけです。</strong>標準のキー配置のままお使いの方、Configurator でキー配置を変えている方は、「<a href="#flash">ファームウェアを書き込む</a>」だけで終わります。GitHub の操作は必要ありません。</p>
       <p>これまでの ZEN は、キー配置を変えるのに GitHub の fork が必要でした。新しいファームウェアでは、キー配置もコンボもマクロも Configurator から変えられます。<strong>fork が要るのは、Configurator に無い項目を触るときだけになります。</strong></p>
-      <p>引っ越しは<strong>初回だけ</strong>です。</p>
+      <p>いままでの設定を引き継ぐための引っ越しが、<strong>初回だけ</strong>あります。</p>
 
       <ol class="fw-steps">
         <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を fork します。</li>
@@ -286,7 +287,7 @@
         <div class="fw-tcard">
           <h3>いまの設定は消えますか</h3>
           <p><strong>すでに Configurator 対応のファームウェアをお使いなら、何も消えません。</strong>Configurator で設定したキー配置・トラックボールの設定・無線の登録は、ファームウェアとは別の場所に保存されているため、書き込みで置き換わりません。コンボとマクロだけ、何も入っていない状態から始まります。</p>
-          <p><strong>以前のファームウェアからの乗り換えでは、</strong>無線の登録とトラックボールの設定は残り、キー配置は標準のものに置き換わります。ただし、ご自身の fork の <code>config/keymap.keymap</code> はそのまま残っています。ファイルごと移せば引き継げますので、「<a href="#migrate">すでに ZEN をお使いの方へ</a>」をご覧ください。</p>
+          <p><strong>以前のファームウェアからの乗り換えでは、</strong>無線の登録とトラックボールの設定は残り、キー配置は標準のものに置き換わります。ただし、ご自身の fork の <code>config/keymap.keymap</code> はそのまま残っています。ファイルごと移せば引き継げますので、「<a href="#migrate">GitHub でカスタマイズしている方へ</a>」をご覧ください。</p>
         </div>
         <div class="fw-tcard">
           <h3>元のファームウェアに戻せますか</h3>
