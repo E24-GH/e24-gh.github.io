@@ -292,6 +292,7 @@
         <div class="fw-tcard">
           <h3>元のファームウェアに戻せますか</h3>
           <p>戻せます。ただし Configurator で設定した内容はキーボード本体に残っているため、戻したあともそちらが優先されます。</p>
+          <p>コンボとマクロに対応していないファームウェアに戻した場合は、作ったコンボとマクロが動かなくなります。もう一度新しいファームウェアを書き込めば、そのまま戻ります。</p>
           <p><strong>先に Configurator の「プリセット」→「出荷時の設定に戻す」を実行してください。</strong></p>
         </div>
         <div class="fw-tcard">
@@ -309,6 +310,7 @@
           <div class="fw-panel warn">
             <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>切り替える前に</div>
             Configurator の「プリセット」→「出荷時の設定に戻す」を実行してください。切り替えたあとは Configurator につなげないため、この操作ができなくなります。<br>
+            <strong>コンボとマクロは使えなくなります。</strong>ZMK Studio 側に編集する機能はありません。必要な場合は <code>config/keymap.keymap</code> に書いてビルドしてください。<br>
             トラックボールの設定は最後に保存した値のまま動きますが、変更する手段がなくなります。
           </div>
           <ol class="fw-steps">
@@ -334,7 +336,7 @@
       <div class="fw-trouble">
         <div class="fw-tcard">
           <h3>設定を元に戻したい</h3>
-          <p>Configurator の <code>プリセット</code> →「出荷時の設定に戻す」で、この画面から変更したキー配置とマウス操作をキーボードから消せます。ファームウェアに入っている元の設定に戻ります。<strong>無線の登録は消えません。</strong></p>
+          <p>Configurator の <code>プリセット</code> →「出荷時の設定に戻す」で、この画面から変更したキー配置・マウス操作・コンボ・マクロをキーボードから消せます。ファームウェアに入っている元の設定に戻ります。<strong>無線の登録は消えません。</strong></p>
         </div>
         <div class="fw-tcard">
           <h3>Configurator がキーボードを見つけられない</h3>

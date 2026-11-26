@@ -1465,6 +1465,19 @@ async function resetKeyboard() {
     }
     state.savedPointer = { ...state.pointer };
 
+    // The button says "back to factory", so it has to cover the editable
+    // slots too. Someone resetting before handing the keyboard on, or before
+    // going back to older firmware, does not expect their combos to survive.
+    // The per-tab "全て消す" stays as the partial version.
+    if (state.comboRuntime) {
+      await state.client.resetCombos();
+      await loadCombosFromDevice();
+    }
+    if (state.macroRuntime) {
+      await state.client.resetMacros();
+      await loadMacrosFromDevice();
+    }
+
     state.active = false;
     toast("キーボードを出荷時の設定に戻しました");
   } catch (error) {
@@ -1752,8 +1765,8 @@ async function resetCombosOnDevice() {
 //
 // A macro is a short list of steps the keyboard plays back: tap a key, hold
 // one down, let it go, or wait. Firmware built with CONFIG_ZEN_RUNTIME_MACRO
-// keeps a few slots it can rewrite while running; nothing that ships does, so
-// the tab is hidden until a keyboard says otherwise.
+// keeps a few slots it can rewrite while running. Firmware older than 2026-11
+// does not, so the tab stays hidden until a keyboard says otherwise.
 //
 // A macro has no trigger of its own. It is reached from a combo, whose output
 // can be "macro n" -- which is why this tab and the combo tab belong together.
@@ -2323,7 +2336,7 @@ function renderPresetPanel() {
       </div>
       <div class="preset-reset">
         <div class="lead">キーボードを出荷時に戻す</div>
-        <p>この画面で変更したキー配置とマウス操作を、キーボードから消します。ファームウェアに入っている元の設定に戻ります。無線の登録は消えません。</p>
+        <p>この画面で変更したキー配置・マウス操作・コンボ・マクロを、キーボードから消します。ファームウェアに入っている元の設定に戻ります。無線の登録は消えません。</p>
         <button type="button" class="btn-danger-plain" ${act("keyboard-reset")} ${state.client ? "" : "disabled"}>
           ${svg(ICON.reset, 15, 1.9)}出荷時の設定に戻す
         </button>
