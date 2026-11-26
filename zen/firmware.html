@@ -89,25 +89,20 @@
           <span class="rt">はじめて設定する方</span>
           <span class="rd">GitHub の操作は必要ありません。<br><strong>0 → 1 → 2</strong> の順に進めてください。</span>
         </a>
-        <a class="fw-route" href="#flash">
+        <a class="fw-route" href="#migrate">
           <span class="rk">B</span>
           <span class="rt">すでに ZEN をお使いの方</span>
-          <span class="rd"><strong>1</strong> を書き込むだけで終わりです。<br>Configurator の設定と無線の登録は残ります。</span>
-        </a>
-        <a class="fw-route" href="#migrate">
-          <span class="rk">C</span>
-          <span class="rt">自分でビルドしている方</span>
-          <span class="rd">GitHub に fork をお持ちの方です。<br><strong>先に 4</strong> をお読みください。</span>
+          <span class="rd">初回だけ、新しいリポジトリへの引っ越しがあります。<br><strong>先に 4</strong> をお読みください。</span>
         </a>
       </div>
-      <p class="fw-routes-note">分かれ目は <strong>GitHub に自分のリポジトリ（fork）があるかどうか</strong>です。心あたりがなければ A か B で大丈夫です。コンボとマクロは、どの場合でも <a href="#combo">3 コンボ／マクロを使う</a> からあとで設定できます。</p>
+      <p class="fw-routes-note">コンボとマクロは、どちらの場合も <a href="#combo">3 コンボ／マクロを使う</a> から、あとで設定できます。</p>
 
       <nav class="fw-toc" aria-label="目次">
         <a href="#req"><span class="n">0</span><span class="t">必要なもの</span></a>
         <a href="#flash"><span class="n">1</span><span class="t">ファームウェアを書き込む</span></a>
         <a href="#configure"><span class="n">2</span><span class="t">Configurator で設定する</span></a>
         <a href="#combo"><span class="n">3</span><span class="t">コンボ／マクロを使う</span></a>
-        <a href="#migrate"><span class="n">4</span><span class="t">自分でビルドしている方へ</span></a>
+        <a href="#migrate"><span class="n">4</span><span class="t">すでにお使いの方へ</span></a>
         <a href="#faq"><span class="n">5</span><span class="t">よくある質問</span></a>
         <a href="#trouble"><span class="n">?</span><span class="t">困ったとき</span></a>
       </nav>
@@ -224,12 +219,8 @@
 
       <div class="fw-panel tip">
         <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>いくつまで作れるか</div>
-        コンボは <strong>8 個</strong>まで、1 つあたり最大 4 キー。マクロは <strong>4 個</strong>まで、1 つあたり最大 16 ステップです。
-      </div>
-
-      <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>保存を押すまでは残りません</div>
-        編集した内容はすぐ試せますが、<strong>保存を押さずに電源を切ると消えます。</strong>試しただけのコンボが残らないようにするためです。気に入ったら保存してください。
+        コンボは <strong>8 個</strong>まで、1 つあたり最大 4 キー。マクロは <strong>4 個</strong>まで、1 つあたり最大 16 ステップです。<br>
+        これ以上必要な場合は、サポートの Discord でご相談ください。
       </div>
 
       <div class="fw-panel tip">
@@ -237,67 +228,46 @@
         <code>マクロ</code> タブは、対応したファームウェアをつないだときだけ出てきます。見あたらない場合は、「<a href="#flash">ファームウェアを書き込む</a>」から新しいものを書き込んでください。
       </div>
 
-      <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>もっと多くのコンボが必要なとき</div>
-        <code>config/keymap.keymap</code> に書いたコンボは、これまで通りファームウェアに焼き込まれたまま使えます。Configurator で作るコンボは<strong>その上に足される</strong>ので、両方を併用できます。設定ファイルを編集する手順（fork → 編集 → Actions → 書き込み）は従来どおりです。
-      </div>
-
-      <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>キー配置は Configurator、設定ファイルのコンボは設定ファイル</div>
-        この2つは別々に保存されます。<strong>同じキーを両方で変更すると、Configurator で設定した内容が優先されます。</strong>設定ファイル側の変更を反映させたいときは、先に Configurator の <code>プリセット</code> →「出荷時の設定に戻す」を実行してください。
-      </div>
       <div class="fw-divider"></div>
     </div>
   </section>
 
-  <!-- 4. people who build their own firmware -->
+  <!-- 4. already using ZEN -->
   <section class="fw-sec" id="migrate">
     <div class="wrap">
-      <div class="sec-num">04 — BUILDING YOUR OWN</div>
-      <h2>自分でビルドしている方へ</h2>
-      <p>GitHub に fork を持ち、<code>config/keymap.keymap</code> をご自分で編集している方向けです。<strong>fork に心あたりがなければ、この章は読み飛ばしてください。</strong>「<a href="#flash">ファームウェアを書き込む</a>」だけで終わります。</p>
+      <div class="sec-num">04 — ALREADY USING ZEN</div>
+      <h2>すでに ZEN をお使いの方へ</h2>
+      <p>これまでの ZEN は、キー配置を変えるのに GitHub の fork が必要でした。新しいファームウェアでは、キー配置もコンボもマクロも Configurator から変えられます。<strong>fork が要るのは、Configurator に無い項目を触るときだけになります。</strong></p>
+      <p>引っ越しは<strong>初回だけ</strong>です。</p>
 
-      <div class="fw-panel warn">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>配布の zip は書き込まないでください</div>
-        配布している zip は<strong>標準の <code>config/keymap.keymap</code> で作られています。</strong>書き込むと、ご自分のビルドに焼き込んだキー配置・コンボ・マクロが標準のものに置き換わります。<br>
-        ご自分の fork でビルドしたものを書き込んでください。
-      </div>
-
-      <h3><code>zen-keyboard</code> を fork している方</h3>
-      <p>fork を最新に同期して、ビルドし直すだけです。焼き込んだコンボはそのまま残り、Configurator で編集できるスロットがその上に増えます。</p>
-      <ol class="fw-steps">
-        <li>ご自分の fork を GitHub で開き、<code>Sync fork</code> → <code>Update branch</code> を押します。</li>
-        <li><code>Actions</code> タブで build の完了を待ちます。</li>
-        <li><code>firmware</code> の zip をダウンロードし、「<a href="#flash">ファームウェアを書き込む</a>」と同じ手順で書き込みます。</li>
-      </ol>
-
-      <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>ご自分の <code>keymap.keymap</code> は上書きされません</div>
-        <code>config/keymap.keymap</code> は公開リポジトリ側で一度も変更していないため、<strong>同期しても衝突しません。</strong>編集した内容はそのまま残ります。
-      </div>
-
-      <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>同期しなくても壊れません</div>
-        そのままビルドしても、これまで通りのファームウェアができます。コンボとマクロを Configurator から編集できるようにならないだけです。急いで同期する必要はありません。
-      </div>
-
-      <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>fork をやめるという選択肢</div>
-        コンボが <strong>8 個</strong>、マクロが <strong>4 個</strong>までに収まるなら、それらを Configurator 側で作り直して fork をやめられます。以降、設定を変えるたびにビルドを待つ必要がなくなります。<br>
-        ただし<strong>キー配置も Configurator で設定し直すことになります。</strong>焼き込んだ配置は配布ファームウェアには入っていないためです。
-      </div>
-
-      <h3>以前の <code>zen-firmware</code> を fork している方</h3>
-      <p>Keymap Editor を使っていた頃のリポジトリです。新しい <code>zen-keyboard</code> の fork に引っ越してください。キー配置もコンボもマクロも同じファイルに入っているので、ファイルごと移せばそのまま引き継がれます。<strong>初回だけの作業です。</strong></p>
       <ol class="fw-steps">
         <li><a href="https://github.com/E24-GH/zen-keyboard" target="_blank" rel="noopener">E24-GH/zen-keyboard</a> を fork します。</li>
         <li>以前の fork（<code>zen-firmware</code>）で <code>config/keymap.keymap</code> を開き、<code>Raw</code> の内容をすべてコピーします。</li>
-        <li>新しい fork の <code>config/keymap.keymap</code> を編集し、すべて貼り替えて commit します。</li>
-        <li><code>Actions</code> タブで build を待ち、<code>firmware</code> の zip をダウンロードして書き込みます。</li>
+        <li>新しい fork の <code>config/keymap.keymap</code> に貼り替えて commit します。</li>
+        <li><code>Actions</code> タブで build を待ち、<code>firmware</code> の zip をダウンロードして、「<a href="#flash">ファームウェアを書き込む</a>」と同じ手順で書き込みます。</li>
+        <li>右手を USB でつなぎ、<a href="configurator/">Configurator</a> を開きます。</li>
       </ol>
+
+      <p>これで、いままでのキー配置・コンボ・マクロがそのまま入った状態になります。<strong>以後のキー配置の変更は Configurator から行ってください。</strong>ビルドを待つ必要はありません。</p>
+
+      <div class="fw-panel warn">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>配布の zip は書き込まないでください</div>
+        配布している zip は<strong>標準の <code>config/keymap.keymap</code> で作られています。</strong>書き込むと、いままでのキー配置・コンボ・マクロが標準のものに置き換わります。<br>
+        ご自分の fork でビルドしたものを書き込んでください。
+      </div>
+
       <div class="fw-panel tip">
-        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><code>keymap.keymap</code> 以外も変更している場合</div>
-        スリープ時間など <code>boards/shields/zen/</code> 以下の設定も変更している場合は、その差分もあわせてご確認ください。
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>すでに <code>zen-keyboard</code> を fork 済みの方</div>
+        引っ越しは不要です。ご自分の fork を GitHub で開いて <code>Sync fork</code> → <code>Update branch</code> で最新にし、ビルドし直したものを書き込んでください。
+      </div>
+
+      <h3>さらに細かく調整したい方</h3>
+      <p>スリープ時間など、Configurator に無い項目を変えたいときは、新しく fork したリポジトリを GitHub で編集してビルドしてください。編集する場所は <code>boards/shields/zen/</code> 以下です。</p>
+
+      <div class="fw-panel tip">
+        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>ビルドし直してもキー配置が変わらないとき</div>
+        Configurator で設定したキー配置は<strong>キーボード本体に保存されていて、ファームウェアに焼き込まれた配置より優先されます。</strong><code>config/keymap.keymap</code> を編集してビルドし直しても、そのキーは変わりません。<br>
+        反映させるには、先に Configurator の <code>プリセット</code> →「出荷時の設定に戻す」を実行してください。
       </div>
       <div class="fw-divider"></div>
     </div>
@@ -316,7 +286,7 @@
         <div class="fw-tcard">
           <h3>いまの設定は消えますか</h3>
           <p><strong>すでに Configurator 対応のファームウェアをお使いなら、何も消えません。</strong>Configurator で設定したキー配置・トラックボールの設定・無線の登録は、ファームウェアとは別の場所に保存されているため、書き込みで置き換わりません。コンボとマクロだけ、何も入っていない状態から始まります。</p>
-          <p><strong>以前のファームウェアからの乗り換えでは、</strong>無線の登録とトラックボールの設定は残り、キー配置は標準のものに置き換わります。ただし、ご自身の fork の <code>config/keymap.keymap</code> はそのまま残っています。ファイルごと移せば引き継げますので、「<a href="#migrate">自分でビルドしている方へ</a>」をご覧ください。</p>
+          <p><strong>以前のファームウェアからの乗り換えでは、</strong>無線の登録とトラックボールの設定は残り、キー配置は標準のものに置き換わります。ただし、ご自身の fork の <code>config/keymap.keymap</code> はそのまま残っています。ファイルごと移せば引き継げますので、「<a href="#migrate">すでに ZEN をお使いの方へ</a>」をご覧ください。</p>
         </div>
         <div class="fw-tcard">
           <h3>元のファームウェアに戻せますか</h3>
