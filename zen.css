@@ -465,8 +465,8 @@ section { position: relative; }
 .spec .mono { font-family: var(--font-mono); font-size: 13px; color: var(--ink-3); }
 .spec .spec-note { display: block; margin-top: 8px; font-size: 13px; line-height: 1.7; color: var(--ink-3); }
 .spec .spec-note:first-of-type { margin-top: 12px; }
-.spec .spec-note a { color: var(--accent); font-weight: 700; text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); }
-.spec .spec-note a:hover { border-bottom-color: var(--accent); }
+.spec .spec-note a, .text-link { color: var(--accent); font-weight: 700; text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); }
+.spec .spec-note a:hover, .text-link:hover { border-bottom-color: var(--accent); }
 .spec .spec-note a .ext { width: 12px; height: 12px; margin-left: 3px; vertical-align: -1px; }
 @media (max-width:600px){ .spec th { width: 130px; font-size: 14px; } }
 
