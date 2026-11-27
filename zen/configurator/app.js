@@ -3088,11 +3088,7 @@ function renderComboPanel() {
           <div style="font-size:13px;font-weight:650">${dirty ? `${dirty} 件の変更が未保存です` : "キーボードの中身と同じです"}</div>
           <div class="card-note">保存するまで、電源を切ると元に戻ります</div>
         </div>
-        ${state.wipeConfirm === "combo"
-          ? `<span class="card-note" style="color:var(--danger)">保存した分ごと消えます。元に戻せません</span>
-             <button type="button" class="btn" ${act("wipe-cancel")}>やめる</button>
-             <button type="button" class="btn-danger-plain" ${act("combo-device-reset")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}本当に消す</button>`
-          : `<button type="button" class="btn-danger-plain" ${act("wipe-ask", "combo")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}すべて消す</button>`}
+        <button type="button" class="btn-danger-plain" ${act("wipe-ask", "combo")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}すべて消す</button>
         <button type="button" class="btn" ${act("combo-device-reload")} ${state.comboBusy ? "disabled" : ""}>${svg(ICON.reset, 13)}読み直す</button>
         <button type="button" class="${cls("btn", dirty && "btn-accent")}" ${act("combo-save")} ${state.comboBusy || !dirty ? "disabled" : ""}>
           ${svg(ICON.bolt, 15, 1.9)}コンボを保存
@@ -3232,11 +3228,7 @@ function renderMacroPanel() {
           : dirty ? `${dirty} 本のマクロが未保存です` : "キーボードの中身と同じです"}</div>
         <div class="card-note">保存するまで、電源を切ると元に戻ります</div>
       </div>
-      ${state.wipeConfirm === "macro"
-        ? `<span class="card-note" style="color:var(--danger)">保存した分ごと消えます。元に戻せません</span>
-           <button type="button" class="btn" ${act("wipe-cancel")}>やめる</button>
-           <button type="button" class="btn-danger-plain" ${act("macro-reset")} ${state.macroBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}本当に消す</button>`
-        : `<button type="button" class="btn-danger-plain" ${act("wipe-ask", "macro")} ${state.macroBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}すべて消す</button>`}
+      <button type="button" class="btn-danger-plain" ${act("wipe-ask", "macro")} ${state.macroBusy ? "disabled" : ""}>${svg(ICON.trash, 13)}すべて消す</button>
       <button type="button" class="btn" ${act("macro-reload")} ${state.macroBusy ? "disabled" : ""}>${svg(ICON.reset, 13)}読み直す</button>
       <button type="button" class="${cls("btn", dirty && sendable && "btn-accent")}" ${act("macro-save")} ${state.macroBusy || !dirty || !sendable ? "disabled" : ""}>
         ${svg(ICON.bolt, 15, 1.9)}マクロを保存
@@ -3717,6 +3709,7 @@ function render() {
         ${renderSaveBar(counts)}
       </div>
       ${state.resetConfirm ? renderResetConfirm() : ""}
+      ${state.wipeConfirm ? renderWipeConfirm(state.wipeConfirm) : ""}
       ${state.leaveConfirm ? renderLeaveConfirm() : ""}
     </div>`;
 
@@ -3775,6 +3768,37 @@ function renderResetConfirm() {
         <div class="modal-actions">
           <button type="button" class="modal-cancel" ${act("keyboard-reset-cancel")}>キャンセル</button>
           <button type="button" class="modal-confirm" ${act("keyboard-reset-confirm")}>戻す</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/**
+ * Wiping every combo or every macro off the keyboard. This used to swap the
+ * button row for a "本当に消す" alongside a line of red text, which asked for a
+ * second click in the place the first one had just been -- easy to finish
+ * without reading, and unlike every other irreversible action in here, which
+ * already opened a dialog.
+ */
+function renderWipeConfirm(kind) {
+  const macro = kind === "macro";
+  const title = macro ? "マクロをすべて消しますか？" : "コンボをすべて消しますか？";
+  const body = macro
+    ? `この画面で作ったマクロ ${state.macroRuntime?.slots ?? 4} 本が、キーボードからすべて消えます。保存した分も消えます。この操作は取り消せません。`
+    : "この画面で作ったコンボが、キーボードからすべて消えます。保存した分も消えます。この操作は取り消せません。";
+  const note = macro
+    ? "そのマクロを出していたコンボは、何も入力しなくなります。"
+    : "ファームウェアに焼き込まれているコンボ（Bluetooth の消去など）は消えません。";
+  const busy = macro ? state.macroBusy : state.comboBusy;
+  return `<div class="modal-back" ${act("wipe-cancel")}>
+      <div class="modal" role="alertdialog" aria-modal="true" data-act="noop" data-stop>
+        <div class="modal-icon">${svg(ICON.warn, 20)}</div>
+        <h2>${title}</h2>
+        <p>${body}</p>
+        <p>${note}</p>
+        <div class="modal-actions">
+          <button type="button" class="modal-cancel" ${act("wipe-cancel")}>キャンセル</button>
+          <button type="button" class="modal-confirm" ${act(macro ? "macro-reset" : "combo-device-reset")} ${busy ? "disabled" : ""}>すべて消す</button>
         </div>
       </div>
     </div>`;

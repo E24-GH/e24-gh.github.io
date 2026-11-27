@@ -303,7 +303,8 @@ input::placeholder { color: var(--mute); }
 
 .btn[disabled], .btn-sm[disabled], .icon-btn[disabled], .btn-dark[disabled],
 .btn-ring[disabled], .btn-danger[disabled], .icon-only[disabled],
-.btn-plain[disabled], .btn-danger-plain[disabled], .preset-files button[disabled] {
+.btn-plain[disabled], .btn-danger-plain[disabled], .preset-files button[disabled],
+.modal-confirm[disabled] {
   opacity: .45; cursor: default; pointer-events: none;
 }
 
