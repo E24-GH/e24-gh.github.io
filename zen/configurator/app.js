@@ -182,6 +182,7 @@ const ICON = {
   palette: "M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.2-4-7.6-9-7.6zM7.5 11.5h.01M10.5 7.5h.01M15.5 8.5h.01",
   warn: "M12 4l9 16H3zM12 10v4M12 17h.01",
   arrow: "M5 12h12M13 7l5 5-5 5",
+  up: "M12 19V5M5 12l7-7 7 7",
   plus: "M12 5v14M5 12h14",
   download: "M12 4v11M7 10l5 5 5-5M4 19h16",
   upload: "M12 15V4M7 9l5-5 5 5M4 19h16",
@@ -2394,7 +2395,7 @@ function renderPresetPanel() {
             </div>`).join("")}
       </div>
       <div class="preset-add">
-        <div class="pop-label" style="font-size:11.5px;font-weight:650">今の設定をプリセットに追加</div>
+        <div class="lead" style="margin-bottom:7px">今の設定をプリセットに追加</div>
         <div class="row">
           <input type="text" placeholder="名前（例: 仕事用）" value="${esc(state.presetName)}" data-preset-name data-f="preset-name" />
           <button type="button" class="btn-dark" ${act("preset-add")}>追加</button>
@@ -3142,13 +3143,19 @@ function renderMacroPanel() {
       <br>1つのマクロに入れられるのは ${meta.maxSteps} ステップまで、マクロは ${meta.slots} 本までです。
     </span></div>
 
-    <div class="combo-head" style="margin-top:14px">
+    <div class="combo-head" style="margin-top:20px">
       <span class="t">どのマクロを編集しますか</span>
     </div>
-    <div class="cats" style="margin-bottom:12px">
-      ${state.macros.map((m, i) => `<button type="button" class="${cls("cat", i === state.macroSel && "is-on")}" ${act("macro-sel", String(i))}>
-        マクロ${i + 1}<span style="opacity:.6;margin-left:6px">${m.steps.length ? `${m.steps.length} ステップ` : "空"}</span>
-      </button>`).join("")}
+    <div class="layer-row" style="margin:12px 0 16px">
+      <span class="layer-row-label">マクロ</span>
+      ${state.macros.map((m, i) => {
+        const on = i === state.macroSel;
+        const empty = m.steps.length === 0;
+        return `<button type="button" class="${cls("layer-chip", on && "is-on")}" ${act("macro-sel", String(i))} title="マクロ ${i + 1}">
+          <span class="${cls("layer-num", empty && !on && "is-empty")}">${i + 1}</span>
+          <span class="${cls("layer-name", empty && "is-unnamed")}">${empty ? "空き" : `${m.steps.length} ステップ`}</span>
+        </button>`;
+      }).join("")}
     </div>
 
     <div class="combo-table">
@@ -3162,7 +3169,7 @@ function renderMacroPanel() {
             <span>${MACRO_OP_LABEL[step.op] ?? step.op}</span>
             <span class="combo-keys"><span class="combo-cap">${esc(macroStepLabel(step))}</span></span>
             <span style="display:flex;gap:4px;justify-content:flex-end">
-              <button type="button" class="btn btn-dark" style="padding:2px 7px" ${act("macro-up", String(i))} ${i === 0 ? "disabled" : ""}>↑</button>
+              <button type="button" class="btn-plain" style="padding:6px 8px" ${act("macro-up", String(i))} ${i === 0 ? "disabled" : ""} title="1つ上へ">${svg(ICON.up, 12)}</button>
               <button type="button" class="btn-danger-plain" style="padding:2px 7px" ${act("macro-del", String(i))}>${svg(ICON.trash, 12)}</button>
             </span>
           </div>`).join("")}
@@ -3184,8 +3191,8 @@ function renderMacroPanel() {
         <div class="combo-hint">英数字と記号を1文字ずつ「押して離す」に変えます</div>
 
         <div class="detail-h" style="margin-top:14px">待つ</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${[100, 250, 500, 1000].map((ms) => `<button type="button" class="btn btn-dark" ${act("macro-wait", String(ms))}>${ms} ms</button>`).join("")}
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px">
+          ${[100, 250, 500, 1000].map((ms) => `<button type="button" class="btn" ${act("macro-wait", String(ms))}>${ms} ms</button>`).join("")}
         </div>
         <div class="combo-hint">直前のステップのあとに、その時間だけ待ちます</div>
       </div>

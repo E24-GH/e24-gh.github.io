@@ -302,7 +302,8 @@ input::placeholder { color: var(--mute); }
 .icon-only:hover { background: var(--danger-tint); color: var(--danger); }
 
 .btn[disabled], .btn-sm[disabled], .icon-btn[disabled], .btn-dark[disabled],
-.btn-ring[disabled], .btn-danger[disabled], .icon-only[disabled] {
+.btn-ring[disabled], .btn-danger[disabled], .icon-only[disabled],
+.btn-plain[disabled], .btn-danger-plain[disabled], .preset-files button[disabled] {
   opacity: .45; cursor: default; pointer-events: none;
 }
 
@@ -417,7 +418,10 @@ input::placeholder { color: var(--mute); }
 }
 .preset-add button { font-size: 12.5px; padding: 0 13px; border-radius: 8px; height: 36px; }
 .preset-files { padding: 8px; border-top: 1px solid var(--line-soft); background: var(--fill); }
-.preset-files .lead { font-size: 10.5px; color: var(--ink3); padding: 4px 8px; }
+.preset-add .lead, .preset-files .lead, .preset-reset .lead {
+  font-size: 11px; font-weight: 600; color: var(--ink3);
+}
+.preset-files .lead { padding: 4px 8px; }
 .preset-files p { font-size: 11.5px; color: var(--ink3); line-height: 1.6; margin: 0 0 7px; padding: 0 8px; }
 .preset-files button {
   display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; font-size: 12.5px;
@@ -430,7 +434,6 @@ input::placeholder { color: var(--mute); }
    support needs to be able to say where it is without asking which tab you
    are on. */
 .preset-reset { padding: 10px 16px 14px; border-top: 1px solid var(--line-soft); }
-.preset-reset .lead { font-size: 10.5px; color: var(--ink3); }
 .preset-reset p { font-size: 11.5px; color: var(--ink3); line-height: 1.6; margin: 5px 0 9px; }
 .preset-reset .btn-danger-plain { padding: 7px 10px; }
 .preset-reset-note { display: block; font-size: 11px; color: var(--mute); margin-top: 6px; }
