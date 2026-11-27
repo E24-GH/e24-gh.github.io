@@ -3786,16 +3786,12 @@ function renderWipeConfirm(kind) {
   const body = macro
     ? `この画面で作ったマクロ ${state.macroRuntime?.slots ?? 4} 本が、キーボードからすべて消えます。保存した分も消えます。この操作は取り消せません。`
     : "この画面で作ったコンボが、キーボードからすべて消えます。保存した分も消えます。この操作は取り消せません。";
-  const note = macro
-    ? "そのマクロを出していたコンボは、何も入力しなくなります。"
-    : "ファームウェアに焼き込まれているコンボ（Bluetooth の消去など）は消えません。";
   const busy = macro ? state.macroBusy : state.comboBusy;
   return `<div class="modal-back" ${act("wipe-cancel")}>
       <div class="modal" role="alertdialog" aria-modal="true" data-act="noop" data-stop>
         <div class="modal-icon">${svg(ICON.warn, 20)}</div>
         <h2>${title}</h2>
         <p>${body}</p>
-        <p>${note}</p>
         <div class="modal-actions">
           <button type="button" class="modal-cancel" ${act("wipe-cancel")}>キャンセル</button>
           <button type="button" class="modal-confirm" ${act(macro ? "macro-reset" : "combo-device-reset")} ${busy ? "disabled" : ""}>すべて消す</button>
