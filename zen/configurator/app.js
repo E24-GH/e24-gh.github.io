@@ -1072,15 +1072,19 @@ function connectErrorMessage(error) {
   if (name === "NotFoundError" || /no port selected/i.test(text)) {
     return "キーボードが選ばれませんでした。もう一度「キーボードをつなぐ」を押してください";
   }
-  // Another tab, another app, or this page's own earlier connection.
+  // The port would not open. Another tab holding it is by far the most common
+  // reason -- that is the one the two-tab test produces, not InvalidStateError
+  // below -- but an app outside the browser, or a keyboard that has gone away,
+  // land here too, so the wording suggests rather than asserts.
   if (name === "NetworkError" || /failed to open serial port/i.test(text)) {
-    return "ポートを開けませんでした。ZEN を開いている他のタブやアプリを閉じて、つなぎ直してください";
+    return "ZEN と接続できませんでした。他のタブやアプリで ZEN を開いていないか、ご確認ください";
   }
+  // This page already holds it. Reloading is the way out, not closing tabs.
   if (name === "InvalidStateError" || /already open/i.test(text)) {
-    return "このポートはすでに開かれています。ページを再読み込みしてください";
+    return "ZEN とはすでに接続されています。ページを再読み込みしてください";
   }
   if (name === "SecurityError") {
-    return "ブラウザにポートの使用を止められました。ページを再読み込みしてください";
+    return "ZEN との接続がブラウザに止められました。ページを再読み込みしてください";
   }
 
   return `接続できませんでした: ${text}`;
