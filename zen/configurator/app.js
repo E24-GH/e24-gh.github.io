@@ -2694,10 +2694,10 @@ function renderLayerRow() {
       <button type="button" class="btn-dark" style="margin-left:auto;height:30px;padding:0 12px;border-radius:7px;font-size:12.5px" ${act("rename")}>完了</button>
     </div>` : ""}
     ${state.layer === SCROLL_LAYER ? `<div class="notice" style="margin-top:10px">${svg(ICON.scroll, 15, 2)}<span>
-      <b>このレイヤーがオンの間、トラックボールはスクロールになります。</b>
-      ふだんはオートマウス中の <b>I</b> キー（レイヤー 1）で呼び出します。
-      ほかのキーからこのレイヤーに入れるようにすると、そのときもボールがスクロールになります。
-      記号などをまとめたいときは、空いているレイヤーをお使いください。
+      <b>このレイヤー（スクロール用レイヤー）がオンの間は、トラックボール操作で上下左右スクロールになります。</b>
+      デフォルトのキーマップで <b>I</b> キー（レイヤー 1）で呼び出します。
+      他のキーからこのレイヤーに入るようにすると、その場合もトラックボールが上下左右スクロールになります。
+      記号などをキーマップに登録したい場合は、このレイヤー以外の空いているレイヤーをお使いください。
     </span></div>` : ""}`;
 }
 
