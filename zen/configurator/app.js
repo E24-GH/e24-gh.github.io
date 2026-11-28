@@ -74,7 +74,17 @@ const SAMPLE_LAYERS = [
   TRANS(),
 ];
 
-const DEFAULT_LAYER_NAMES = ["ふだん", "マウス", "記号・数字", "F・テンキー", "", "ファンクション", ""];
+/* Layer 4 is not a free layer. The right half's input listener has a
+   `scroller { layers = <4>; }` child (boards/shields/zen/zen_right.overlay),
+   so whenever this layer is on -- however it was turned on -- the trackball
+   sends wheel events instead of moving the cursor. Layer 1's `I` is `&mo 4`,
+   which is the intended way in, but any other key bound to layer 4 does the
+   same thing. It is all &trans by default, so without a name the layer row
+   would label it "空き" and invite people to use it for something else.
+   Changing which layer this is means editing the overlay and rebuilding. */
+const SCROLL_LAYER = 4;
+
+const DEFAULT_LAYER_NAMES = ["ふだん", "マウス", "記号・数字", "F・テンキー", "スクロール", "ファンクション", ""];
 
 // --- Key picker ------------------------------------------------------------
 
@@ -2682,7 +2692,13 @@ function renderLayerRow() {
       <input type="text" value="${esc(state.layerNames[state.layer] || "")}" placeholder="例: 記号" data-layer-name data-f="layer-name" />
       <span class="rename-note">${svg(ICON.cards, 13, 1.9)}名前はこのパソコンにだけ保存されます（キーボードには記録されません）</span>
       <button type="button" class="btn-dark" style="margin-left:auto;height:30px;padding:0 12px;border-radius:7px;font-size:12.5px" ${act("rename")}>完了</button>
-    </div>` : ""}`;
+    </div>` : ""}
+    ${state.layer === SCROLL_LAYER ? `<div class="notice" style="margin-top:10px">${svg(ICON.scroll, 15, 2)}<span>
+      <b>このレイヤーがオンの間、トラックボールはスクロールになります。</b>
+      ふだんはオートマウス中の <b>I</b> キー（レイヤー 1）で呼び出します。
+      ほかのキーからこのレイヤーに入れるようにすると、そのときもボールがスクロールになります。
+      記号などをまとめたいときは、空いているレイヤーをお使いください。
+    </span></div>` : ""}`;
 }
 
 function renderBoardCard() {
