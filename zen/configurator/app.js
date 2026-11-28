@@ -2974,12 +2974,21 @@ function renderComboPanel() {
           <span class="group-title">コンボ</span>
           <span class="card-note">同時に押すと別のキーとして働きます</span>
         </div>
-        <div class="notice">${svg(ICON.warn, 15, 2)}<span>
-          コンボは<b>キーボードではなく <code>config/keymap.keymap</code></b> に入っています。
-          キーボードに送ることはできないので、このファイルを書き換えてファームウェアを作り直します。
+        ${/* Reaching here with a keyboard attached means its firmware answered
+              GET_COMBO_META with nothing, so the file really is the only way
+              in. Without one we cannot know that yet, and saying so flatly
+              was wrong from the moment runtime combos shipped. */ ""}
+        ${state.client ? `<div class="notice">${svg(ICON.warn, 15, 2)}<span>
+          このキーボードのファームウェアは、<b>コンボをその場で書き換えられません</b>。
+          コンボは <code>config/keymap.keymap</code> に入っているので、このファイルを書き換えてファームウェアを作り直します。
           ${canWriteKeymapInPlace() ? "" : `<br>GitHub のご自分のリポジトリから
           <code>config/keymap.keymap</code> をダウンロードして、ここで読み込んでください。`}
-        </span></div>
+        </span></div>` : `<div class="notice">${svg(ICON.bolt, 15, 2)}<span>
+          キーボードをつなぐと、<b>コンボをその場で書き換えられるか</b>を確認します。
+          対応したファームウェアなら、ファームウェアを作り直さずに編集できます。
+          <br>つながずに編集したいときや、対応していないファームウェアのときは、コンボが入っている
+          <code>config/keymap.keymap</code>${canWriteKeymapInPlace() ? "" : "（GitHub のご自分のリポジトリにあります）"}を読み込んでください。
+        </span></div>`}
         ${state.comboError ? `<div class="notice" style="margin-top:10px;border-color:var(--danger)"><span style="color:var(--danger)">${esc(state.comboError)}</span></div>` : ""}
         <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
           <button type="button" class="btn btn-accent" ${act("combo-pick")} ${state.comboBusy ? "disabled" : ""}>
