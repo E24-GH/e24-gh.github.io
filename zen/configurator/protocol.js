@@ -635,6 +635,17 @@ function activeTransportClass() {
   return null;
 }
 
+/** The keyboard said nothing at all, as opposed to answering "no" or "unknown
+ * command". Worth telling apart: connect() falls back for a half that has no
+ * keymap of its own, which is a real answer, and that fallback must not
+ * swallow a dead link as if it were one. */
+class DeviceNotAnsweringError extends Error {
+  constructor() {
+    super("Timed out waiting for device response");
+    this.name = "DeviceNotAnsweringError";
+  }
+}
+
 class ZenConfigClient {
   constructor(transport) {
     this.transport = transport;
@@ -729,13 +740,21 @@ class ZenConfigClient {
       this.pending = { resolve, reject, expectedCommand: command };
     });
 
-    await this.transport.write(encodeFrame(command, payloadBytes));
-
-    const timeout = new Promise((_resolve, reject) =>
-      setTimeout(() => reject(new Error("Timed out waiting for device response")), 3000),
-    );
-
-    return Promise.race([responsePromise, timeout]);
+    let timer;
+    // However this ends, the request is over. Leaving `pending` set wedged the
+    // client for the rest of the session: the timeout below cleared nothing,
+    // so every later call reported "a request is already in flight" instead of
+    // the silence that actually caused it, and the real error never surfaced.
+    try {
+      await this.transport.write(encodeFrame(command, payloadBytes));
+      const timeout = new Promise((_resolve, reject) => {
+        timer = setTimeout(() => reject(new DeviceNotAnsweringError()), 3000);
+      });
+      return await Promise.race([responsePromise, timeout]);
+    } finally {
+      clearTimeout(timer);
+      this.pending = null;
+    }
   }
 
   async getPointerSettings() {

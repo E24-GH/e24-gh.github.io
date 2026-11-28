@@ -1079,6 +1079,9 @@ async function connect() {
       state.layer = 0;
       state.active = false;
     } catch (error) {
+      // "Not supported" is an answer; silence is not. Only the first means
+      // this really is a half without a keymap.
+      if (error instanceof DeviceNotAnsweringError) throw error;
       console.warn("no keymap on this device, continuing without one:", error);
       state.liveKeymap = false;
       state.active = false;
@@ -1130,8 +1133,18 @@ async function connect() {
       : "接続しました（この個体はキーマップを持ちません・左手側）");
   } catch (error) {
     console.error(error);
+    // The port is open even though the handshake failed. Left that way it
+    // cannot be opened again, so the next attempt fails for a second,
+    // unrelated reason and the message gets further from the truth.
+    try {
+      await state.client?.close();
+    } catch (closeError) {
+      console.warn("could not close the port after a failed connect:", closeError);
+    }
     state.client = null;
-    toast(`接続できませんでした: ${error.message}`, true);
+    toast(error instanceof DeviceNotAnsweringError
+      ? "ZEN から応答がありません。他のタブを閉じて、つなぎ直してください"
+      : `接続できませんでした: ${error.message}`, true);
   }
   state.busy = false;
   render();
