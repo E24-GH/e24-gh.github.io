@@ -3774,21 +3774,25 @@ function renderConnectHelp() {
         <span class="group-title">${busy ? "ZEN と接続できませんでした" : "ZEN から応答がありません"}</span>
         <button type="button" class="btn-plain" style="margin-left:auto" ${act("help-close")} aria-label="閉じる">${svg(ICON.close, 12, 2.4)}</button>
       </div>
-      <p class="help-lead">${busy
-        ? "ZEN を開いている<b>他のタブやアプリ</b>があると、こちらからは開けません。心当たりがあれば閉じて、もう一度お試しください。"
-        : "ケーブルを挿し直して、もう一度お試しください。"}</p>
-      <p class="help-lead">それでも変わらないときは、ブラウザが覚えている接続先を一度消すと直ることがあります。</p>
-      <ol class="help-steps">
-        <li>アドレスバーの左にあるアイコンを押す</li>
-        <li>「ZEN シリアルポート」の右の <b>✕</b> を押す</li>
-        <li>このページを再読み込みして、もう一度「キーボードをつなぐ」</li>
-      </ol>
-      <figure class="help-shot">
-        <img src="assets/serial-permission.png" width="350" height="268"
-             alt="Chrome のアドレスバー左のアイコンを押したところ。「ZEN シリアルポート」の行に ✕ ボタンがある" />
-        <figcaption>Chrome の場合。お使いのバージョンによって見た目が少し違うことがあります</figcaption>
-      </figure>
-      <p class="help-lead">ここに <b>ZEN 以外</b>のものが並んでいたら、そちらにつなぎにいって失敗している可能性があります。まとめて消してしまって大丈夫です。</p>
+      <div class="help-body">
+        <div class="help-text">
+          <p class="help-lead">${busy
+            ? "ZEN を開いている<b>他のタブやアプリ</b>があると、こちらからは開けません。心当たりがあれば閉じて、もう一度お試しください。"
+            : "ケーブルを挿し直して、もう一度お試しください。"}</p>
+          <p class="help-lead">それでも変わらないときは、ブラウザが覚えている接続先を一度消すと直ることがあります。</p>
+          <ol class="help-steps">
+            <li>アドレスバーの左にあるアイコンを押す</li>
+            <li>「ZEN シリアルポート」の右の <b>✕</b> を押す</li>
+            <li>このページを再読み込みして、もう一度「キーボードをつなぐ」</li>
+          </ol>
+          <p class="help-lead">ここに <b>ZEN 以外</b>のものが並んでいたら、そちらにつなぎにいって失敗している可能性があります。まとめて消してしまって大丈夫です。</p>
+        </div>
+        <figure class="help-shot">
+          <img src="assets/serial-permission.png" width="350" height="268"
+               alt="Chrome のアドレスバー左のアイコンを押したところ。「ZEN シリアルポート」の行に ✕ ボタンがある" />
+          <figcaption>Chrome の場合。お使いのバージョンによって見た目が少し違うことがあります</figcaption>
+        </figure>
+      </div>
     </div>`;
 }
 

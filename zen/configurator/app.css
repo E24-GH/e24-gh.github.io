@@ -1275,20 +1275,34 @@ input::placeholder { color: var(--mute); }
   background: var(--danger-tint);
   border: 1px solid var(--danger);
   border-radius: 16px;
-  padding: 16px 18px 18px;
+  padding: 14px 18px 16px;
 }
 .help-head { display: flex; align-items: center; gap: 10px; }
 .help-card .group-icon { background: var(--danger); color: #FFFFFF; }
 .help-card .group-title { color: var(--danger); }
-/* A measure, so the lead does not run the whole width of a wide window. */
-.help-lead, .help-steps, .help-shot { max-width: 62ch; }
-.help-lead { margin: 10px 0 0; font-size: 12.5px; color: var(--ink2); line-height: 1.75; }
+
+/* Text beside the picture rather than above it. Stacked, the card was tall
+   enough to push the page out of the way while leaving the right half of a
+   wide window empty. */
+.help-body {
+  /* The picture's column is stated rather than left to auto: auto sizes it to
+     the caption's max-content, which is wider, and that opened a gap between
+     the picture and the card's edge. */
+  display: grid; grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 8px 24px; align-items: start; margin-top: 8px;
+}
+@media (max-width: 900px) {
+  .help-body { grid-template-columns: minmax(0, 1fr); }
+}
+.help-lead { margin: 8px 0 0; font-size: 12.5px; color: var(--ink2); line-height: 1.7; }
+.help-text > .help-lead:first-child { margin-top: 0; }
 .help-lead b { color: var(--ink); }
 .help-steps {
-  margin: 10px 0 0; padding-left: 1.3em; font-size: 12.5px; color: var(--ink2); line-height: 1.95;
+  margin: 8px 0 0; padding-left: 1.3em; font-size: 12.5px; color: var(--ink2); line-height: 1.85;
 }
 .help-steps b { color: var(--ink); }
-.help-shot { margin: 12px 0 0; }
+/* <figure> carries a 40px side margin from the UA stylesheet. */
+.help-shot { margin: 0; max-width: 100%; }
 .help-shot img {
   display: block; width: 350px; max-width: 100%; height: auto;
   border: 1px solid var(--line); border-radius: 10px;
