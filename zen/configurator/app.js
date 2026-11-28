@@ -1054,6 +1054,38 @@ function toast(message, isError) {
   toastHideTimer = setTimeout(() => { state.toast = ""; state.toastOut = false; render(); }, 3300);
 }
 
+/** What to put on screen when connecting fails.
+ *
+ * Web Serial speaks DOMException, and the browser's own text reaches the user
+ * as English with a "Failed to execute 'open' on 'SerialPort'" prefix in front
+ * of it. Match on the name where there is one and on the text where there is
+ * not -- the raw error still goes to the console for us. */
+function connectErrorMessage(error) {
+  if (error instanceof DeviceNotAnsweringError) {
+    return "ZEN から応答がありません。ケーブルを挿し直して、もう一度お試しください";
+  }
+
+  const name = error?.name ?? "";
+  const text = String(error?.message ?? "");
+
+  // The picker was dismissed, or nothing was picked. Not a fault.
+  if (name === "NotFoundError" || /no port selected/i.test(text)) {
+    return "キーボードが選ばれませんでした。もう一度「キーボードをつなぐ」を押してください";
+  }
+  // Another tab, another app, or this page's own earlier connection.
+  if (name === "NetworkError" || /failed to open serial port/i.test(text)) {
+    return "ポートを開けませんでした。ZEN を開いている他のタブやアプリを閉じて、つなぎ直してください";
+  }
+  if (name === "InvalidStateError" || /already open/i.test(text)) {
+    return "このポートはすでに開かれています。ページを再読み込みしてください";
+  }
+  if (name === "SecurityError") {
+    return "ブラウザにポートの使用を止められました。ページを再読み込みしてください";
+  }
+
+  return `接続できませんでした: ${text}`;
+}
+
 async function connect() {
   if (!activeTransportClass()) {
     toast("このブラウザはWeb Serialに対応していません（Chrome / Edge をお使いください）", true);
@@ -1142,9 +1174,7 @@ async function connect() {
       console.warn("could not close the port after a failed connect:", closeError);
     }
     state.client = null;
-    toast(error instanceof DeviceNotAnsweringError
-      ? "ZEN から応答がありません。他のタブを閉じて、つなぎ直してください"
-      : `接続できませんでした: ${error.message}`, true);
+    toast(connectErrorMessage(error), true);
   }
   state.busy = false;
   render();
