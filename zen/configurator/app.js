@@ -2711,7 +2711,11 @@ function renderBoardCard() {
     ? "お使いのキーボードと同じ色にすると、キー設定の画面でも同じ見た目で表示されます"
     : comboMode
       ? (selCombo ? "キーをクリックすると、選んでいるコンボに追加 / 外せます" : "下でコンボを選ぶか追加してください")
-      : "現在の設定が表示されています。変えたいキーをクリックしてください";
+      // Without a keymap read back from the keyboard this is sampleKeymap(),
+      // so "現在の設定" would be a claim about settings nobody has looked at.
+      : state.client && state.liveKeymap
+        ? "現在の設定が表示されています。変えたいキーをクリックしてください"
+        : "標準のキー配置です。キーボードをつなぐと、入っている設定を読み込みます";
 
   let legend = "";
   if (comboMode) {
@@ -3159,8 +3163,8 @@ function renderMacroPanel() {
 
   return `<section class="card card-pad glass" style="padding-bottom:18px">
     <div class="notice">${svg(ICON.bolt, 15, 2)}<span>
-      マクロは<b>キーを順番に送る</b>しくみです。マクロ自体には押すキーがありません。
-      コンボの出力に「マクロ1」などを選ぶと、そのコンボで動きます。
+      マクロは<b>キーを順番に送る</b>しくみです。マクロ自体には押すキーがないので、呼び出すものを決めます。
+      キー配置の画面でキーの役割を「マクロを実行」にするか、コンボの出力に「マクロ1」などを選んでください。
       <br>1つのマクロに入れられるのは ${meta.maxSteps} ステップまで、マクロは ${meta.slots} 本までです。
     </span></div>
 
