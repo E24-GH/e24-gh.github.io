@@ -575,6 +575,7 @@ const state = {
   leaveConfirm: null,
   // True while state.combos is the keyboard's own slots rather than a file.
   comboLive: false,
+  connectHelp: null, // null | "busy" | "silent" -- see connectHelpKind()
   savedCombos: null,
   // The keymap file the combos came out of: its name, for the UI, and its
   // text, which the browser build writes the edited combos block back into.
@@ -1043,6 +1044,17 @@ function composeBinding() {
 // the only record of what went wrong, and reading it is the point.
 let toastHideTimer = null;
 let toastOutTimer = null;
+/** Which "it still will not connect" card to leave on screen, if any.
+ * "busy" when the port would not open, "silent" when the keyboard did not
+ * answer. The other failures tell you what to do in one line and need none. */
+function connectHelpKind(error) {
+  if (error instanceof DeviceNotAnsweringError) return "silent";
+  const name = error?.name ?? "";
+  const text = String(error?.message ?? "");
+  if (name === "NetworkError" || /failed to open serial port/i.test(text)) return "busy";
+  return null;
+}
+
 function toast(message, isError) {
   state.toast = message;
   state.toastError = !!isError;
@@ -1164,6 +1176,7 @@ async function connect() {
     await refreshBleProfiles();
     startStatusPolling();
 
+    state.connectHelp = null;
     toast(state.liveKeymap
       ? "キーボードから今の設定を読み込みました"
       : "接続しました（この個体はキーマップを持ちません・左手側）");
@@ -1178,6 +1191,7 @@ async function connect() {
       console.warn("could not close the port after a failed connect:", closeError);
     }
     state.client = null;
+    state.connectHelp = connectHelpKind(error);
     toast(connectErrorMessage(error), true);
   }
   state.busy = false;
@@ -3746,6 +3760,38 @@ function applyTheme() {
   lsSet(LS.theme, { dark: state.dark, accent: state.accent });
 }
 
+/** The card that stays on screen after a connect fails.
+ *
+ * The toast says the one thing most people need and then goes; this is for
+ * when that did not help. The screenshot is the point of it: the alternative
+ * was telling people to open Chrome's developer tools, which is not something
+ * to ask of someone who bought a keyboard. */
+function renderConnectHelp() {
+  const busy = state.connectHelp === "busy";
+  return `<div class="help-card">
+      <div class="help-head">
+        <span class="group-icon">${svg(ICON.warn, 16, 1.9)}</span>
+        <span class="group-title">${busy ? "ZEN と接続できませんでした" : "ZEN から応答がありません"}</span>
+        <button type="button" class="btn-plain" style="margin-left:auto" ${act("help-close")} aria-label="閉じる">${svg(ICON.close, 12, 2.4)}</button>
+      </div>
+      <p class="help-lead">${busy
+        ? "ZEN を開いている<b>他のタブやアプリ</b>があると、こちらからは開けません。心当たりがあれば閉じて、もう一度お試しください。"
+        : "ケーブルを挿し直して、もう一度お試しください。"}</p>
+      <p class="help-lead">それでも変わらないときは、ブラウザが覚えている接続先を一度消すと直ることがあります。</p>
+      <ol class="help-steps">
+        <li>アドレスバーの左にあるアイコンを押す</li>
+        <li>「ZEN シリアルポート」の右の <b>✕</b> を押す</li>
+        <li>このページを再読み込みして、もう一度「キーボードをつなぐ」</li>
+      </ol>
+      <figure class="help-shot">
+        <img src="assets/serial-permission.png" width="350" height="268"
+             alt="Chrome のアドレスバー左のアイコンを押したところ。「ZEN シリアルポート」の行に ✕ ボタンがある" />
+        <figcaption>Chrome の場合。お使いのバージョンによって見た目が少し違うことがあります</figcaption>
+      </figure>
+      <p class="help-lead">ここに <b>ZEN 以外</b>のものが並んでいたら、そちらにつなぎにいって失敗している可能性があります。まとめて消してしまって大丈夫です。</p>
+    </div>`;
+}
+
 function render() {
   applyTheme();
 
@@ -3777,6 +3823,7 @@ function render() {
       <div class="main">
         ${renderHeader()}
         <div style="height:16px"></div>
+        ${state.connectHelp ? renderConnectHelp() + '<div style="height:16px"></div>' : ""}
         ${showBoard ? `<div class="stack">${renderBoardCard()}${under}</div>` : ""}
         ${state.tab === "macro" ? renderMacroPanel() : ""}
         ${state.tab === "pointer" ? renderPointer() : ""}
@@ -4293,6 +4340,7 @@ const CLICK = {
   "splash-replay": () => { state.themeOpen = false; render(); runSplash(); },
 
   "toast-close": () => { state.toast = ""; state.toastOut = false; render(); },
+  "help-close": () => { state.connectHelp = null; render(); },
 };
 
 function onToggleSwitch(action) {

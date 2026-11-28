@@ -1264,3 +1264,28 @@ input::placeholder { color: var(--mute); }
   .savebar-actions { margin-left: 0; }
   .savebar-wrap { margin: 0; }
 }
+
+/* ------------------------------------------------- connect help */
+
+/* Shown only after a connect fails, above whichever tab is open. Warmer than
+   .notice because it is longer than a notice and has to be read, not glanced
+   at. */
+.help-card {
+  background: var(--surface); border: 1px solid #E8B7A6; border-left: 4px solid var(--accent);
+  border-radius: 16px; padding: 16px 18px 18px;
+  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+.help-head { display: flex; align-items: center; gap: 10px; }
+.help-card .group-icon { color: var(--accent); }
+.help-lead { margin: 10px 0 0; font-size: 12.5px; color: var(--ink2); line-height: 1.75; }
+.help-lead b { color: var(--ink); }
+.help-steps {
+  margin: 10px 0 0; padding-left: 1.3em; font-size: 12.5px; color: var(--ink2); line-height: 1.95;
+}
+.help-steps b { color: var(--ink); }
+.help-shot { margin: 12px 0 0; }
+.help-shot img {
+  display: block; width: 350px; max-width: 100%; height: auto;
+  border: 1px solid var(--line); border-radius: 10px;
+}
+.help-shot figcaption { margin-top: 6px; font-size: 11px; color: var(--ink3); }
